@@ -2,33 +2,34 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<!-- Easily greppable versions. This should be the same as the value of the _*PackageVersion variables -->
-		<!-- iOSPackageVersion:     @IOS_PACKAGE_VERSION_MAJOR@.@IOS_PACKAGE_VERSION_MINOR@.@IOS_PACKAGE_VERSION_REV@-alpha.@IOS_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- macOSPackageVersion:   @MACOS_PACKAGE_VERSION_MAJOR@.@MACOS_PACKAGE_VERSION_MINOR@.@MACOS_PACKAGE_VERSION_REV@-alpha.@MACOS_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- tvOSPackageVersion:    @TVOS_PACKAGE_VERSION_MAJOR@.@TVOS_PACKAGE_VERSION_MINOR@.@TVOS_PACKAGE_VERSION_REV@-alpha.@TVOS_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- watchOSPackageVersion: @WATCHOS_PACKAGE_VERSION_MAJOR@.@WATCHOS_PACKAGE_VERSION_MINOR@.@WATCHOS_PACKAGE_VERSION_REV@-alpha.@WATCHOS_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<_iOSPackageVersionMajor>@IOS_PACKAGE_VERSION_MAJOR@</_iOSPackageVersionMajor>
-		<_iOSPackageVersionMinor>@IOS_PACKAGE_VERSION_MINOR@</_iOSPackageVersionMinor>
-		<_iOSPackageVersionRev>@IOS_PACKAGE_VERSION_REV@</_iOSPackageVersionRev>
-		<_iOSCommitDistance>@IOS_COMMIT_DISTANCE@</_iOSCommitDistance>
-		<_tvOSPackageVersionMajor>@TVOS_PACKAGE_VERSION_MAJOR@</_tvOSPackageVersionMajor>
-		<_tvOSPackageVersionMinor>@TVOS_PACKAGE_VERSION_MINOR@</_tvOSPackageVersionMinor>
-		<_tvOSPackageVersionRev>@TVOS_PACKAGE_VERSION_REV@</_tvOSPackageVersionRev>
-		<_tvOSCommitDistance>@TVOS_COMMIT_DISTANCE@</_tvOSCommitDistance>
-		<_watchOSPackageVersionMajor>@WATCHOS_PACKAGE_VERSION_MAJOR@</_watchOSPackageVersionMajor>
-		<_watchOSPackageVersionMinor>@WATCHOS_PACKAGE_VERSION_MINOR@</_watchOSPackageVersionMinor>
-		<_watchOSPackageVersionRev>@WATCHOS_PACKAGE_VERSION_REV@</_watchOSPackageVersionRev>
-		<_watchOSCommitDistance>@WATCHOS_COMMIT_DISTANCE@</_watchOSCommitDistance>
-		<_macOSPackageVersionMajor>@MACOS_PACKAGE_VERSION_MAJOR@</_macOSPackageVersionMajor>
-		<_macOSPackageVersionMinor>@MACOS_PACKAGE_VERSION_MINOR@</_macOSPackageVersionMinor>
-		<_macOSPackageVersionRev>@MACOS_PACKAGE_VERSION_REV@</_macOSPackageVersionRev>
-		<_macOSCommitDistance>@MACOS_COMMIT_DISTANCE@</_macOSCommitDistance>
-		<CurrentBranch>@CURRENT_BRANCH@</CurrentBranch>
+		<!-- iOSPackageVersion:     @IOS_NUGET_VERSION_MAJOR@.@IOS_NUGET_VERSION_MINOR@.@IOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@IOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
+		<!-- tvOSPackageVersion:    @TVOS_NUGET_VERSION_MAJOR@.@TVOS_NUGET_VERSION_MINOR@.@TVOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@TVOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
+		<!-- watchOSPackageVersion: @WATCHOS_NUGET_VERSION_MAJOR@.@WATCHOS_NUGET_VERSION_MINOR@.@WATCHOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@WATCHOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
+		<!-- macOSPackageVersion:   @MACOS_NUGET_VERSION_MAJOR@.@MACOS_NUGET_VERSION_MINOR@.@MACOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@MACOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
+		<_iOSPackageVersionMajor>@IOS_NUGET_VERSION_MAJOR@</_iOSPackageVersionMajor>
+		<_iOSPackageVersionMinor>@IOS_NUGET_VERSION_MINOR@</_iOSPackageVersionMinor>
+		<_iOSPackageVersionPatch>@IOS_NUGET_VERSION_PATCH@</_iOSPackageVersionPatch>
+		<_iOSCommitDistance>@IOS_NUGET_COMMIT_DISTANCE@</_iOSCommitDistance>
+		<_tvOSPackageVersionMajor>@TVOS_NUGET_VERSION_MAJOR@</_tvOSPackageVersionMajor>
+		<_tvOSPackageVersionMinor>@TVOS_NUGET_VERSION_MINOR@</_tvOSPackageVersionMinor>
+		<_tvOSPackageVersionPatch>@TVOS_NUGET_VERSION_PATCH@</_tvOSPackageVersionPatch>
+		<_tvOSCommitDistance>@TVOS_NUGET_COMMIT_DISTANCE@</_tvOSCommitDistance>
+		<_watchOSPackageVersionMajor>@WATCHOS_NUGET_VERSION_MAJOR@</_watchOSPackageVersionMajor>
+		<_watchOSPackageVersionMinor>@WATCHOS_NUGET_VERSION_MINOR@</_watchOSPackageVersionMinor>
+		<_watchOSPackageVersionPatch>@WATCHOS_NUGET_VERSION_PATCH@</_watchOSPackageVersionPatch>
+		<_watchOSCommitDistance>@WATCHOS_NUGET_COMMIT_DISTANCE@</_watchOSCommitDistance>
+		<_macOSPackageVersionMajor>@MACOS_NUGET_VERSION_MAJOR@</_macOSPackageVersionMajor>
+		<_macOSPackageVersionMinor>@MACOS_NUGET_VERSION_MINOR@</_macOSPackageVersionMinor>
+		<_macOSPackageVersionPatch>@MACOS_NUGET_VERSION_PATCH@</_macOSPackageVersionPatch>
+		<_macOSCommitDistance>@MACOS_NUGET_COMMIT_DISTANCE@</_macOSCommitDistance>
+		<_prereleaseIdentifier>ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.</_prereleaseIdentifier>
+		<CurrentBranch>@CURRENT_BRANCH_ALPHANUMERIC@</CurrentBranch>
 		<CurrentHash>@CURRENT_HASH@</CurrentHash>
 
-		<_iOSShortPackageVersion>$(_iOSPackageVersionMajor).$(_iOSPackageVersionMinor).$(_iOSPackageVersionRev)-alpha.$(_iOSCommitDistance)</_iOSShortPackageVersion>
-		<_macOSShortPackageVersion>$(_macOSPackageVersionMajor).$(_macOSPackageVersionMinor).$(_macOSPackageVersionRev)-alpha.$(_macOSCommitDistance)</_macOSShortPackageVersion>
-		<_tvOSShortPackageVersion>$(_tvOSPackageVersionMajor).$(_tvOSPackageVersionMinor).$(_tvOSPackageVersionRev)-alpha.$(_tvOSCommitDistance)</_tvOSShortPackageVersion>
-		<_watchOSShortPackageVersion>$(_watchOSPackageVersionMajor).$(_watchOSPackageVersionMinor).$(_watchOSPackageVersionRev)-alpha.$(_watchOSCommitDistance)</_watchOSShortPackageVersion>
+		<_iOSShortPackageVersion>$(_iOSPackageVersionMajor).$(_iOSPackageVersionMinor).$(_iOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_iOSCommitDistance)</_iOSShortPackageVersion>
+		<_macOSShortPackageVersion>$(_macOSPackageVersionMajor).$(_macOSPackageVersionMinor).$(_macOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_macOSCommitDistance)</_macOSShortPackageVersion>
+		<_tvOSShortPackageVersion>$(_tvOSPackageVersionMajor).$(_tvOSPackageVersionMinor).$(_tvOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_tvOSCommitDistance)</_tvOSShortPackageVersion>
+		<_watchOSShortPackageVersion>$(_watchOSPackageVersionMajor).$(_watchOSPackageVersionMinor).$(_watchOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_watchOSCommitDistance)</_watchOSShortPackageVersion>
 
 		<_iOSPackageVersion>$(_iOSShortPackageVersion)+sha.$(CurrentHash)</_iOSPackageVersion>
 		<_macOSPackageVersion>$(_macOSShortPackageVersion)+sha.$(CurrentHash)</_macOSPackageVersion>
