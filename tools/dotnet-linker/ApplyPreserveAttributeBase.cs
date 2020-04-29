@@ -47,8 +47,6 @@ namespace Mono.Tuner {
 
 		public override void ProcessMethod (MethodDefinition method)
 		{
-			if (method.Name == "Initialize")
-				Console.WriteLine ();
 			MarkMethodIfPreserved (method);
 		}
 
