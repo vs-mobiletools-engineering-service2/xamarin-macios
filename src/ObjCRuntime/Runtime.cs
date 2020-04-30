@@ -662,11 +662,6 @@ namespace ObjCRuntime {
 			Registrar.GetMethodDescription (Class.Lookup (cls), sel, is_static, desc);
 		}
 
-		static IntPtr GetNSObjectWrapped (IntPtr ptr)
-		{
-			return GCHandle.ToIntPtr (GCHandle.Alloc ((TryGetNSObject (ptr, true))));
-		}
-
 		static bool HasNSObject (IntPtr ptr)
 		{
 			return TryGetNSObject (ptr) != null;
@@ -1073,7 +1068,7 @@ namespace ObjCRuntime {
 			if (obj == null)
 				obj = (NSObject) handle.Target;
 			lock (lock_obj) {
-				object_map [ptr] = handle;
+				object_map [ptr] = GCHandle.Alloc (obj, GCHandleType.WeakTrackResurrection);
 				obj.Handle = ptr;
 			}
 		}

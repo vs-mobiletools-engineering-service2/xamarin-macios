@@ -59,10 +59,17 @@ namespace ObjCRuntime {
 		[EditorBrowsable (EditorBrowsableState.Never)]
 		static public List<WeakReference> GetSurfacedObjects ()
 		{
-			throw new NotSupportedException ();
+			lock (lock_obj){
+				var list = new List<WeakReference> (object_map.Count);
+
+				foreach (var kv in object_map)
+					list.Add (new WeakReference (kv.Value, true));
+
+				return list;
+			}
 		}
 #endif
-
+			
 #if TVOS || WATCH
 		[Advice ("This method is present only to help porting code.")]
 		public static void StartWWAN (Uri uri, Action<Exception> callback)
