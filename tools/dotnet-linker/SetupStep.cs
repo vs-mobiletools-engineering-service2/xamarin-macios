@@ -101,8 +101,6 @@ namespace Xamarin {
 				// subs.Add (new OptimizeGeneratedCodeSubStep ());
 				// subs.Add (new RemoveUserResourcesSubStep ());
 				// subs.Add (new RemoveAttributes ());
-				// // http://bugzilla.xamarin.com/show_bug.cgi?id=1408
-				// subs.Add (new RemoveCode ());
 
 				subs.Add (new MarkNSObjects ());
 

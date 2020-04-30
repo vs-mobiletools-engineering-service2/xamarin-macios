@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="Xamarin.iOS">
+    <type fullname="UIKit.UIButton">
+      <method signature="System.Void VerifyIsUIButton()" body="stub" />
+    </type>
+  </assembly>
+</linker>

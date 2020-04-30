@@ -102,6 +102,8 @@
 	<ItemGroup>
 		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-32bits.xml" Condition=" '$(_Is32BitBuild)' == 'true' " />
 		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-64bits.xml" Condition=" '$(_Is64BitBuild)' == 'true' " />
+		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/registerentryassembly.xml" Condition=" '$(_SdkIsSimulator)' != 'true' " />
+		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/uibutton.xml" Condition=" '$(MtouchDebug)' != 'true' " />
 	</ItemGroup>
 	<Target Name="_ComputeLinkerSubstitutions">
 		<PropertyGroup>

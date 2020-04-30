@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="Xamarin.iOS">
+    <type fullname="ObjCRuntime.Runtime">
+      <method signature="System.Void RegisterEntryAssembly(System.Reflection.Assembly)" body="stub" />
+    </type>
+  </assembly>
+</linker>
