@@ -1,9 +1,8 @@
-#if true
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Diagnostics;
 
 using Mono.Cecil;
 using Mono.Linker;
@@ -124,6 +123,7 @@ namespace Xamarin {
 					Steps.Insert (i + 1, new TimeStampStep (Steps [i].ToString ()));
 				}
 				Steps.Insert (0, new TimeStampStep ("Start"));
+				TimeStampStep.Start ();
 			}
 
 			if (Configuration.InsaneVerbosity) {
@@ -202,6 +202,8 @@ namespace Xamarin {
 	}
 
 	public class TimeStampStep : IStep {
+
+		static Stopwatch watch = new Stopwatch ();
 		readonly string message;
 
 		public TimeStampStep (string message)
@@ -211,10 +213,12 @@ namespace Xamarin {
 
 		public void Process (LinkContext context)
 		{
-			Console.WriteLine ($"{DateTime.UtcNow}: {message}");
+			Console.WriteLine ($"Timestamp after {message}: {watch.ElapsedMilliseconds} ms");
+		}
+
+		public static void Start ()
+		{
+			watch.Start ();
 		}
 	}
 }
-
-#endif
-
