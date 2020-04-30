@@ -70,6 +70,11 @@
     <OutputType Condition=" '$(XamarinReplaceBuildTarget)' == 'true'">DefaultOutputType</OutputType>
 
     <_XamarinSdkToolsDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools'))</_XamarinSdkToolsDirectory>
+
+    <!-- We always require the linker -->
+    <PublishTrimmed Condition="'$(PublishTrimmed)' == ''">true</PublishTrimmed>
+    <!-- We're not using an app host -->
+    <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 
   <!-- Defaults -->

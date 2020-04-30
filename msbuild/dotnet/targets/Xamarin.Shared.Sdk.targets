@@ -50,51 +50,31 @@
 
 	<!-- Override overridable targets -->
 	<PropertyGroup>
-		<BeforeComputeFilesToPublishTargets>_EarlyAppBundleTasks</BeforeComputeFilesToPublishTargets>
-		<AfterComputeFilesToPublishTargets>_LateAppBundleTasks</AfterComputeFilesToPublishTargets>
-		<BeforeILLinkTargets>_PreProcessAssemblies</BeforeILLinkTargets>
-		<AfterILLinkTargets>_PostProcessAssemblies</AfterILLinkTargets>
-		<BeforeMonoAOTCompilationTargets></BeforeMonoAOTCompilationTargets>
-		<AfterMonoAOTCompilationTargets>_PostProcessAOTCompilation</AfterMonoAOTCompilationTargets>
-		<BeforeGenerateSingleFileBundleTargets>_PreProcessNativeLinker</BeforeGenerateSingleFileBundleTargets>
-		<AfterGenerateSingleFileBundleTargets>_PostProcessNativeLinker</AfterGenerateSingleFileBundleTargets>
 		<!-- Codesign fails for unknown reasons for simulator builds -->
-		<AfterPublishTargets Condition=" '$(_SdkIsSimulator)' == 'true' ">Codesign;CreateIpa;Archive</AfterPublishTargets>
+		<_ToCodesignOrNotToCodesign Condition=" '$(_SdkIsSimulator)' == 'true' ">Codesign;</_ToCodesignOrNotToCodesign>
+		<_BuildAppTargets>
+			_EarlyAppBundleTasks;
+			_ComputeLinkerArguments;
+			ComputeFilesToPublish;
+			ILLink;
+			_AOTCompile;
+			_CompileLauncher;
+			_StripManagedAssemblies;
+			_ComputeOutputLocation;
+			CopyFilesToPublishDirectory;
+			_LateAppBundleTasks;
+			$(_ToCodesignOrNotToCodesign);
+			CreateIpa;
+			Archive;
+		</_BuildAppTargets>
 	</PropertyGroup>
 
-	<!-- Another big hack: inject our targets -->
-	<Target Name="ComputeAndCopyFilesToPublishDirectory"
-          DependsOnTargets="
-          $(BeforeComputeFilesToPublishTargets);
-          ComputeFilesToPublish;
-          $(AfterComputeFilesToPublishTargets);
-          CopyFilesToPublishDirectory">
-	</Target>
-	<Target Name="ComputeFilesToPublish"
-          DependsOnTargets="
-          	ComputeResolvedFilesToPublishList;
-          	$(BeforeILLinkTargets);
-            ILLink;
-            $(AfterILLinkTargets);
-            CreateReadyToRunImages;
-            $(BeforeMonoAOTCompilationTargets);
-            $(AfterMonoAOTCompilationTargets);
-            GeneratePublishDependencyFile;
-            $(BeforeGenerateSingleFileBundleTargets);
-            GenerateSingleFileBundle;
-            $(AfterGenerateSingleFileBundleTargets);">
-  	</Target>
-  	<PropertyGroup>
-    <_CorePublishTargets>
-    	$(_CorePublishTargets);
-    	$(AfterPublishTargets);
-    </_CorePublishTargets>
+	<!-- Inject our build app target -->
+	<Target Name="_BuildApp" AfterTargets="Build" BeforeTargets="AfterBuild" DependsOnTargets="$(_BuildAppTargets)" />
 
-  	</PropertyGroup>
 	<!-- Actual implementations for what we need to do -->
 
 	<!-- Linker targets -->
-	<Target Name="_PreProcessAssemblies" DependsOnTargets="_ComputeLinkerArguments;_ExtractNativeLibrariesFromBindingAssemblies;" />
 	<PropertyGroup>
 		<_AdditionalTaskAssemblyDirectory>$(XamarinSdkRootDirectory)tools/dotnet-linker/</_AdditionalTaskAssemblyDirectory>
 		<_AdditionalTaskAssembly>$(_AdditionalTaskAssemblyDirectory)dotnet-linker.dll</_AdditionalTaskAssembly>
@@ -152,8 +132,6 @@
 
 		<SetEnvironmentVariable Name="CUSTOM_LINKER_OPTIONS_FILE" Value="$(_CustomLinkerOptionsFile)" />
 		<WriteLinesToFile File="$(_CustomLinkerOptionsFile)" Lines="$(_CustomLinkerOptions)" Overwrite="true" />
-	</Target>
-	<Target Name="_ExtractNativeLibrariesFromBindingAssemblies">
 	</Target>
 
 	<PropertyGroup Condition=" '$(_PlatformName)' != 'macOS' ">
@@ -221,7 +199,6 @@
 	<Target Name="_EarlyAppBundleTasks" DependsOnTargets="$(_EarlyAppBundleTasksDependsOn)" />
 	<Target Name="_LateAppBundleTasks" DependsOnTargets="$(_LateAppBundleTasksDependsOn)" />
 
-	<Target Name="_PostProcessAssemblies" DependsOnTargets="_GenerateRegistrarCode;_GeneratePInvokeWrapperCode;_CompilePInvokeWrappers" />
 	<Target Name="_PreAOTCompile" DependsOnTargets="_SetVariables">
 		<Copy SourceFiles="@(_AssembliesToAOT)" DestinationFolder="$(_AOTInputDirectory)" />
 	</Target>
@@ -232,25 +209,8 @@
 			Outputs="@(_AssembliesToAOT->'$(_AOTOutputDirectory)%(Filename)%(Extension).s')">
 		<Error Text="Files to AOT (which hasn't been implemented): @(_AssembliesToAOT) " />
 	</Target>
-	<Target Name="_PostProcessAOTCompilation" DependsOnTargets="_BuildMSymDirectories;_StripManagedAssemblies;_AOTCompile;">
-	</Target>
-	<Target Name="_PreProcessNativeLinker" DependsOnTargets="_SelectExecutableOutputMode;_CompileLauncher;_PostProcessAOTCompilation" />
-	<Target Name="_PostProcessNativeLinker" DependsOnTargets="_ComputeOutputLocation;_CreateUserFrameworks;_BuildDSymDirectories;_StripNativeCode;"/>
 
-	<Target Name="_GenerateRegistrarCode">
-	</Target>
-
-	<Target Name="_GeneratePInvokeWrapperCode">
-	</Target>
-
-	<Target Name="_CompilePInvokeWrappers">
-	</Target>
-
-	<Target Name="_BuildMSymDirectories">
-	</Target>
-
-	<Target Name="_StripManagedAssemblies">
-	</Target>
+	<Target Name="_StripManagedAssemblies" />
 
 	<Target Name="_SetVariables">
 		<PropertyGroup>
@@ -331,18 +291,6 @@
 			<ResolvedFileToPublish Remove="@(_NativeDynamicLibrary)" />
 			<ResolvedFileToPublish Include="@(_NativeDynamicLibraryFixed)" />
 		</ItemGroup>
-	</Target>
-
-	<Target Name="_CreateUserFrameworks">
-	</Target>
-
-	<Target Name="_BuildDSymDirectories">
-	</Target>
-
-	<Target Name="_StripNativeCode">
-	</Target>
-
-	<Target Name="_SelectExecutableOutputMode">
 	</Target>
 
 	<Target Name="Install" DependsOnTargets="_DetectSdkLocations;_GenerateBundleName">
