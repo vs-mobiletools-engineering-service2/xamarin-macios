@@ -38,13 +38,8 @@ namespace Xamarin.Linker.Steps
 
 		public override bool IsActiveFor (AssemblyDefinition assembly)
 		{
-#if NET
-			if (assembly.Name.Name == LinkerConfiguration.Instance.PlatformAssembly)
-				return true;
-#else
 			if (Profile.IsProductAssembly (assembly))
 				return true;
-#endif
 
 			// We don't need to process assemblies that don't reference ObjCRuntime.BindAsAttribute.
 			foreach (var tr in assembly.MainModule.GetTypeReferences ()) {
