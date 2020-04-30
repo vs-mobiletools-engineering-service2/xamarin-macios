@@ -27,11 +27,11 @@ This is the scheme: `OsMajor.OsMinor.InternalRelease[-prereleaseX]+sha.1b2c3d4`.
     * If we have a particular feature we want people to subscribe to (such as
       an Xcode release), we publish previews with a custom pre-release
       identifier:
-        * Example: `iOS 15.1.100-xcode13_1.beta.1`
+        * Example: `iOS 15.1.100-xcode13-1.beta.1`
         * This way people can sign up for only official previews, by
-          referencing `iOS *-xcode13_1.beta.*`
-        * It's still possible to sign up for all `xcode13_1` builds, by
-          referencing `iOS *-ci.xcode11_3.*`
+          referencing `iOS *-xcode13-1.beta.*`
+        * It's still possible to sign up for all `xcode13-1` builds, by
+          referencing `iOS *-ci.xcode11-3.*`
 * Build metadata: Required Hash
     * This is `sha.` + the short commit hash.
         * Use the short hash because the long hash is quite long and
@@ -44,8 +44,8 @@ This is the scheme: `OsMajor.OsMinor.InternalRelease[-prereleaseX]+sha.1b2c3d4`.
       version string refers to a stable version or not.
         * Example: `iOS 15.0.100`: incomplete version
         * Example: `iOS 15.0.100+sha.1a2b3c`: stable
-        * Example: `iOS 15.0.100-ci.d17_0.1234+sha.1a2b3c`: CI build
-        * Example: `iOS 15.0.100-xcode13_1.beta.1+sha.1a2b3c`: official
+        * Example: `iOS 15.0.100-ci.d17-0.1234+sha.1a2b3c`: CI build
+        * Example: `iOS 15.0.100-xcode13-1.beta.1+sha.1a2b3c`: official
           preview
             * Technically it's possible to remove the prerelease part, but
               we’d still be able to figure out it’s not a stable version by
