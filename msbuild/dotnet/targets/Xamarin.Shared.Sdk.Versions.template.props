@@ -4,14 +4,14 @@
 		<CurrentBranch>@CURRENT_BRANCH@</CurrentBranch>
 		<CurrentHash>@CURRENT_HASH_LONG@</CurrentHash>
 
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@IOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@MACOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@IOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
 		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">@TVOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
 		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">@WATCHOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@MACOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
 
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@IOS_NUGET_VERSION_FULL@</_PackageVersion>
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@MACOS_NUGET_VERSION_FULL@</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@IOS_NUGET_VERSION_FULL@</_PackageVersion>
 		<_PackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">@TVOS_NUGET_VERSION_FULL@</_PackageVersion>
 		<_PackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">@WATCHOS_NUGET_VERSION_FULL@</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@MACOS_NUGET_VERSION_FULL@</_PackageVersion>
 	</PropertyGroup>
 </Project>
