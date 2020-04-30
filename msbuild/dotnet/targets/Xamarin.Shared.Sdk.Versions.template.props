@@ -1,56 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<!-- Easily greppable versions. This should be the same as the value of the _*PackageVersion variables -->
-		<!-- iOSPackageVersion:     @IOS_NUGET_VERSION_MAJOR@.@IOS_NUGET_VERSION_MINOR@.@IOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@IOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- tvOSPackageVersion:    @TVOS_NUGET_VERSION_MAJOR@.@TVOS_NUGET_VERSION_MINOR@.@TVOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@TVOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- watchOSPackageVersion: @WATCHOS_NUGET_VERSION_MAJOR@.@WATCHOS_NUGET_VERSION_MINOR@.@WATCHOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@WATCHOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<!-- macOSPackageVersion:   @MACOS_NUGET_VERSION_MAJOR@.@MACOS_NUGET_VERSION_MINOR@.@MACOS_NUGET_VERSION_PATCH@-ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.@MACOS_NUGET_COMMIT_DISTANCE@+sha.@CURRENT_HASH@ -->
-		<_iOSPackageVersionMajor>@IOS_NUGET_VERSION_MAJOR@</_iOSPackageVersionMajor>
-		<_iOSPackageVersionMinor>@IOS_NUGET_VERSION_MINOR@</_iOSPackageVersionMinor>
-		<_iOSPackageVersionPatch>@IOS_NUGET_VERSION_PATCH@</_iOSPackageVersionPatch>
-		<_iOSCommitDistance>@IOS_NUGET_COMMIT_DISTANCE@</_iOSCommitDistance>
-		<_tvOSPackageVersionMajor>@TVOS_NUGET_VERSION_MAJOR@</_tvOSPackageVersionMajor>
-		<_tvOSPackageVersionMinor>@TVOS_NUGET_VERSION_MINOR@</_tvOSPackageVersionMinor>
-		<_tvOSPackageVersionPatch>@TVOS_NUGET_VERSION_PATCH@</_tvOSPackageVersionPatch>
-		<_tvOSCommitDistance>@TVOS_NUGET_COMMIT_DISTANCE@</_tvOSCommitDistance>
-		<_watchOSPackageVersionMajor>@WATCHOS_NUGET_VERSION_MAJOR@</_watchOSPackageVersionMajor>
-		<_watchOSPackageVersionMinor>@WATCHOS_NUGET_VERSION_MINOR@</_watchOSPackageVersionMinor>
-		<_watchOSPackageVersionPatch>@WATCHOS_NUGET_VERSION_PATCH@</_watchOSPackageVersionPatch>
-		<_watchOSCommitDistance>@WATCHOS_NUGET_COMMIT_DISTANCE@</_watchOSCommitDistance>
-		<_macOSPackageVersionMajor>@MACOS_NUGET_VERSION_MAJOR@</_macOSPackageVersionMajor>
-		<_macOSPackageVersionMinor>@MACOS_NUGET_VERSION_MINOR@</_macOSPackageVersionMinor>
-		<_macOSPackageVersionPatch>@MACOS_NUGET_VERSION_PATCH@</_macOSPackageVersionPatch>
-		<_macOSCommitDistance>@MACOS_NUGET_COMMIT_DISTANCE@</_macOSCommitDistance>
-		<_prereleaseIdentifier>ci.@PULL_REQUEST_INFIX@@CURRENT_BRANCH_ALPHANUMERIC@.</_prereleaseIdentifier>
-		<CurrentBranch>@CURRENT_BRANCH_ALPHANUMERIC@</CurrentBranch>
-		<CurrentHash>@CURRENT_HASH@</CurrentHash>
+		<CurrentBranch>@CURRENT_BRANCH@</CurrentBranch>
+		<CurrentHash>@CURRENT_HASH_LONG@</CurrentHash>
 
-		<_iOSShortPackageVersion>$(_iOSPackageVersionMajor).$(_iOSPackageVersionMinor).$(_iOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_iOSCommitDistance)</_iOSShortPackageVersion>
-		<_macOSShortPackageVersion>$(_macOSPackageVersionMajor).$(_macOSPackageVersionMinor).$(_macOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_macOSCommitDistance)</_macOSShortPackageVersion>
-		<_tvOSShortPackageVersion>$(_tvOSPackageVersionMajor).$(_tvOSPackageVersionMinor).$(_tvOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_tvOSCommitDistance)</_tvOSShortPackageVersion>
-		<_watchOSShortPackageVersion>$(_watchOSPackageVersionMajor).$(_watchOSPackageVersionMinor).$(_watchOSPackageVersionPatch)-$(_prereleaseIdentifier)$(_watchOSCommitDistance)</_watchOSShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@IOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@MACOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">@TVOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
+		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">@WATCHOS_NUGET_VERSION_NO_METADATA@</_ShortPackageVersion>
 
-		<_iOSPackageVersion>$(_iOSShortPackageVersion)+sha.$(CurrentHash)</_iOSPackageVersion>
-		<_macOSPackageVersion>$(_macOSShortPackageVersion)+sha.$(CurrentHash)</_macOSPackageVersion>
-		<_tvOSPackageVersion>$(_tvOSShortPackageVersion)+sha.$(CurrentHash)</_tvOSPackageVersion>
-		<_watchOSPackageVersion>$(_watchOSShortPackageVersion)+sha.$(CurrentHash)</_watchOSPackageVersion>
-
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">$(_macOSShortPackageVersion)</_ShortPackageVersion>
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">$(_iOSShortPackageVersion)</_ShortPackageVersion>
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">$(_tvOSShortPackageVersion)</_ShortPackageVersion>
-		<_ShortPackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">$(_watchOSShortPackageVersion)</_ShortPackageVersion>
-
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">$(_macOSPackageVersion)</_PackageVersion>
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">$(_iOSPackageVersion)</_PackageVersion>
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">$(_tvOSPackageVersion)</_PackageVersion>
-		<_PackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">$(_watchOSPackageVersion)</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'macOS' ">@IOS_NUGET_VERSION_FULL@</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'iOS' ">@MACOS_NUGET_VERSION_FULL@</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'tvOS' ">@TVOS_NUGET_VERSION_FULL@</_PackageVersion>
+		<_PackageVersion Condition=" '$(_PlatformName)' == 'watchOS' ">@WATCHOS_NUGET_VERSION_FULL@</_PackageVersion>
 	</PropertyGroup>
-
-	<Target Name="PrintVersions">
-		<Exec Command="printf 'Xamarin.iOS PackageVersion: $(_iOSPackageVersion)' "/>
-		<Exec Command="printf 'Xamarin.macOS: PackageVersion: $(_macOSPackageVersion)' " />
-		<Exec Command="printf 'Xamarin.tvOS: PackageVersion: $(_tvOSPackageVersion)' " />
-		<Exec Command="printf 'Xamarin.watchOS: PackageVersion: $(_watchOSPackageVersion)' " />
-	</Target>
 </Project>

@@ -114,39 +114,20 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/target
 $(DIRECTORIES):
 	$(Q) mkdir -p $@
 
-ifneq ($(CHANGE_ID),)
-PULL_REQUEST=$(CHANGE_ID)
-else ifneq ($(ghprbPullId),)
-PULL_REQUEST=$(ghprbPullId)
-endif
+CURRENT_HASH_LONG:=$(shell git log -1 --pretty=%H)
 
-CURRENT_HASH:=$(shell git log -1 --pretty=%h)
-# The branch name in the nuget version has to be alphanumeric
-CURRENT_BRANCH_ALPHANUMERIC:=$(shell printf "%s" "$(CURRENT_BRANCH)" | tr -c '[a-zA-Z0-9-]' '?')
-ifneq ($(PULL_REQUEST),)
-PULL_REQUEST_INFIX=pr.gh$(PULL_REQUEST).
-endif
 targets/%.props: targets/%.template.props Makefile $(TOP)/Make.config.inc
 	$(Q_GEN) sed \
-		-e "s/@IOS_NUGET_VERSION_MAJOR@/$(IOS_NUGET_VERSION_MAJOR)/g" \
-		-e "s/@IOS_NUGET_VERSION_MINOR@/$(IOS_NUGET_VERSION_MINOR)/g" \
-		-e "s/@IOS_NUGET_VERSION_PATCH@/$(IOS_NUGET_VERSION_PATCH)/g" \
-		-e "s/@TVOS_NUGET_VERSION_MAJOR@/$(TVOS_NUGET_VERSION_MAJOR)/g" \
-		-e "s/@TVOS_NUGET_VERSION_MINOR@/$(TVOS_NUGET_VERSION_MINOR)/g" \
-		-e "s/@TVOS_NUGET_VERSION_PATCH@/$(TVOS_NUGET_VERSION_PATCH)/g" \
-		-e "s/@WATCHOS_NUGET_VERSION_MAJOR@/$(WATCHOS_NUGET_VERSION_MAJOR)/g" \
-		-e "s/@WATCHOS_NUGET_VERSION_MINOR@/$(WATCHOS_NUGET_VERSION_MINOR)/g" \
-		-e "s/@WATCHOS_NUGET_VERSION_PATCH@/$(WATCHOS_NUGET_VERSION_PATCH)/g" \
-		-e "s/@MACOS_NUGET_VERSION_MAJOR@/$(MACOS_NUGET_VERSION_MAJOR)/g" \
-		-e "s/@MACOS_NUGET_VERSION_MINOR@/$(MACOS_NUGET_VERSION_MINOR)/g" \
-		-e "s/@MACOS_NUGET_VERSION_PATCH@/$(MACOS_NUGET_VERSION_PATCH)/g" \
-		-e 's/@IOS_NUGET_COMMIT_DISTANCE@/$(IOS_NUGET_COMMIT_DISTANCE)/g' \
-		-e 's/@TVOS_NUGET_COMMIT_DISTANCE@/$(TVOS_NUGET_COMMIT_DISTANCE)/g' \
-		-e 's/@WATCHOS_NUGET_COMMIT_DISTANCE@/$(WATCHOS_NUGET_COMMIT_DISTANCE)/g' \
-		-e 's/@MACOS_NUGET_COMMIT_DISTANCE@/$(MACOS_NUGET_COMMIT_DISTANCE)/g' \
-		-e "s/@CURRENT_BRANCH_ALPHANUMERIC@/$(CURRENT_BRANCH_ALPHANUMERIC)/g" \
-		-e "s/@CURRENT_HASH@/$(CURRENT_HASH)/g" \
-		-e "s/@PULL_REQUEST_INFIX@/$(PULL_REQUEST_INFIX)/g" \
+		-e "s/@IOS_NUGET_VERSION_NO_METADATA@/$(IOS_NUGET_VERSION_NO_METADATA)/g" \
+		-e "s/@TVOS_NUGET_VERSION_NO_METADATA@/$(TVOS_NUGET_VERSION_NO_METADATA)/g" \
+		-e "s/@WATCHOS_NUGET_VERSION_NO_METADATA@/$(WATCHOS_NUGET_VERSION_NO_METADATA)/g" \
+		-e "s/@MACOS_NUGET_VERSION_NO_METADATA@/$(MACOS_NUGET_VERSION_NO_METADATA)/g" \
+		-e "s/@IOS_NUGET_VERSION_FULL@/$(IOS_NUGET_VERSION_FULL)/g" \
+		-e "s/@TVOS_NUGET_VERSION_FULL@/$(TVOS_NUGET_VERSION_FULL)/g" \
+		-e "s/@WATCHOS_NUGET_VERSION_FULL@/$(WATCHOS_NUGET_VERSION_FULL)/g" \
+		-e "s/@MACOS_NUGET_VERSION_FULL@/$(MACOS_NUGET_VERSION_FULL)/g" \
+		-e "s/@CURRENT_BRANCH@/$(CURRENT_BRANCH_SED_ESCAPED)/g" \
+		-e "s/@CURRENT_HASH_LONG@/$(CURRENT_HASH_LONG)/g" \
 	$< > $@
 
 TEMPLATED_FILES = \
@@ -161,20 +142,15 @@ packsimple: prepare
 	$(Q) rm -Rf nupkgs/*
 	$(Q) $(MAKE) ref-pack-iOS sdk-pack-iOS nupkgs/Microsoft.iOS.Runtime.ios-x64.nupkg nupkgs/Microsoft.iOS.Runtime.ios-arm64.nupkg
 
-CURRENT_IOS_VERSION=$(shell grep 'iOSPackageVersion:'     targets/Xamarin.Shared.Sdk.Versions.props | sed -e 's/.*PackageVersion://g' -e 's/.sha.*//' -e 's/[[:space:]]//g')
-CURRENT_TVOS_VERSION=$(shell grep 'tvOSPackageVersion:'    targets/Xamarin.Shared.Sdk.Versions.props | sed -e 's/.*PackageVersion://g' -e 's/.sha.*//' -e 's/[[:space:]]//g')
-CURRENT_WATCHOS_VERSION=$(shell grep 'watchOSPackageVersion:' targets/Xamarin.Shared.Sdk.Versions.props | sed -e 's/.*PackageVersion://g' -e 's/.sha.*//' -e 's/[[:space:]]//g')
-CURRENT_MACOS_VERSION=$(shell grep 'macOSPackageVersion:'   targets/Xamarin.Shared.Sdk.Versions.props | sed -e 's/.*PackageVersion://g' -e 's/.sha.*//' -e 's/[[:space:]]//g')
+nupkgs/Microsoft.iOS.%.nupkg: CURRENT_VERSION=$(IOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Microsoft.tvOS.%.nupkg: CURRENT_VERSION=$(TVOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Microsoft.watchOS.%.nupkg: CURRENT_VERSION=$(WATCHOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Microsoft.macOS.%.nupkg: CURRENT_VERSION=$(MACOS_NUGET_VERSION_NO_METADATA)
 
-nupkgs/Microsoft.iOS.%.nupkg: CURRENT_VERSION=$(CURRENT_IOS_VERSION)
-nupkgs/Microsoft.tvOS.%.nupkg: CURRENT_VERSION=$(CURRENT_TVOS_VERSION)
-nupkgs/Microsoft.watchOS.%.nupkg: CURRENT_VERSION=$(CURRENT_WATCHOS_VERSION)
-nupkgs/Microsoft.macOS.%.nupkg: CURRENT_VERSION=$(CURRENT_MACOS_VERSION)
-
-nupkgs/Xamarin.iOS.%.nupkg: CURRENT_VERSION=$(CURRENT_IOS_VERSION)
-nupkgs/Xamarin.tvOS.%.nupkg: CURRENT_VERSION=$(CURRENT_TVOS_VERSION)
-nupkgs/Xamarin.watchOS.%.nupkg: CURRENT_VERSION=$(CURRENT_WATCHOS_VERSION)
-nupkgs/Xamarin.macOS.%.nupkg: CURRENT_VERSION=$(CURRENT_MACOS_VERSION)
+nupkgs/Xamarin.iOS.%.nupkg: CURRENT_VERSION=$(IOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Xamarin.tvOS.%.nupkg: CURRENT_VERSION=$(TVOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Xamarin.watchOS.%.nupkg: CURRENT_VERSION=$(WATCHOS_NUGET_VERSION_NO_METADATA)
+nupkgs/Xamarin.macOS.%.nupkg: CURRENT_VERSION=$(MACOS_NUGET_VERSION_NO_METADATA)
 
 nupkgs/%.nupkg: prepare $(TEMPLATED_FILES)
 	$(Q) rm -f $@ nupkgs/$*.*.nupkg
@@ -217,10 +193,10 @@ test/global.json: Makefile $(TEMPLATED_FILES)
 		printf "{\n" > $@; \
 		printf "\t\"sdk\": { \"version\": \"5.*\" },\n" >> $@; \
 		printf "\t\"msbuild-sdks\": {\n" >> $@; \
-		printf "\t\t\"Microsoft.iOS.Sdk\": \"$(CURRENT_IOS_VERSION)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.tvOS.Sdk\": \"$(CURRENT_TVOS_VERSION)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.watchOS.Sdk\": \"$(CURRENT_WATCHOS_VERSION)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.macOS.Sdk\": \"$(CURRENT_MACOS_VERSION)\"\n" >> $@; \
+		printf "\t\t\"Microsoft.iOS.Sdk\": \"$(IOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
+		printf "\t\t\"Microsoft.tvOS.Sdk\": \"$(TVOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
+		printf "\t\t\"Microsoft.watchOS.Sdk\": \"$(WATCHOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
+		printf "\t\t\"Microsoft.macOS.Sdk\": \"$(MACOS_NUGET_VERSION_NO_METADATA)\"\n" >> $@; \
 		printf "\t}\n}\n" >> $@
 
 test-nuget: test/NuGet.config test/global.json
