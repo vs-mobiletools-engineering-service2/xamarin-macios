@@ -39,7 +39,7 @@ namespace Xamarin.Linker.Steps
 		public override bool IsActiveFor (AssemblyDefinition assembly)
 		{
 #if NET
-			if (assembly.Name.Name == Path.GetFileNameWithoutExtension (LinkerConfiguration.Instance.PlatformAssembly))
+			if (assembly.Name.Name == LinkerConfiguration.Instance.PlatformAssembly)
 				return true;
 #else
 			if (Profile.IsProductAssembly (assembly))

@@ -4,10 +4,6 @@ using System.IO;
 using Xamarin.Bundler;
 using Xamarin.Utils;
 
-namespace Xamarin.Tuner {
-
-}
-
 namespace Xamarin.Linker {
 	public class LinkerConfiguration {
 		public ApplePlatform Platform { get; private set; }
@@ -68,7 +64,7 @@ namespace Xamarin.Linker {
 					LinkMode = LinkMode.None;
 					break;
 				case string _ when line.StartsWith ("PlatformAssembly=", StringComparison.Ordinal):
-					PlatformAssembly = line ["PlatformAssembly=".Length..];
+					PlatformAssembly = Path.GetFileNameWithoutExtension (line ["PlatformAssembly=".Length..]);
 					break;
 				default:
 					var eq = line.IndexOf ('=');
@@ -84,7 +80,7 @@ namespace Xamarin.Linker {
 			Console.WriteLine ($"LinkerConfiguration:");
 			Console.WriteLine ($"    Platform: {Platform}");
 			Console.WriteLine ($"    LinkMode: {LinkMode}");
-			Console.WriteLine ($"    PlatformAssembly: {PlatformAssembly}");
+			Console.WriteLine ($"    PlatformAssembly: {PlatformAssembly}.dll");
 		}
 	}
 }

@@ -56,7 +56,7 @@ namespace Xamarin.Linker.Steps {
 		{
 			if (ProductAssembly == null)
 #if NET
-				ProductAssembly = Path.GetFileNameWithoutExtension (LinkerConfiguration.Instance.PlatformAssembly);
+				ProductAssembly = LinkerConfiguration.Instance.PlatformAssembly;
 #else
 				ProductAssembly = (Profile.Current as BaseProfile).ProductAssembly;
 #endif
