@@ -79,18 +79,18 @@
 		<_AdditionalTaskAssemblyDirectory>$(XamarinSdkRootDirectory)tools/dotnet-linker/</_AdditionalTaskAssemblyDirectory>
 		<_AdditionalTaskAssembly>$(_AdditionalTaskAssemblyDirectory)dotnet-linker.dll</_AdditionalTaskAssembly>
 	</PropertyGroup>
-	<ItemGroup>
-		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-32bits.xml" Condition=" '$(_Is32BitBuild)' == 'true' " />
-		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-64bits.xml" Condition=" '$(_Is64BitBuild)' == 'true' " />
-		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/registerentryassembly.xml" Condition=" '$(_SdkIsSimulator)' != 'true' " />
-		<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/uibutton.xml" Condition=" '$(MtouchDebug)' != 'true' " />
-	</ItemGroup>
 	<Target Name="_ComputeLinkerSubstitutions">
+		<ItemGroup>
+			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-32bits.xml" Condition=" '$(_Is32BitBuild)' == 'true' " />
+			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-64bits.xml" Condition=" '$(_Is64BitBuild)' == 'true' " />
+			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/registerentryassembly.xml" Condition=" '$(_SdkIsSimulator)' != 'True' " />
+			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/uibutton.xml" Condition=" '$(MtouchDebug)' != 'true' " />
+		</ItemGroup>
 		<PropertyGroup>
 			<_LinkerSubstitutionsCommand>@(_LinkerSubstitutions -> '--substitutions %(FullPath)', '%0a')</_LinkerSubstitutionsCommand>
 		</PropertyGroup>
 	</Target>
-	<Target Name="_SelectAssembliesToLink">
+	<Target Name="_SelectAssembliesToLink" DependsOnTargets="ComputeResolvedFilesToPublishList">
 		<ItemGroup>
 			<ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == '$(_PlatformAssemblyName).dll'">
 				<!-- This makes it so that the platform assembly isn't treated as a root assembly -->
