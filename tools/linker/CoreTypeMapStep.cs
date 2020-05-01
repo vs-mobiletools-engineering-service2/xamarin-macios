@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Mono.Cecil;
+using Mono.Linker;
 using Mono.Linker.Steps;
 using Mono.Tuner;
 
@@ -23,14 +24,22 @@ using Xamarin.Tuner;
 namespace MonoTouch.Tuner {
 
 	// This class is shared between Xamarin.Mac and Xamarin.iOS
+#if NET
+	public class CoreTypeMapStep : BaseStep {
+#else
 	public class CoreTypeMapStep : TypeMapStep {
+#endif
 		HashSet<TypeDefinition> cached_isnsobject = new HashSet<TypeDefinition> ();
 		Dictionary<TypeDefinition, bool?> isdirectbinding_value = new Dictionary<TypeDefinition, bool?> ();
 		bool dynamic_registration_support_required;
 
 		DerivedLinkContext LinkContext {
 			get {
+#if NET
+				return DerivedLinkContext.Instance;
+#else
 				return (DerivedLinkContext) base.Context;
+#endif
 			}
 		}
 
@@ -39,19 +48,25 @@ namespace MonoTouch.Tuner {
 			if (LinkContext.App.Optimizations.RemoveDynamicRegistrar != false)
 				dynamic_registration_support_required |= RequiresDynamicRegistrar (assembly, LinkContext.App.Optimizations.RemoveDynamicRegistrar == true);
 
+#if NET
+			foreach (TypeDefinition type in assembly.MainModule.Types)
+				MapType (type);
+#else
 			base.ProcessAssembly (assembly);
+#endif
 		}
 
 		// If certain conditions are met, we can optimize away the code for the dynamic registrar.
 		bool RequiresDynamicRegistrar (AssemblyDefinition assembly, bool warnIfRequired)
 		{
+#if !NET
 			// We know that the SDK assemblies we ship don't use the methods we're looking for.
 			if (Profile.IsSdkAssembly (assembly))
 				return false;
-
+#endif
 			// The product assembly itself is safe as long as it's linked
 			if (Profile.IsProductAssembly (assembly))
-				return LinkContext.Annotations.GetAction (assembly) != Mono.Linker.AssemblyAction.Link;
+				return Annotations.GetAction (assembly) != AssemblyAction.Link;
 
 			// Can't touch the forbidden fruit in the product assembly unless there's a reference to it
 			var hasProductReference = false;
@@ -65,7 +80,11 @@ namespace MonoTouch.Tuner {
 				return false;
 
 			// Check if the assembly references any methods that require the dynamic registrar
+#if NET
+			var productAssemblyName = LinkerConfiguration.Instance.PlatformAssembly;
+#else
 			var productAssemblyName = ((MobileProfile) Profile.Current).ProductAssembly;
+#endif
 			var requires = false;
 			foreach (var mr in assembly.MainModule.GetMemberReferences ()) {
 				if (mr.DeclaringType == null || string.IsNullOrEmpty (mr.DeclaringType.Namespace))
@@ -112,7 +131,7 @@ namespace MonoTouch.Tuner {
 							// Fortunately the linker is able to rewrite calls to SetupBlock[Unsafe] to call
 							// SetupBlockImpl (which doesn't need the dynamic registrar), which means we only have
 							// to look in assemblies that aren't linked.
-							if (LinkContext.Annotations.GetAction (assembly) == Mono.Linker.AssemblyAction.Link && LinkContext.App.Optimizations.OptimizeBlockLiteralSetupBlock == true)
+							if (Annotations.GetAction (assembly) == AssemblyAction.Link && LinkContext.App.Optimizations.OptimizeBlockLiteralSetupBlock == true)
 								break;
 
 							if (warnIfRequired)
@@ -142,12 +161,18 @@ namespace MonoTouch.Tuner {
 
 		void Show2107 (AssemblyDefinition assembly, MemberReference mr)
 		{
+#if NET
+			ErrorHelper.Show (ErrorHelper.CreateWarning (2107, null, "2107: {0}{1}{2}{3}", assembly.Name.Name, mr.DeclaringType.FullName, mr.Name, string.Join (", ", ((MethodReference) mr).Parameters.Select ((v) => v.ParameterType.FullName))));
+#else
 			ErrorHelper.Warning (2107, Errors.MM2107, assembly.Name.Name, mr.DeclaringType.FullName, mr.Name, string.Join (", ", ((MethodReference) mr).Parameters.Select ((v) => v.ParameterType.FullName)));
+#endif
 		}
 
 		protected override void EndProcess ()
 		{
+#if !NET
 			base.EndProcess ();
+#endif
 
 			LinkContext.CachedIsNSObject = cached_isnsobject;
 			LinkContext.IsDirectBindingValue = isdirectbinding_value;
@@ -170,10 +195,14 @@ namespace MonoTouch.Tuner {
 			}
 		}
 
+#if NET
+		protected void MapType (TypeDefinition type)
+		{
+#else
 		protected override void MapType (TypeDefinition type)
 		{
 			base.MapType (type);
-
+#endif
 			// additional checks for NSObject to check if the type is a *generated* bindings
 			// bonus: we cache, for every type, whether or not it inherits from NSObject (very useful later)
 			if (!IsNSObject (type))
@@ -187,15 +216,24 @@ namespace MonoTouch.Tuner {
 		// and ensure later steps re-use the same, pre-computed, result
 		bool IsNSObject (TypeDefinition type)
 		{
+#if NET
+			if (!type.IsNSObject ())
+				return false;
+#else
 			if (!type.IsNSObject (LinkContext))
 				return false;
+#endif
 			cached_isnsobject.Add (type);
 			return true;
 		}
 
 		bool IsWrapperType (TypeDefinition type)
 		{
+#if NET
+			var registerAttribute = RegisterAttribute.GetRegisterAttribute (type);
+#else
 			var registerAttribute = LinkContext.StaticRegistrar.GetRegisterAttribute (type);
+#endif
 			return registerAttribute?.IsWrapper == true || registerAttribute?.SkipRegistration == true;
 		}
 

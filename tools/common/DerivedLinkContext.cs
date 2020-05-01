@@ -5,17 +5,24 @@ using Mono.Cecil;
 using Mono.Linker;
 using Mono.Collections.Generic;
 
+#if NET
+using Xamarin.Linker;
+#else
 using Registrar;
+#endif
 using Mono.Tuner;
 using Xamarin.Bundler;
 
 namespace Xamarin.Tuner
 {
-	public class DerivedLinkContext : LinkContext
-	{
+#if NET
+	public class DerivedLinkContext {
+#else
+	public class DerivedLinkContext : LinkContext {
 		internal IStaticRegistrar StaticRegistrar;
 		internal Target Target;
 		Symbols required_symbols;
+#endif
 
 		// Any errors or warnings during the link process that won't prevent linking from continuing can be stored here.
 		// This is typically used to show as many problems as possible per build (so that the user doesn't have to fix one thing, rebuild, fix another, rebuild, fix another, etc).
@@ -23,15 +30,10 @@ namespace Xamarin.Tuner
 		// The errors/warnings will be shown when the linker is done.
 		public List<Exception> Exceptions = new List<Exception> ();
 
+#if !NET
 		// SDK candidates - they will be preserved only if the application (not the SDK) uses it
 		List<ICustomAttributeProvider> srs_data_contract = new List<ICustomAttributeProvider> ();
 		List<ICustomAttributeProvider> xml_serialization = new List<ICustomAttributeProvider> ();
-
-		HashSet<TypeDefinition> cached_isnsobject;
-		// Tristate:
-		//   null = don't know, must check at runtime (can't inline)
-		//   true/false = corresponding constant value
-		Dictionary<TypeDefinition, bool?> isdirectbinding_value;
 
 		// Store interfaces the linker has linked away so that the static registrar can access them.
 		public Dictionary<TypeDefinition, List<TypeDefinition>> ProtocolImplementations { get; private set; } = new Dictionary<TypeDefinition, List<TypeDefinition>> ();
@@ -40,7 +42,12 @@ namespace Xamarin.Tuner
 		// The linked away TypeDefinitions lacks some information (it can't even find itself in the LinkedAwayTypes dictionary)
 		// so we need a second dictionary
 		Dictionary<TypeDefinition, LinkedAwayTypeReference> LinkedAwayTypeMap = new Dictionary<TypeDefinition, LinkedAwayTypeReference> ();
+#endif
 
+#if NET
+		public static DerivedLinkContext Instance { get; } = new DerivedLinkContext ();
+		public App App { get; } = new App ();
+#else
 		public Application App {
 			get {
 				return Target.App;
@@ -59,16 +66,15 @@ namespace Xamarin.Tuner
 				return corlib;
 			}
 		}
-		public HashSet<TypeDefinition> CachedIsNSObject {
-			get { return cached_isnsobject; }
-			set { cached_isnsobject = value; }
-		}
+#endif
+		public HashSet<TypeDefinition> CachedIsNSObject { get; set; }
 
-		public Dictionary<TypeDefinition, bool?> IsDirectBindingValue {
-			get { return isdirectbinding_value; }
-			set { isdirectbinding_value = value; }
-		}
+		// Tristate:
+		//   null = don't know, must check at runtime (can't inline)
+		//   true/false = corresponding constant value
+		public Dictionary<TypeDefinition, bool?> IsDirectBindingValue { get; set; }
 
+#if !NET
 		public IList<ICustomAttributeProvider> DataContract {
 			get {
 				return srs_data_contract;
@@ -88,11 +94,13 @@ namespace Xamarin.Tuner
 				return required_symbols;
 			}
 		}
+#endif
 
 		public bool RequireMonoNative {
 			get; set;
 		}
 
+#if !NET
 		public DerivedLinkContext (Pipeline pipeline, AssemblyResolver resolver)
 			: base (pipeline, resolver)
 		{
@@ -255,5 +263,6 @@ namespace Xamarin.Tuner
 				set { scope = value; }
 			}
 		}
+#endif
 	}
 }

@@ -1,9 +1,11 @@
+#if true
+
 // Compat.cs: might not be ideal but ease code sharing with existing implementation
 
 using System;
 using Mono.Cecil;
-
-namespace Xamarin.Tuner { }
+using Mono.Tuner;
+using Xamarin.Bundler;
 
 namespace Xamarin.Linker {
 
@@ -54,4 +56,89 @@ namespace Xamarin.Linker {
 			return assembly == LinkerConfiguration.Instance.PlatformAssembly;
 		}
 	}
+
+	public class App {
+		public Optimizations Optimizations { get; } = new Optimizations ();
+	}
+
+
+	// from StaticRegistrar.cs
+	class RegisterAttribute : Attribute {
+		public RegisterAttribute () {}
+		public RegisterAttribute (string name) {
+			this.Name = name;
+		}
+
+		public RegisterAttribute (string name, bool isWrapper) {
+			this.Name = name;
+			this.IsWrapper = isWrapper;
+		}
+
+		public string Name { get; set; }
+		public bool IsWrapper { get; set; }
+		public bool SkipRegistration { get; set; }
+
+		// FIXME: does not include attributes removed by the linker
+		static public bool TryGetAttribute (ICustomAttributeProvider provider, string @namespace, string attributeName, out ICustomAttribute attribute)
+		{
+			attribute = null;
+			if (provider.HasCustomAttributes) {
+				foreach (var custom_attribute in provider.CustomAttributes) {
+					if (!custom_attribute.AttributeType.Is (@namespace, attributeName))
+						continue;
+					attribute = custom_attribute;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static public RegisterAttribute GetRegisterAttribute (TypeReference type)
+		{
+			RegisterAttribute rv = null;
+
+			if (!TryGetAttribute (type.Resolve (), "Foundation", "RegisterAttribute", out var attrib))
+				return null;
+
+			if (!attrib.HasConstructorArguments) {
+				rv = new RegisterAttribute ();
+			} else {
+				switch (attrib.ConstructorArguments.Count) {
+				case 0:
+					rv = new RegisterAttribute ();
+					break;
+				case 1:
+					rv = new RegisterAttribute ((string) attrib.ConstructorArguments [0].Value);
+					break;
+				case 2:
+					rv = new RegisterAttribute ((string) attrib.ConstructorArguments [0].Value, (bool) attrib.ConstructorArguments [1].Value);
+					break;
+				default:
+					throw ErrorHelper.CreateError (4124, type.FullName);
+				}
+			}
+
+			if (attrib.HasProperties) {
+				foreach (var prop in attrib.Properties) {
+					switch (prop.Name) {
+					case "IsWrapper":
+						rv.IsWrapper = (bool) prop.Argument.Value;
+						break;
+					case "Name":
+						rv.Name = (string) prop.Argument.Value;
+						break;
+					case "SkipRegistration":
+						rv.SkipRegistration = (bool) prop.Argument.Value;
+						break;
+					default:
+						throw ErrorHelper.CreateError (4124, type.FullName + " " + prop.Name);
+					}
+				}
+			}
+
+			return rv;
+		}
+	}
 }
+
+#endif

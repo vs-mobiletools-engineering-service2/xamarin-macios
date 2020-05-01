@@ -89,6 +89,8 @@ namespace Xamarin {
 				// platform assemblies (and friends) are linked along with the BCL
 				InsertAfter (new LinkSdkStep (), "LoadReferencesStep");
 
+				InsertAfter (new CoreTypeMapStep (), "TypeMapStep");
+
 				var subs = new MobileSubStepDispatcher ();
 				// only our _old_ [Preserve] code is needed, other stuff is handled differently
 				subs.Add (new ApplyPreserveAttribute ());

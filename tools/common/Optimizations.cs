@@ -170,6 +170,7 @@ namespace Xamarin.Bundler
 			values = new bool? [opt_names.Length];
 		}
 
+#if !NET
 		public void Initialize (Application app)
 		{
 			// warn if the user asked to optimize something when the optimization can't be applied
@@ -371,5 +372,6 @@ namespace Xamarin.Bundler
 					ErrorHelper.Warning (132, Errors.MX0132, opt, string.Join (", ", opt_names.Where ((v) => !string.IsNullOrEmpty (v))));
 			}
 		}
+#endif // !NET
 	}
 }

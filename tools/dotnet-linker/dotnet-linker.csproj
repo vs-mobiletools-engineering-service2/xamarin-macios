@@ -52,5 +52,14 @@
     <Compile Include="..\linker\ExceptionalSubStep.cs">
       <Link>ExceptionalSubStep.cs</Link>
     </Compile>
+    <Compile Include="..\linker\CoreTypeMapStep.cs">
+      <Link>CoreTypeMapStep.cs</Link>
+    </Compile>
+    <Compile Include="..\common\Optimizations.cs">
+      <Link>Optimizations.cs</Link>
+    </Compile>
+    <Compile Include="..\common\DerivedLinkContext.cs">
+      <Link>DerivedLinkContext.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
