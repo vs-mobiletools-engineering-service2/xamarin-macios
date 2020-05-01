@@ -94,10 +94,6 @@ namespace Xamarin {
 				var subs = new MobileSubStepDispatcher ();
 				// only our _old_ [Preserve] code is needed, other stuff is handled differently
 				subs.Add (new ApplyPreserveAttribute ());
-				// CoreRemoveSecurity does not hit any extra case
-				// the old #28918 bug should not happen anymore (types not present)
-				// https://xamarin.github.io/bugzilla-archives/28/28918/bug.html
-				// subs.Add (new Mono.Tuner.CoreRemoveSecurity ());
 
 				// subs.Add (new OptimizeGeneratedCodeSubStep ());
 				// subs.Add (new RemoveUserResourcesSubStep ());
