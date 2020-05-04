@@ -73,7 +73,7 @@ namespace MonoTouchFixtures.CoreGraphics {
 
 			Assert.Throws<Exception> (() => new CGContextPDF ((CGDataConsumer) null, CGRect.Empty, null), "null CGDataConsumer, Empty, null");
 
-			Assert.Throws<Exception> (() => new CGContextPDF ((CGDataConsumer) null, null), "null CGDataConsumer, null");
+			Assert.Throws<Exception> (() => new CGContextPDF ((CGDataConsumer) null, (CGPDFInfo) null), "null CGDataConsumer, null");
 
 			Assert.Throws<Exception> (() => new CGContextPDF ((NSUrl) null), "null NSUrl");
 
@@ -81,7 +81,7 @@ namespace MonoTouchFixtures.CoreGraphics {
 
 			Assert.Throws<Exception> (() => new CGContextPDF ((NSUrl) null, CGRect.Empty, null), "null NSUrl, Empty, null");
 
-			Assert.Throws<Exception> (() => new CGContextPDF ((NSUrl) null, null), "null NSUrl, null");
+			Assert.Throws<Exception> (() => new CGContextPDF ((NSUrl) null, (CGPDFInfo) null), "null NSUrl, null");
 
 		}
 
