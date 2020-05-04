@@ -1456,11 +1456,11 @@ namespace Xamarin.Bundler {
 			RunXcodeTool ("strip", options);
 		}
 
-		public static string CorlibName {
+		public static string [] CorlibNames {
 			get {
 				if (IsDotNet)
-					return "System.Private.CoreLib";
-				return "mscorlib";
+					return new string [] { "System.Private.CoreLib", "System.Runtime" } ;
+				return new string [] { "mscorlib" };
 			}
 		}
 

@@ -110,7 +110,6 @@ copy_ios_native_libs_to_runtime_pack ()
 	inputs+=("$lib_dir"/libtvextension.a)
 	inputs+=("$lib_dir"/libwatchextension.a)
 	inputs+=("$lib_dir"/libxamarin*)
-	inputs+=("$lib_dir"/*registrar.a)
 	for element in "${inputs[@]}"; do
 		if [[ x$fat == x1 ]]; then
 			lipo "$element" "${thin[@]}" -output "$destdir/$(basename "$element")"
@@ -134,6 +133,8 @@ copy_ios_native_libs_to_runtime_pack ()
 	$cp "$TOP"/tools/mtouch/simlauncher.mm "$destdir"
 
 	$cp -r "$include_dir/xamarin" "$destdir/"
+
+	make -C "$TOP/tools/mtouch" dotnet -j
 }
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm64" "arm64"
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm"   "armv7 armv7s"
@@ -166,7 +167,9 @@ copy_macos_native_libs_to_runtime_pack ()
 	inputs+=("$lib_dir"/libxammac.dylib)
 	inputs+=("$lib_dir"/libxammac-debug.a)
 	inputs+=("$lib_dir"/libxammac-debug.dylib)
-	inputs+=("$lib_dir"/mmp/Xamarin.Mac.registrar.mobile.a)
+
+	make -C "$TOP/tools/mmp" dotnet -j
+
 	for element in "${inputs[@]}"; do
 		#shellcheck disable=SC2155
 		local filename=$(basename "$element")

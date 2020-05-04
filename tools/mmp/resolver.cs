@@ -80,6 +80,11 @@ namespace Xamarin.Bundler {
 			if (assembly != null)
 				return assembly;
 
+			// The entry assembly may be a library
+			assembly = SearchDirectory (name, RootDirectory);
+			if (assembly != null)
+				return assembly;
+
 			if (!string.IsNullOrEmpty (GlobalAssemblyCache)) {
 				var gac_folder = new StringBuilder ()
 					.Append (reference.Version)

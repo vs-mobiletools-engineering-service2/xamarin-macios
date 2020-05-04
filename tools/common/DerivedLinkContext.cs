@@ -58,10 +58,13 @@ namespace Xamarin.Tuner
 		public AssemblyDefinition Corlib {
 			get {
 				if (corlib == null) {
-					var name = Driver.CorlibName;
-					corlib = this.GetAssembly (name);
+					foreach (var name in Driver.CorlibNames) {
+						corlib = this.GetAssembly (name);
+						if (corlib != null)
+							break;
+					}
 					if (corlib == null)
-						throw ErrorHelper.CreateError (2020, Errors.MX2020 /* Can not find the corlib assembly '{0}' in the list of loaded assemblies. */, name);
+						throw ErrorHelper.CreateError (2020, Errors.MX2020 /* Can not find the corlib assembly '{0}' in the list of loaded assemblies. */, Driver.CorlibNames [0]);
 				}
 				return corlib;
 			}

@@ -994,21 +994,27 @@ namespace Registrar {
 				return system_void;
 			
 			// find corlib
-			var corlib_name = Driver.CorlibName;
+			var corlib_names = Driver.CorlibNames;
 			AssemblyDefinition corlib = null;
 			AssemblyDefinition first = null;
 
 			foreach (var assembly in input_assemblies) {
 				if (first == null)
 					first = assembly;
-				if (assembly.Name.Name == corlib_name) {
+				if (Array.IndexOf (corlib_names, assembly.Name.Name) >= 0) {
 					corlib = assembly;
 					break;
 				}
 			}
 
 			if (corlib == null) {
-				corlib = first.MainModule.AssemblyResolver.Resolve (AssemblyNameReference.Parse (corlib_name), new ReaderParameters ());
+				foreach (var name in corlib_names) {
+					corlib = first.MainModule.AssemblyResolver.Resolve (AssemblyNameReference.Parse (name), new ReaderParameters ());
+					if (corlib != null)
+						break;
+				}
+				if (corlib == null)
+					throw ErrorHelper.CreateError (99, Errors.MX0099, "Could not find corlib.");
 			}
 			foreach (var type in corlib.MainModule.Types) {
 				if (type.Namespace == "System" && type.Name == "Void")

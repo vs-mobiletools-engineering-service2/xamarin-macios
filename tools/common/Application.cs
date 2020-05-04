@@ -401,12 +401,18 @@ namespace Xamarin.Bundler {
 			var RootAssembly = RootAssemblies [0];
 			var resolvedAssemblies = new Dictionary<string, AssemblyDefinition> ();
 			var resolver = new PlatformResolver () {
-				FrameworkDirectory = Driver.GetBCLImplementationDirectory (this),
 				RootDirectory = Path.GetDirectoryName (RootAssembly),
 #if MMP
 				CommandLineAssemblies = RootAssemblies,
 #endif
 			};
+
+			if (Driver.IsDotNet) {
+				resolver.FrameworkDirectory = "/Users/rolf/work/maccore/onedotnet/xamarin-macios/builds/downloads/microsoft.netcore.app.ref.3.1.0/ref/netcoreapp3.1"; // Path.GetDirectoryName (RootAssembly);
+			} else {
+				resolver.FrameworkDirectory = Driver.GetPlatformFrameworkDirectory (this);
+			}
+
 
 			if (Platform == ApplePlatform.iOS) {
 				if (Is32Build) {
@@ -418,7 +424,14 @@ namespace Xamarin.Bundler {
 
 			var ps = new ReaderParameters ();
 			ps.AssemblyResolver = resolver;
-			resolvedAssemblies.Add ("mscorlib", ps.AssemblyResolver.Resolve (AssemblyNameReference.Parse ("mscorlib"), new ReaderParameters ()));
+			AssemblyDefinition corlib = null;
+			foreach (var name in Driver.CorlibNames) {
+				corlib = ps.AssemblyResolver.Resolve (AssemblyNameReference.Parse (name), new ReaderParameters ());
+				if (corlib != null) {
+					resolvedAssemblies.Add (name, corlib);
+					break;
+				}
+			}
 
 			var productAssembly = Driver.GetProductAssembly (this);
 			bool foundProductAssembly = false;
