@@ -153,8 +153,7 @@ namespace Xamarin.MacDev.Tasks {
 			//	lib_registrar_name = "Xamarin.Mac.registrar.mobile.a";
 			//	break;
 			//default:
-			//	// FIXME: Add error
-			//	throw new NotImplementedException ($"Unknown platform: {Platform}");
+			//	throw new InvalidOperationException ($"Invalid platform: {Platform}");
 			//}
 			//var lib_registrar = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_registrar_name);
 			//arguments.Add (lib_registrar.ItemSpec);
