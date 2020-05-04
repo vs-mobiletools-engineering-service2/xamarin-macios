@@ -182,7 +182,7 @@ namespace MonoTouch.Tuner {
 				// been disabled, then we can remove it!
 				LinkContext.App.Optimizations.RemoveDynamicRegistrar = !dynamic_registration_support_required;
 				Driver.Log (4, "Optimization dynamic registrar removal: {0}", LinkContext.App.Optimizations.RemoveDynamicRegistrar.Value ? "enabled" : "disabled");
-#if MTOUCH
+#if MTOUCH && !NET
 				var app = LinkContext.App;
 				if (app.IsCodeShared) {
 					foreach (var appex in app.AppExtensions) {

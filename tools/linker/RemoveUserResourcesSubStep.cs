@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Mono.Cecil;
 using Mono.Linker;
+using Mono.Linker.Steps;
 using Mono.Tuner;
 
 namespace Xamarin.Linker {
@@ -12,10 +13,6 @@ namespace Xamarin.Linker {
 #if MTOUCH
 		const string Content = "__monotouch_content_";
 		const string Page = "__monotouch_page_";
-
-		public RemoveUserResourcesSubStep ()
-		{
-		}
 #else
 		const string Content = "__xammac_content_";
 		const string Page = "__xammac_page_";
@@ -24,16 +21,25 @@ namespace Xamarin.Linker {
 			get { return SubStepTargets.Assembly; }
 		}
 
+#if !NET
 		public bool Device { get { return LinkContext.App.IsDeviceBuild; } }
+#endif
 
 		protected override string Name { get; } = " Removing User Resources";
 		protected override int ErrorCode { get; } = 2030;
 
+		public override bool IsActiveFor (AssemblyDefinition assembly)
+		{
+			// we know we do not ship assemblies with such resources so we can skip this step for our code
+#if NET
+			return !Profile.IsProductAssembly (assembly);
+#else
+			return !(Profile.IsProductAssembly (assembly) || Profile.IsSdkAssembly (assembly));
+#endif
+		}
+
 		protected override void Process (AssemblyDefinition assembly)
 		{
-			if (Profile.IsProductAssembly (assembly) || Profile.IsSdkAssembly (assembly))
-				return;
-
 			var module = assembly.MainModule;
 			if (!module.HasResources)
 				return;
@@ -41,13 +47,11 @@ namespace Xamarin.Linker {
 			HashSet<string> libraries = null;
 			if (assembly.HasCustomAttributes) {
 				foreach (var ca in assembly.CustomAttributes) {
-					if (!ca.AttributeType.Is ("ObjCRuntime", "LinkWithAttribute"))
-						continue;
-					var lwa = Xamarin.Bundler.Assembly.GetLinkWithAttribute (ca);
-					if (lwa.LibraryName != null) {
+					var libName = GetLinkWithLibraryName (ca);
+					if (libName != null) {
 						if (libraries == null)
 							libraries = new HashSet<string> (StringComparer.OrdinalIgnoreCase);
-						libraries.Add (lwa.LibraryName);
+						libraries.Add (libName);
 					}
 				}
 			}
@@ -73,9 +77,20 @@ namespace Xamarin.Linker {
 				Annotations.SetAction (assembly, AssemblyAction.Save);
 		}
 
+		// simplified version of Xamarin.Bundler.Assembly.GetLinkWithAttribute
+		// with less allocations
+		static string GetLinkWithLibraryName (CustomAttribute ca)
+		{
+			if (!ca.AttributeType.Is ("ObjCRuntime", "LinkWithAttribute"))
+				return null;
+			if (ca.HasConstructorArguments && ca.ConstructorArguments.Count > 1)
+				return (string) ca.ConstructorArguments [0].Value; // first argument
+			return null;
+		}
+
 		bool IsMonoTouchResource (string resourceName)
 		{
-#if MTOUCH
+#if MTOUCH && !NET
 			if (!Device)
 				return false;
 #endif

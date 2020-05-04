@@ -96,7 +96,7 @@ namespace Xamarin {
 				subs.Add (new ApplyPreserveAttribute ());
 
 				// subs.Add (new OptimizeGeneratedCodeSubStep ());
-				// subs.Add (new RemoveUserResourcesSubStep ());
+				subs.Add (new RemoveUserResourcesSubStep ());
 				// subs.Add (new RemoveAttributes ());
 
 				subs.Add (new MarkNSObjects ());
