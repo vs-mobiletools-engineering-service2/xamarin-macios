@@ -1,0 +1,5 @@
+# This files contains a list of labels to apply to a commit, each label on a separate line.
+# Do not merge this file into master (or any other release branch) if it has any labels in it.
+# This is used to adjust what we build when we're building a branch (since we can't apply labels to branches).
+
+skip-all-tests
