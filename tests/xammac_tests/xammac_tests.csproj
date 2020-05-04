@@ -101,6 +101,9 @@
     <Compile Include="..\..\tests\test-libraries\TrampolineTest.generated.cs" />
     <Compile Include="..\..\tests\test-libraries\RegistrarTest.generated.cs" />
     <Compile Include="AppKit\NSGridViewTest.cs" />
+    <Compile Include="..\mtouch\Cache.cs">
+      <Link>Cache.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
