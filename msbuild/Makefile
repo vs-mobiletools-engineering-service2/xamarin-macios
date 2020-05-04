@@ -321,7 +321,7 @@ $(foreach dll,$(MSBUILD_TASK_ASSEMBLIES),$(dll)/bin/$(CONFIG)/$(TARGETFRAMEWORK)
 .PHONY: $(MSBUILD_SYMLINKS)
 
 # this is a directory-creating target.
-# we sort to remove duplicates, which can happen if MAC_DESTDIR and IOS_DESTDIR are the same (both produce a '/Library/Frameworks/Mono.framework/External/xbuild/Xamarin' directory)
+# we sort to remove duplicates, which can happen if MAC_DESTDIR and IOS_DESTDIR are the same (both create a '/Library/Frameworks/Mono.framework/External/xbuild/Xamarin' target)
 $(sort $(MSBUILD_DIRECTORIES)) build:
 	$(Q) mkdir -p $@
 
