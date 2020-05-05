@@ -977,32 +977,35 @@ namespace Registrar {
 			if (system_void != null)
 				return system_void;
 			
-			// find corlib
-			var corlib_names = Driver.CorlibNames;
+			// Find System.Void in corlib, or if we can't find corlib, look in all assemblies.
+			var corlib_name = Driver.CorlibName;
 			AssemblyDefinition corlib = null;
 			AssemblyDefinition first = null;
+			IEnumerable<AssemblyDefinition> candidates = null;
 
 			foreach (var assembly in input_assemblies) {
 				if (first == null)
 					first = assembly;
-				if (Array.IndexOf (corlib_names, assembly.Name.Name) >= 0) {
+				if (corlib_name == assembly.Name.Name) {
 					corlib = assembly;
 					break;
 				}
 			}
 
-			if (corlib == null) {
-				foreach (var name in corlib_names) {
-					corlib = first.MainModule.AssemblyResolver.Resolve (AssemblyNameReference.Parse (name), new ReaderParameters ());
-					if (corlib != null)
-						break;
-				}
-				if (corlib == null)
-					throw ErrorHelper.CreateError (99, Errors.MX0099, "Could not find corlib.");
+			if (corlib == null)
+				corlib = first.MainModule.AssemblyResolver.Resolve (AssemblyNameReference.Parse (corlib_name), new ReaderParameters ());
+
+			if (corlib != null) { 
+				candidates = new AssemblyDefinition [] { corlib };
+			} else {
+				candidates = input_assemblies;
 			}
-			foreach (var type in corlib.MainModule.Types) {
-				if (type.Namespace == "System" && type.Name == "Void")
-					return system_void = type;
+
+			foreach (var candidate in candidates) {
+				foreach (var type in candidate.MainModule.Types) {
+					if (type.Namespace == "System" && type.Name == "Void")
+						return system_void = type;
+				}
 			}
 
 			throw ErrorHelper.CreateError (4165, Errors.MT4165);
