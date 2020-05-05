@@ -260,7 +260,6 @@ void			xamarin_printf (const char *format, ...);
 void			xamarin_vprintf (const char *format, va_list args);
 void			xamarin_install_log_callbacks ();
 
-id				xamarin_get_handle_for_inativeobject (MonoObject * obj, guint32 *exception_gchandle);
 /*
  * Wrapper GCHandle functions that takes pointer sized handles instead of ints,
  * so that we can adapt our code incrementally to use pointers instead of ints

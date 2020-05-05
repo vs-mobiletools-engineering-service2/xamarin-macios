@@ -3638,7 +3638,7 @@ namespace Registrar {
 
 							if (HasAttribute (paramBase, ObjCRuntime, StringConstants.TransientAttribute)) {
 								copyback.AppendLine ("if (created{0}) {{", i);
-								copyback.AppendLine ("xamarin_dispose (xamarin_gchandle_new (mobj{0}, false), &exception_gchandle);", i);
+								copyback.AppendLine ("xamarin_dispose (mobj{0}, &exception_gchandle);", i);
 								copyback.AppendLine ("if (exception_gchandle != 0) goto exception_handling;");
 								copyback.AppendLine ("}");
 							}
@@ -3902,9 +3902,9 @@ namespace Registrar {
 			body.WriteLine ("if (!managed_method) {");
 			body.Write ("GCHandle reflection_method_handle = ");
 			if (isGeneric)
-				body.Write ("xamarin_get_generic_method_from_token (mthis_handle, ");
+				body.Write ("xamarin_get_generic_method_from_token (mthis, ");
 			else
-				body.Write ("(MonoReflectionMethod *) xamarin_get_method_from_token (");
+				body.Write ("xamarin_get_method_from_token (");
 
 			if (merge_bodies) {
 				body.WriteLine ("token_ref, &exception_gchandle);");

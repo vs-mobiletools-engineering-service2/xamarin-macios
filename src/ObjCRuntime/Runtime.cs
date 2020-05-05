@@ -378,9 +378,9 @@ namespace ObjCRuntime {
 
 		// value: native NSString *
 		// returns: GCHandle to a (smart) enum value. Caller must free the GCHandle.
-		static IntPtr ConvertNSStringToSmartEnum (IntPtr value, IntPtr type_handle)
+		static IntPtr ConvertNSStringToSmartEnum (IntPtr value, IntPtr type)
 		{
-			var smart_type = (Type) GetGCHandleTarget (type_handle);
+			var smart_type = (Type) GetGCHandleTarget (type);
 			var str = GetNSObject<NSString> (value);
 			MethodBase getConstantMethod, getValueMethod;
 			if (!Registrar.IsSmartEnum (smart_type, out getConstantMethod, out getValueMethod))
@@ -739,9 +739,9 @@ namespace ObjCRuntime {
 			return parameters [parameter].IsOut;
 		}
 
-		static void GetMethodAndObjectForSelector (IntPtr klass, IntPtr sel, bool is_static, IntPtr obj, ref IntPtr mthis_gchandle, IntPtr desc)
+		static void GetMethodAndObjectForSelector (IntPtr klass, IntPtr sel, bool is_static, IntPtr obj, ref IntPtr mthis, IntPtr desc)
 		{
-			Registrar.GetMethodDescriptionAndObject (Class.Lookup (klass), sel, is_static, obj, ref mthis_gchandle, desc);
+			Registrar.GetMethodDescriptionAndObject (Class.Lookup (klass), sel, is_static, obj, ref mthis, desc);
 		}
 
 		// If inner_exception_gchandle is provided, it will be freed.
