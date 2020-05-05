@@ -80,7 +80,7 @@ namespace MonoTouch.Tuner {
 			if (cache.TryGetValue (aname, out assembly))
 				return assembly;
 
-			if (EnableRepl) {
+			if (EnableRepl && FrameworkDirectory != null) {
 				var replDir = Path.Combine (FrameworkDirectory, "repl");
 				if (Directory.Exists (replDir)) {
 					assembly = SearchDirectory (aname, replDir);
@@ -89,11 +89,13 @@ namespace MonoTouch.Tuner {
 				}
 			}
 
-			var facadeDir = Path.Combine (FrameworkDirectory, "Facades");
-			if (Directory.Exists (facadeDir)) {
-				assembly = SearchDirectory (aname, facadeDir);
-				if (assembly != null)
-					return assembly;
+			if (FrameworkDirectory != null) {
+				var facadeDir = Path.Combine (FrameworkDirectory, "Facades");
+				if (Directory.Exists (facadeDir)) {
+					assembly = SearchDirectory (aname, facadeDir);
+					if (assembly != null)
+						return assembly;
+				}
 			}
 
 			if (ArchDirectory != null) {
