@@ -408,13 +408,6 @@ namespace Xamarin.Bundler {
 #endif
 			};
 
-			if (Driver.IsDotNet) {
-				resolver.FrameworkDirectory = "/Users/rolf/work/maccore/onedotnet/xamarin-macios/builds/downloads/microsoft.netcore.app.ref.3.1.0/ref/netcoreapp3.1"; // Path.GetDirectoryName (RootAssembly);
-			} else {
-				resolver.FrameworkDirectory = Driver.GetPlatformFrameworkDirectory (this);
-			}
-
-
 			if (Platform == ApplePlatform.iOS) {
 				if (Is32Build) {
 					resolver.ArchDirectory = Driver.GetArch32Directory (this);
@@ -425,13 +418,11 @@ namespace Xamarin.Bundler {
 
 			var ps = new ReaderParameters ();
 			ps.AssemblyResolver = resolver;
-			AssemblyDefinition corlib = null;
-			foreach (var name in Driver.CorlibNames) {
-				corlib = ps.AssemblyResolver.Resolve (AssemblyNameReference.Parse (name), new ReaderParameters ());
-				if (corlib != null) {
-					resolvedAssemblies.Add (name, corlib);
-					break;
-				}
+
+			foreach (var reference in References) {
+				var r = resolver.Load (reference);
+				if (r == null)
+					throw ErrorHelper.CreateError (2002, Errors.MT2002, reference);
 			}
 
 			var productAssembly = Driver.GetProductAssembly (this);
@@ -467,7 +458,13 @@ namespace Xamarin.Bundler {
 				throw ErrorHelper.CreateError (131, Errors.MX0131, productAssembly, string.Join ("', '", RootAssemblies.ToArray ()));
 
 #if MONOTOUCH
-			BuildTarget = BuildTarget.Simulator;
+			if (SelectAbis (Abis, Abi.SimulatorArchMask).Count > 0) {
+				BuildTarget = BuildTarget.Simulator;
+			} else if (SelectAbis (Abis, Abi.DeviceArchMask).Count > 0) {
+				BuildTarget = BuildTarget.Device;
+			} else {
+				throw ErrorHelper.CreateError (99, Errors.MX0099, "No valid ABI");
+			}
 #endif
 			var registrar = new Registrar.StaticRegistrar (this);
 			if (RootAssemblies.Count == 1)
