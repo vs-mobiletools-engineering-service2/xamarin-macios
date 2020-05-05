@@ -60,6 +60,10 @@ namespace Xamarin {
 			// we need to store the Field attribute in annotations, since it may end up removed.
 			InsertAfter (new ProcessExportedFields (), "TypeMapStep");
 
+			var prelink_subs = new MobileSubStepDispatcher ();
+			prelink_subs.Add (new RemoveUserResourcesSubStep ());
+			InsertAfter (prelink_subs, "RemoveSecurityStep");
+
 			switch (Configuration.LinkMode) {
 			case LinkMode.None:
 				// remove about everything if we're not linking
@@ -88,7 +92,7 @@ namespace Xamarin {
 				InsertAfter (new DoNotLinkStep (), "LoadReferencesStep");
 				break;
 			case LinkMode.SDKOnly:
-				// FIXME: it's so noisy that il makes the log viewer hang :(
+				// FIXME: it's so noisy that it makes the log viewer hang :(
 				RemoveStep ("RemoveUnreachableBlocksStep");
 
 				// platform assemblies (and friends) are linked along with the BCL
@@ -96,23 +100,19 @@ namespace Xamarin {
 
 				InsertAfter (new CoreTypeMapStep (), "TypeMapStep");
 
-				var subs = new MobileSubStepDispatcher ();
 				// only our _old_ [Preserve] code is needed, other stuff is handled differently
-				subs.Add (new ApplyPreserveAttribute ());
+				prelink_subs.Add (new ApplyPreserveAttribute ());
 
 				// subs.Add (new OptimizeGeneratedCodeSubStep ());
-				subs.Add (new RemoveUserResourcesSubStep ());
 				// subs.Add (new RemoveAttributes ());
 
-				subs.Add (new MarkNSObjects ());
+				prelink_subs.Add (new MarkNSObjects ());
 
 				// subs.Add (new PreserveSoapHttpClients ());
 				// subs.Add (new CoreHttpMessageHandler ());
 				// subs.Add (new InlinerSubStep ());
 
-				subs.Add (new PreserveSmartEnumConversionsSubStep ());
-
-				InsertAfter (subs, "RemoveSecurityStep");
+				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
 				break;
 			case LinkMode.All:
 				break;
