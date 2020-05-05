@@ -18,8 +18,10 @@ using Xamarin.Linker;
 
 #if MTOUCH
 using ProductException=Xamarin.Bundler.MonoTouchException;
+using PlatformResolver = MonoTouch.Tuner.MonoTouchResolver;
 #else
-using ProductException=Xamarin.Bundler.MonoMacException;
+using ProductException =Xamarin.Bundler.MonoMacException;
+using PlatformResolver = Xamarin.Bundler.MonoMacResolver;
 #endif
 
 using Registrar;
@@ -576,6 +578,9 @@ namespace Registrar {
 		IEnumerable<AssemblyDefinition> input_assemblies;
 		Dictionary<IMetadataTokenProvider, object> availability_annotations;
 
+		PlatformResolver resolver;
+		PlatformResolver Resolver {  get { return resolver ?? Target.Resolver; } }
+
 #if MONOMAC
 		readonly Version MacOSTenTwelveVersion = new Version (10,12);
 #endif
@@ -980,12 +985,9 @@ namespace Registrar {
 			// Find System.Void in corlib, or if we can't find corlib, look in all assemblies.
 			var corlib_name = Driver.CorlibName;
 			AssemblyDefinition corlib = null;
-			AssemblyDefinition first = null;
 			IEnumerable<AssemblyDefinition> candidates = null;
 
 			foreach (var assembly in input_assemblies) {
-				if (first == null)
-					first = assembly;
 				if (corlib_name == assembly.Name.Name) {
 					corlib = assembly;
 					break;
@@ -993,18 +995,20 @@ namespace Registrar {
 			}
 
 			if (corlib == null)
-				corlib = first.MainModule.AssemblyResolver.Resolve (AssemblyNameReference.Parse (corlib_name), new ReaderParameters ());
+				corlib = Resolver.Resolve (AssemblyNameReference.Parse (corlib_name), new ReaderParameters ());
 
 			if (corlib != null) { 
 				candidates = new AssemblyDefinition [] { corlib };
-			} else {
-				candidates = input_assemblies;
+			} else if (Resolver != null) {
+				candidates = Resolver.ToResolverCache ().Values.Cast<AssemblyDefinition> ();
 			}
 
-			foreach (var candidate in candidates) {
-				foreach (var type in candidate.MainModule.Types) {
-					if (type.Namespace == "System" && type.Name == "Void")
-						return system_void = type;
+			if (candidates != null) {
+				foreach (var candidate in candidates) {
+					foreach (var type in candidate.MainModule.Types) {
+						if (type.Namespace == "System" && type.Name == "Void")
+							return system_void = type;
+					}
 				}
 			}
 
@@ -4771,9 +4775,10 @@ namespace Registrar {
 			pinfo.EntryPoint = wrapperName;
 		}
 
-		public void GenerateSingleAssembly (IEnumerable<AssemblyDefinition> assemblies, string header_path, string source_path, string assembly)
+		public void GenerateSingleAssembly (PlatformResolver resolver, IEnumerable<AssemblyDefinition> assemblies, string header_path, string source_path, string assembly)
 		{
 			single_assembly = assembly;
+			this.resolver = resolver;
 			Generate (assemblies, header_path, source_path);
 		}
 
