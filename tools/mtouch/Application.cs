@@ -1315,7 +1315,7 @@ namespace Xamarin.Bundler {
 
 			var RootDirectory = Path.GetDirectoryName (Path.GetFullPath (RootAssemblies [0]));
 			foreach (var target in Targets) {
-				target.Resolver.FrameworkDirectory = Driver.GetFrameworkDirectory (this);
+				target.Resolver.FrameworkDirectory = Driver.GetPlatformFrameworkDirectory (this);
 				target.Resolver.RootDirectory = RootDirectory;
 				target.Resolver.EnableRepl = EnableRepl;
 				target.ManifestResolver.EnableRepl = EnableRepl;
