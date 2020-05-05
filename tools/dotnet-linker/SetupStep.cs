@@ -45,6 +45,16 @@ namespace Xamarin {
 			throw new InvalidOperationException ($"Could not insert {step} after {stepName}.");
 		}
 
+		void RemoveStep (string stepName)
+		{
+			for (int i = Steps.Count - 1; i >= 0; i--) {
+				if (Steps [i].GetType ().Name == stepName) {
+					Steps.RemoveAt (i);
+					return;
+				}
+			}
+		}
+
 		protected override void Process ()
 		{
 			// we need to store the Field attribute in annotations, since it may end up removed.
@@ -78,14 +88,9 @@ namespace Xamarin {
 				InsertAfter (new DoNotLinkStep (), "LoadReferencesStep");
 				break;
 			case LinkMode.SDKOnly:
-				for (int i = Steps.Count - 1; i >= 0; i--) {
-					switch (Steps [i].GetType ().Name) {
-					// FIXME: it's so noisy that il makes the log viewer hang :(
-					case "RemoveUnreachableBlocksStep":
-						Steps.RemoveAt (i);
-						break;
-					}
-				}
+				// FIXME: it's so noisy that il makes the log viewer hang :(
+				RemoveStep ("RemoveUnreachableBlocksStep");
+
 				// platform assemblies (and friends) are linked along with the BCL
 				InsertAfter (new LinkSdkStep (), "LoadReferencesStep");
 
