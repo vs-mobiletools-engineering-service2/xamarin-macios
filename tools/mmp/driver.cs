@@ -74,7 +74,7 @@ namespace Xamarin.Bundler {
 		const string FRAMEWORK_LOCATION_VARIABLE = "XAMMAC_FRAMEWORK_PATH";
 		internal static Application App = new Application (Environment.GetCommandLineArgs ());
 		static Target BuildTarget;
-		static List<string> references = new List<string> ();
+		static List<string> references { get { return App.References; } }
 		static List<string> resources = new List<string> ();
 		static List<string> resolved_assemblies = new List<string> ();
 		static List<string> ignored_assemblies = new List<string> ();
@@ -457,7 +457,7 @@ namespace Xamarin.Bundler {
 		static void FixReferences (Func<string, bool> match, Func<string, string> fix)
 		{
 			var assembliesToFix = references.Where (x => match(x)).ToList ();
-			references = references.Except (assembliesToFix).ToList ();
+			App.References = references.Except (assembliesToFix).ToList ();
 			var fixedAssemblies = assembliesToFix.Select (x => fix(x));
 			references.AddRange (fixedAssemblies);
 		}
