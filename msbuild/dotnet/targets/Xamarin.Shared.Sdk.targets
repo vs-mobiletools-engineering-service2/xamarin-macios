@@ -76,7 +76,7 @@
 	</PropertyGroup>
 
 	<!-- Inject our build app target -->
-	<Target Name="_BuildApp" AfterTargets="Build" BeforeTargets="AfterBuild" DependsOnTargets="$(_BuildAppTargets)" />
+	<Target Name="_BuildApp" AfterTargets="Build" BeforeTargets="AfterBuild" Condition="'$(_CanOutputAppBundle)' == 'true'" DependsOnTargets="$(_BuildAppTargets)" />
 
 	<!-- Actual implementations for what we need to do -->
 
