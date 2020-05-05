@@ -827,38 +827,6 @@ namespace Xamarin.Bundler {
 			return local_build;
 		}
 
-		// The layout on the file system is different depending on where we're installed
-		//
-		// As a framework (in /Library/Frameworks/Xamarin.*.framework/Versions/Current):
-		// 
-		// * bin:
-		//     - executable scripts for mtouch, mmp, mlaunch, bgen, etc
-		// * SDKs: native sdks (MonoTouch.iphoneos.sdk, etc)
-		// * lib:
-		//     - the binaries for mtouch, mmp, mlaunch, bgen, etc
-		//     * native libraries (.a / .dylib) for Xamarin.Mac
-		//     * mono/TFI: BCL
-		//     * [32|64]bits|x86_64: arch specific BCL libraries
-		//     * msbuild: targets and task assemblies
-		//
-		// As an Sdk (in /usr/local/share/dotnet/sdk/<version>/Sdks/Xamarin.*.Sdk):
-		//
-		// - This has to follow the structure of a nuget
-		// * lib (can only contain managed assemblies part of the BCL)
-		//     * TFI/v1.0: BCL
-		// * tools (can contain anything)
-		//     - targets and task assemblies
-		//     * bin
-		//         - executable scripts for mtouch, mmp, mlaunch, bgen, etc
-		//     * lib
-		//         - the binaries for mtouch, mmp, mlaunch, bgen, etc
-		//     * [32|64]bits: arch specific BCL libraries
-		//     * SDKs: native sdks (MonoTouch.iphoneos.sdk, etc)
-		//     
-		// * targets
-		//     - Sdk-specific targets files
-		// 
-
 		// This is the 'Current' directory of the installed framework
 		// For XI/XM installed from package it's /Library/Frameworks/Xamarin.iOS.framework/Versions/Current or /Library/Frameworks/Xamarin.Mac.framework/Versions/Current
 		static string framework_dir;
@@ -875,10 +843,6 @@ namespace Xamarin.Bundler {
 						framework_dir = WalkUpDirHierarchyLookingForLocalBuild ();
 #else
 						framework_dir = Path.GetDirectoryName (Path.GetDirectoryName (Path.GetDirectoryName (GetFullPath ())));
-
-						// If we're in a nuget we need to go one more directory up
-						if (!File.Exists (Path.Combine (framework_dir, "Version")) && File.Exists (Path.Combine (framework_dir, "..", "Version")))
-							framework_dir = Path.GetDirectoryName (framework_dir);
 #endif
 					}
 					framework_dir = Target.GetRealPath (framework_dir);
@@ -908,58 +872,26 @@ namespace Xamarin.Bundler {
 		}
 
 		// This is the directory where libxamarin[-debug].[a|dylib] are
-		public static string GetXamarinLibraryDirectory (Application app, Abi abi)
+		public static string GetXamarinLibraryDirectory (Application app)
 		{
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (app)}-{GetNugetArchitecture(abi)}",  "native");
 			return GetProductSdkLibDirectory (app);
 		}
 
 		// This is the directory where Xamarin[-debug].framework are
-		public static string GetXamarinFrameworkDirectory (Application app, Abi abi)
+		public static string GetXamarinFrameworkDirectory (Application app)
 		{
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (app)}-{GetNugetArchitecture (abi)}", "native");
 			return GetProductFrameworksDirectory (app);
 		}
 
-		// This is the directory where libmono*.[a|dylib] are
-		public static string GetMonoLibraryDirectory (Application app, Abi abi)
-		{
-#if MMP
-			if (IsUnifiedFullSystemFramework)
-				return RunPkgConfig ("--variable=libdir");
-#endif
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (app)}-{GetNugetArchitecture (abi)}", "native");
-			return GetProductSdkLibDirectory (app);
-		}
-
 		// This is the directory where Mono.framework is
-		public static string GetMonoFrameworkDirectory (Application app, Abi abi)
+		public static string GetMonoFrameworkDirectory (Application app)
 		{
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (app)}-{GetNugetArchitecture (abi)}", "native");
 			return GetProductFrameworksDirectory (app);
 		}
 
 		public static string GetProductFrameworksDirectory (Application app)
 		{
 			return Path.Combine (GetProductSdkDirectory (app), "Frameworks");
-		}
-
-		public static string GetBCLImplementationDirectory (Target target)
-		{
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (target.App)}-{GetNugetArchitecture (target)}", "lib", GetNugetFramework (target.App));
-			return GetPlatformFrameworkDirectory (target.App);
-		}
-
-		public static string GetBCLImplementationDirectory (Application app)
-		{
-			if (IsDotNet)
-				return Path.Combine (FrameworkDirectory, "runtimes", $"{GetNugetPlatform (app)}-{GetNugetArchitecture (app)}", "lib", GetNugetFramework (app));
-			return GetPlatformFrameworkDirectory (app);
 		}
 
 		// This is the directory where the platform assembly (Xamarin.*.dll) can be found
@@ -1056,85 +988,6 @@ namespace Xamarin.Bundler {
 				throw ErrorHelper.CreateError (71, Errors.MX0071, app.Platform, PRODUCT);
 			}
 			return Path.Combine (sdksDir, sdkName);
-		}
-
-		static string GetNugetFramework (Application app)
-		{
-			switch (app.Platform) {
-			case ApplePlatform.MacOSX:
-				return "xamarinmac10";
-			case ApplePlatform.iOS:
-				return "xamarinios10";
-			case ApplePlatform.WatchOS:
-				return "xamarinwatchos10";
-			case ApplePlatform.TVOS:
-				return "xamarintvos10";
-			default:
-				throw ErrorHelper.CreateError (71, Errors.MX0071, TargetFramework.Platform, PRODUCT);
-			}
-		}
-
-		static string GetNugetPlatform (Application app)
-		{
-			switch (app.Platform) {
-			case ApplePlatform.MacOSX:
-				return "macos";
-			case ApplePlatform.iOS:
-				return "ios";
-			case ApplePlatform.WatchOS:
-				return "watchos";
-			case ApplePlatform.TVOS:
-				return "tvos";
-			default:
-				throw ErrorHelper.CreateError (71, Errors.MX0071, TargetFramework.Platform, PRODUCT);
-			}
-		}
-
-		static string GetNugetArchitecture (Target target)
-		{
-			if (target.App.Platform == ApplePlatform.MacOSX)
-				return "x64";
-
-			if (target.App.IsDeviceBuild) {
-				return target.Is32Build ? "arm" : "arm64";
-			} else {
-				return target.Is32Build ? "x86_64" : "x64";
-			}
-		}
-
-		static string GetNugetArchitecture (Application app)
-		{
-			if (app.Platform == ApplePlatform.MacOSX)
-				return "x64";
-
-			if (app.Is64Build && app.Is32Build)
-				throw new NotImplementedException ();
-
-			if (app.IsDeviceBuild) {
-				return app.Is64Build ? "arm64" : "arm";
-			} else {
-				return app.Is64Build ? "x64" : "x86";
-			}
-		}
-
-		static string GetNugetArchitecture (Abi abi)
-		{
-			switch (abi) {
-			case Abi.ARMv7:
-			case Abi.ARMv7s:
-			case Abi.ARMv7k:
-				return "arm";
-			case Abi.ARM64:
-				return "arm64";
-			case Abi.ARM64_32:
-				throw new NotImplementedException ();
-			case Abi.i386:
-				return "x86";
-			case Abi.x86_64:
-				return "x64";
-			default:
-				throw ErrorHelper.CreateError (99, Errors.MX0099, $"Invalid abi: {abi.ToString ()}");
-			}
 		}
 
 		// This returns the platform to use in /Applications/Xcode*.app/Contents/Developer/Platforms/*.platform

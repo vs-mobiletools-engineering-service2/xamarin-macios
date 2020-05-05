@@ -124,16 +124,16 @@ namespace Xamarin.Utils
 			OtherFlags.Add (flags);
 		}
 
-		public void LinkWithMono (Abi abi)
+		public void LinkWithMono ()
 		{
 			var mode = Target.App.LibMonoLinkMode;
 			switch (mode) {
 			case AssemblyBuildTarget.DynamicLibrary:
 			case AssemblyBuildTarget.StaticObject:
-				AddLinkWith (Application.GetLibMono (mode, abi));
+				AddLinkWith (Application.GetLibMono (mode));
 				break;
 			case AssemblyBuildTarget.Framework:
-				AddFramework (Application.GetLibMono (mode, abi));
+				AddFramework (Application.GetLibMono (mode));
 				break;
 			default:
 				throw ErrorHelper.CreateError (100, Errors.MT0100, mode);
@@ -142,16 +142,16 @@ namespace Xamarin.Utils
 			AddOtherFlag ("-liconv");
 		}
 
-		public void LinkWithXamarin (Abi abi)
+		public void LinkWithXamarin ()
 		{
 			var mode = Target.App.LibXamarinLinkMode;
 			switch (mode) {
 			case AssemblyBuildTarget.DynamicLibrary:
 			case AssemblyBuildTarget.StaticObject:
-				AddLinkWith (Application.GetLibXamarin (mode, abi));
+				AddLinkWith (Application.GetLibXamarin (mode));
 				break;
 			case AssemblyBuildTarget.Framework:
-				AddFramework (Application.GetLibXamarin (mode, abi));
+				AddFramework (Application.GetLibXamarin (mode));
 				break;
 			default:
 				throw ErrorHelper.CreateError (100, Errors.MT0100, mode);

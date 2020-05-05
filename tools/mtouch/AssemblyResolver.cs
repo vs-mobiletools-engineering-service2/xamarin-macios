@@ -33,13 +33,6 @@ namespace MonoTouch.Tuner {
 					file = fn;
 			}
 
-			if (Driver.IsDotNet && (Profile.IsSdkAssembly (Path.GetFileNameWithoutExtension (file)) ||  Profile.IsProductAssembly (Path.GetFileNameWithoutExtension (file)))) {
-				var fn = Path.Combine (FrameworkDirectory, Path.GetFileName (file));
-				if (File.Exists (fn)) {
-					Driver.Log (1, "Redirected from {0} to {1}", file, fn);
-					file = fn;
-				}
-			}
 			return base.Load (file);
 		}
 	}

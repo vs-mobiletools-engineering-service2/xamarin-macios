@@ -141,9 +141,6 @@ namespace Xamarin.Bundler {
 
 		void ComputePInvokeLinkerFlags ()
 		{
-			if (!Driver.IsDotNet)
-				return;
-
 #if MTOUCH
 			// Check for native libraries from the BCL
 			var symbols = GetAllSymbols ();
@@ -175,7 +172,7 @@ namespace Xamarin.Bundler {
 				throw ErrorHelper.CreateError (100, Errors.MT0100, mode);
 			}
 
-			var bcl_implementation_dir = Driver.GetBCLImplementationDirectory (this);
+			var bcl_implementation_dir = Driver.GetFrameworkDirectory (this.App);
 			foreach (var nl in native_libraries) {
 				var lib = nl.Key;
 

@@ -100,10 +100,6 @@ namespace Xamarin.Bundler
 
 		public void SelectMonoNative ()
 		{
-			if (Driver.IsDotNet) {
-				MonoNativeMode = MonoNativeMode.Unified;
-				return;
-			}
 			switch (App.Platform) {
 			case ApplePlatform.iOS:
 			case ApplePlatform.TVOS:
@@ -1005,7 +1001,7 @@ namespace Xamarin.Bundler
 						AddToBundle (pinvoke_task.OutputFile);
 					}
 					pinvoke_task.CompilerFlags.AddFramework ("Foundation");
-					pinvoke_task.CompilerFlags.LinkWithXamarin (abi);
+					pinvoke_task.CompilerFlags.LinkWithXamarin ();
 				}
 				pinvoke_tasks.Add (abi, pinvoke_task);
 
@@ -1172,8 +1168,8 @@ namespace Xamarin.Bundler
 					}
 					if (App.Embeddinator)
 						compiler_flags.AddOtherFlag (App.UserGccFlags);
-					compiler_flags.LinkWithMono (abi);
-					compiler_flags.LinkWithXamarin (abi);
+					compiler_flags.LinkWithMono ();
+					compiler_flags.LinkWithXamarin ();
 					if (GetAllSymbols ().Contains ("UIApplicationMain"))
 						compiler_flags.AddFramework ("UIKit");
 
@@ -1507,17 +1503,12 @@ namespace Xamarin.Bundler
 			} else {
 				CompileTask.GetSimulatorCompilerFlags (linker_flags, false, App);
 			}
-			linker_flags.LinkWithMono (abi);
+			linker_flags.LinkWithMono ();
 			if (App.LibMonoLinkMode != AssemblyBuildTarget.StaticObject)
-				AddToBundle (App.GetLibMono (App.LibMonoLinkMode, abi));
-			linker_flags.LinkWithXamarin (abi);
+				AddToBundle (App.GetLibMono (App.LibMonoLinkMode));
+			linker_flags.LinkWithXamarin ();
 			if (App.LibXamarinLinkMode != AssemblyBuildTarget.StaticObject)
-				AddToBundle (App.GetLibXamarin (App.LibXamarinLinkMode, abi));
-
-			if (App.LibMonoLinkMode == AssemblyBuildTarget.DynamicLibrary) {
-				foreach (var lib in Directory.GetFiles (Driver.GetBCLImplementationDirectory (this), "*.dylib"))
-					AddToBundle (lib);
-			}
+				AddToBundle (App.GetLibXamarin (App.LibXamarinLinkMode));
 
 			linker_flags.AddOtherFlag ("-o", output_file);
 
@@ -1688,8 +1679,6 @@ namespace Xamarin.Bundler
 				return;
 			if (!MonoNative.RequireMonoNative)
 				return;
-			if (Driver.IsDotNet)
-				return;
 			var libnative = GetLibNativeName ();
 			var libdir = Driver.GetMonoLibraryDirectory (app);
 			Driver.Log (3, "Adding mono-native library {0} for {1}.", libnative, app);
@@ -1775,7 +1764,7 @@ namespace Xamarin.Bundler
 
 			Symlinked = true;
 
-			if (MonoNativeMode != MonoNativeMode.None && !Driver.IsDotNet) {
+			if (MonoNativeMode != MonoNativeMode.None) {
 				var lib_native_target = Path.Combine (TargetDirectory, "libmono-native.dylib");
 
 				var lib_native_name = GetLibNativeName () + ".dylib";

@@ -990,7 +990,7 @@ namespace Xamarin.Bundler {
 			}
 
 			var str_cflags = RunPkgConfig ("--cflags");
-			var libdir = GetMonoLibraryDirectory (App, App.Abi);
+			var libdir = GetMonoLibraryDirectory (App);
 
 			if (!StringUtils.TryParseArguments (str_cflags, out cflags, out var ex))
 				throw ErrorHelper.CreateError (147, ex, Errors.MM0147, str_cflags, ex.Message);
@@ -1766,7 +1766,7 @@ namespace Xamarin.Bundler {
 
 		static AssemblyDefinition AddAssemblyPathToResolver (string path)
 		{
-			if (!IsDotNet && AssemblySwapInfo.AssemblyNeedsSwappedOut (path))
+			if (AssemblySwapInfo.AssemblyNeedsSwappedOut (path))
 				path = AssemblySwapInfo.GetSwappedAssemblyPath (path);
 
 			var assembly = BuildTarget.Resolver.Load (path);
