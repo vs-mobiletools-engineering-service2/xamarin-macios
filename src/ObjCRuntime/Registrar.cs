@@ -637,15 +637,15 @@ namespace Registrar {
 				if (bindas_count < 1 + Parameters.Length)
 					throw ErrorHelper.CreateError (8018, $"Internal consistency error: BindAs array is not big enough (expected at least {1 + parameters.Length} elements, got {bindas_count} elements) for {method_base.DeclaringType.FullName + "." + method_base.Name}. Please file a bug report at https://github.com/xamarin/xamarin-macios/issues/new.");
 
-				Marshal.WriteIntPtr (desc, GCHandle.ToIntPtr (GCHandle.Alloc ((method_base))));
+				Marshal.WriteIntPtr (desc, Runtime.AllocGCHandle (method_base));
 				Marshal.WriteInt32 (desc + IntPtr.Size, (int) semantic);
 
 				if (!IsConstructor && ReturnType != NativeReturnType)
-					Marshal.WriteIntPtr (desc + IntPtr.Size + 8, GCHandle.ToIntPtr (GCHandle.Alloc (NativeReturnType)));
+					Marshal.WriteIntPtr (desc + IntPtr.Size + 8, Runtime.AllocGCHandle (NativeReturnType));
 				for (int i = 0; i < NativeParameters.Length; i++) {
 					if (parameters [i] == native_parameters [i])
 						continue;
-					Marshal.WriteIntPtr (desc + IntPtr.Size + 8 + IntPtr.Size * (i + 1), GCHandle.ToIntPtr (GCHandle.Alloc (native_parameters [i])));
+					Marshal.WriteIntPtr (desc + IntPtr.Size + 8 + IntPtr.Size * (i + 1), Runtime.AllocGCHandle (native_parameters [i]));
 				}
 			}
 #endif
