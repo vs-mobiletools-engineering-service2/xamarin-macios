@@ -73,6 +73,10 @@
 
     <!-- We're not using an app host -->
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
+    <!-- We don't need runtime configuration files -->
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+    <!-- We don't need the dependency file either -->
+    <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
 
   <!-- Defaults -->
