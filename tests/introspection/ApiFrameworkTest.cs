@@ -96,7 +96,7 @@ namespace Introspection {
 #elif __TVOS__
 			return Frameworks.TVOSFrameworks;
 #elif __WATCHOS__
-			return Frameworks.GetwatchOSFrameworks (app);
+			return Frameworks.GetwatchOSFrameworks (app.IsSimulatorBuild);
 #elif __MACOS__
 			return Frameworks.MacFrameworks;
 #else

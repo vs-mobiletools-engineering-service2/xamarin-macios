@@ -10,6 +10,8 @@ using Xamarin.Bundler;
 using Registrar;
 #endif
 
+using Xamarin.Utils;
+
 public class Framework
 {
 	public string Namespace;
@@ -200,13 +202,6 @@ public class Frameworks : Dictionary <string, Framework>
 		}
 	}
 
-#if MTOUCH
-	public static Frameworks GetiOSFrameworks (Application app)
-	{
-		return GetiOSFrameworks (app.IsSimulatorBuild);
-	}
-#endif
-
 	static Frameworks ios_frameworks;
 	public static Frameworks GetiOSFrameworks (bool is_simulator_build)
 	{
@@ -349,13 +344,6 @@ public class Frameworks : Dictionary <string, Framework>
 		return ios_frameworks;
 	}
 
-#if MTOUCH
-	public static Frameworks GetwatchOSFrameworks (Application app)
-	{
-		return GetwatchOSFrameworks (app.IsSimulatorBuild);
-	}
-#endif
-
 	static Frameworks watch_frameworks;
 	public static Frameworks GetwatchOSFrameworks (bool is_simulator_build)
 	{
@@ -493,17 +481,18 @@ public class Frameworks : Dictionary <string, Framework>
 		}
 	}
 
+	// returns null if the platform doesn't exist (the ErrorHandler machinery is heavy and this file is included in several projects, which makes throwing an exception complicated)
 	public static Frameworks GetFrameworks (ApplePlatform platform, bool is_simulator_build)
 	{
 		switch (platform) {
 		case ApplePlatform.iOS:
-			return Frameworks.GetiOSFrameworks (is_simulator_build);
+			return GetiOSFrameworks (is_simulator_build);
 		case ApplePlatform.WatchOS:
-			return Frameworks.GetwatchOSFrameworks (is_simulator_build);
+			return GetwatchOSFrameworks (is_simulator_build);
 		case ApplePlatform.TVOS:
-			return Frameworks.TVOSFrameworks;
+			return TVOSFrameworks;
 		case ApplePlatform.MacOSX:
-			return Frameworks.MacFrameworks;
+			return MacFrameworks;
 		default:
 			return null;
 		}
