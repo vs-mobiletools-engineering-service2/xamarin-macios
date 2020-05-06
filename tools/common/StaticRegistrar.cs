@@ -18,10 +18,10 @@ using Xamarin.Linker;
 
 #if MTOUCH
 using ProductException=Xamarin.Bundler.MonoTouchException;
-using PlatformResolver = MonoTouch.Tuner.MonoTouchResolver;
+using PlatformResolver=MonoTouch.Tuner.MonoTouchResolver;
 #else
-using ProductException =Xamarin.Bundler.MonoMacException;
-using PlatformResolver = Xamarin.Bundler.MonoMacResolver;
+using ProductException=Xamarin.Bundler.MonoMacException;
+using PlatformResolver=Xamarin.Bundler.MonoMacResolver;
 #endif
 
 using Registrar;
