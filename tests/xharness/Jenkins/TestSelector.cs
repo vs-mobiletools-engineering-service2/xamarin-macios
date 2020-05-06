@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
 using System.Collections.Generic;
