@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Xamarin.iOS.Sdk">
+<Project Sdk="Microsoft.iOS.Sdk">
   <PropertyGroup>
-    <TargetFramework>xamarinios10</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>ios-x64</RuntimeIdentifier>
     <DefaultItemExcludes>$(DefaultItemExcludes);MyLibrary\**</DefaultItemExcludes>
 
     <MtouchExtraArgs>--nofastsim --ignore-dynamic-symbol=SystemNative_EnumerateGatewayAddressesForInterface --dlsym:true --nosymbolstrip</MtouchExtraArgs>
     <MtouchLink>Full</MtouchLink>
     <AssemblyName>MySingleView</AssemblyName>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetDeviceArchitecture)' == 'Device' And '$(Configuration)' == 'Release'">
@@ -19,8 +22,6 @@
     </BundleResource>
     <BundleResource Include="Folder\BundleResource.txt" />
     <BundleResource Include="Resources\image.png" />
-
-    <Reference Include="System.Console" />
   </ItemGroup>
 
   <ItemGroup>
