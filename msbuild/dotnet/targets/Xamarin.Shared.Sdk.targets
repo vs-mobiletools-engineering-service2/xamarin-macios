@@ -276,8 +276,6 @@
 				Update="@(ResolvedFileToPublish)"
 				RelativePath="$([MSBuild]::MakeRelative($(MSBuildProjectDirectory)$(PublishDir),$(MSBuildProjectDirectory)$(_AppBundlePath)))\%(Filename)%(Extension)"
 				Condition=" '%(Extension)' == '.dll' Or '%(Extension)' == '.pdb' Or '$(Extension)' == '.exe' Or '%(Extension)' == '.dylib'" />
-			<Whatever Include="@(ResolvedFileToPublish)" />
-			<Whatever2 Include="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.dylib'" />
 		</ItemGroup>
 	</Target>
 
