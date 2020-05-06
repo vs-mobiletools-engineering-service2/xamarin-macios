@@ -62,14 +62,15 @@ namespace Xamarin.iOS.Tasks
 				var binDir = Path.Combine (baseDir, "bin", platform, config);
 
 				if (Directory.Exists (objDir)) {
-					var path = Directory.EnumerateFiles (objDir, "*.*", SearchOption.AllDirectories).FirstOrDefault ();
-					Assert.IsNull (path, "File not cleaned: {0}", path);
+					var paths = Directory.EnumerateFiles (objDir, "*.*", SearchOption.AllDirectories)
+							.Where (v => !v.EndsWith (".FileListAbsolute.txt", StringComparison.Ordinal))
+							.Where (v => !v.EndsWith (".assets.cache", StringComparison.Ordinal));
+					Assert.IsEmpty (paths, "Files not cleaned:\n\t{0}", string.Join ("\n\t", paths));
 				}
 
 				if (Directory.Exists (binDir)) {
-					// Note: the .dSYM/Contents string match is a work-around for xbuild which is broken (wrongly interprets %(Directory))
-					var path = Directory.EnumerateFiles (binDir, "*.*", SearchOption.AllDirectories).FirstOrDefault (x => x.IndexOf (".dSYM/Contents/", StringComparison.Ordinal) == -1);
-					Assert.IsNull (path, "File not cleaned: {0}", path);
+					var paths = Directory.EnumerateFiles (binDir, "*.*", SearchOption.AllDirectories);
+					Assert.IsEmpty (paths, "Files not cleaned:\n\t{0}", string.Join ("\n\t", paths));
 				}
 			}
 
