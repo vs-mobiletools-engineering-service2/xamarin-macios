@@ -71,6 +71,7 @@ create_runtime_packs ()
 		esac
 
 		$cp "$TOP/src/build/dotnet/$platform_lower/$bitsize/Xamarin.$assembly_infix.dll" "$destdir/runtimes/$rid/lib/netcoreapp5.0"
+		$cp "$TOP/src/build/dotnet/$platform_lower/$bitsize/Xamarin.$assembly_infix.pdb" "$destdir/runtimes/$rid/lib/netcoreapp5.0"
 		# RuntimeList.xml is generated
 		#$cp "$TOP/msbuild/dotnet/package/$packageid/RuntimeList.xml" "$destdir/data/"
 
