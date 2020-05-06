@@ -3,3 +3,4 @@
 # This is used to adjust what we build when we're building a branch (since we can't apply labels to branches).
 
 skip-all-tests
+run-msbuild-tests
