@@ -25,7 +25,7 @@ namespace Xamarin.Linker {
 		public bool Device { get { return LinkContext.App.IsDeviceBuild; } }
 #endif
 
-		protected override string Name { get; } = " Removing User Resources";
+		protected override string Name { get; } = "Removing User Resources";
 		protected override int ErrorCode { get; } = 2030;
 
 		public override bool IsActiveFor (AssemblyDefinition assembly)
