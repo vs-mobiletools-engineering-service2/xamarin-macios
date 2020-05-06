@@ -56,8 +56,6 @@
 
 	<!-- Override overridable targets -->
 	<PropertyGroup>
-		<!-- Codesign fails for unknown reasons for simulator builds -->
-		<_ToCodesignOrNotToCodesign Condition=" '$(_SdkIsSimulator)' == 'true' ">Codesign;</_ToCodesignOrNotToCodesign>
 		<_BuildAppTargets>
 			_EarlyAppBundleTasks;
 			_ComputeLinkerArguments;
@@ -69,7 +67,7 @@
 			_ComputeOutputLocation;
 			CopyFilesToPublishDirectory;
 			_LateAppBundleTasks;
-			$(_ToCodesignOrNotToCodesign);
+			Codesign;
 			CreateIpa;
 			Archive;
 		</_BuildAppTargets>
