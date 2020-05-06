@@ -177,8 +177,6 @@ $(MTOUCH_DIR)/mtouch.exe: $(mtouch_dependencies)
 #
 # Partial static registrar libraries
 #
-REGISTRAR_CFLAGS=-stdlib=libc++ -std=c++14
-
 define RunRegistrar
 %.registrar.$(1).$(2).m %.registrar.$(1).$(2).h: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/$(3)bits/%.dll $(LOCAL_MTOUCH)
 	$$(Q_GEN) $$(LOCAL_MTOUCH_COMMAND) --xamarin-framework-directory=$$(IOS_DESTDIR)/$$(MONOTOUCH_PREFIX) $$(MTOUCH_VERBOSITY) --runregistrar:$$(abspath $$(basename $$@).m) --sdkroot $$(XCODE_DEVELOPER_ROOT) --sdk $(4) $$< --registrar:static --target-framework Xamarin.$(5),v1.0 --abi $(2) -r:$(8)/mscorlib.dll
@@ -189,10 +187,10 @@ define RunRegistrar
 	$$(Q) touch $$(basename $$@).m $$(basename $$@).h
 
 %.registrar.$(1).$(2).a: %.registrar.$(1).$(2).m %.registrar.$(1).$(2).h
-	$$(Q_CC) $$(IOS_CC) -DDEBUG -g -gdwarf-2 $(6)    $$(REGISTRAR_CFLAGS) -x objective-c++ -o $$@ -c $$< -Wall -Wno-unguarded-availability-new -I$(7)
+	$$(Q_CC) $$(IOS_CC) -DDEBUG -g -gdwarf-2 $(6) -stdlib=libc++ -std=c++14 -x objective-c++ -o $$@ -c $$< -Wall -Wno-unguarded-availability-new -I$(7)
 
 %.registrar.$(1).$(2).dotnet.a: %.registrar.$(1).$(2).m %.registrar.$(1).$(2).h
-	$$(Q_CC) $$(IOS_CC) -DDEBUG -g -gdwarf-2 $(6)    $$(REGISTRAR_CFLAGS) -x objective-c++ -o $$@ -c $$< -Wall -Wno-unguarded-availability-new -I$(7)
+	$$(Q_CC) $$(IOS_CC) -DDEBUG -g -gdwarf-2 $(6) -stdlib=libc++ -std=c++14 -x objective-c++ -o $$@ -c $$< -Wall -Wno-unguarded-availability-new -I$(7)
 
 # make will automatically consider files created in chained implicit rules as temporary files, and delete them afterwards
 # marking those files as .SECONDARY will prevent that deletion.
@@ -364,4 +362,4 @@ include ../common/Make.common
 
 # make will automatically consider files created in chained implicit rules as temporary files, and delete them afterwards
 # marking those files as .SECONDARY will prevent that deletion.
-.SECONDARY: Xamarin.iOS.registrar.ios.device.a
+.SECONDARY: Xamarin.iOS.registrar.ios.simulator.a Xamarin.iOS.registrar.ios.device.a
