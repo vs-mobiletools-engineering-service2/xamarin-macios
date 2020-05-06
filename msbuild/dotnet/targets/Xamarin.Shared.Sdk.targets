@@ -254,7 +254,7 @@
 			IsAppExtension="$(IsAppExtension)"
 			IsDebug="$(MtouchDebug)"
 			NativeDynamicLibraries="@(_NativeDynamicLibraryFixed)"
-			OutputPath="$(_AppBundlePath)$(_AppBundleName)"
+			OutputPath="$(_IntermediateNativeLibraryDir)$(_AppBundleName)"
 			ResolvedFileToPublish="@(ResolvedFileToPublish)"
 			RuntimePackAsset="@(RuntimePackAsset)"
 			SdkDevPath="$(_SdkDevPath)"
@@ -263,6 +263,12 @@
 			SdkVersion="$(_SdkVersion)"
 			TargetFrameworkMoniker="$(_ComputedTargetFrameworkMoniker)"
 		/>
+		<ItemGroup>
+			<!-- Copy the executable from the intermediate directory to the .app -->
+			<ResolvedFileToPublish
+				Include="$(_IntermediateNativeLibraryDir)$(_AppBundleName)"
+				RelativePath="$([MSBuild]::MakeRelative($(MSBuildProjectDirectory)$(PublishDir),$(MSBuildProjectDirectory)$(_AppBundlePath)))\$(_AppBundleName)"/>
+		</ItemGroup>
 	</Target>
 
 	<Target Name="_ComputeOutputLocation">
