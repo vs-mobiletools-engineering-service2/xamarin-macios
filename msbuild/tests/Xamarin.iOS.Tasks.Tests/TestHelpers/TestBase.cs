@@ -46,7 +46,22 @@ namespace Xamarin.iOS.Tasks
 			}
 
 			var testSourceDirectory = Path.Combine (Configuration.RootPath, "msbuild", "tests");
-			return Configuration.CloneTestDirectory (testSourceDirectory, mode);
+			var rv = Configuration.CloneTestDirectory (testSourceDirectory, mode);
+
+			if (mode == "dotnet") {
+				var dir = Path.Combine (Configuration.SourceRoot, "msbuild", "dotnet");
+				var args = new [] {
+					"-C",
+					dir,
+					"test/global.json",
+					"test/NuGet.config",
+				};
+				ExecutionHelper.Execute ("make", args);
+				File.Copy (Path.Combine (dir, "test", "global.json"), Path.Combine (rv, "global.json"), true);
+				File.Copy (Path.Combine (dir, "test", "NuGet.config"), Path.Combine (rv, "NuGet.config"), true);
+			}
+
+			return rv;
 		}
 
 		public string [] ExpectedAppFiles = { };
@@ -136,17 +151,17 @@ namespace Xamarin.iOS.Tasks
 			string binPath;
 			string objPath;
 			if (use_dotnet) {
-				var targetPlatform = platform == "iPhone" ? "Device" : "Simulator";
+				var targetPlatform = "netcoreapp5.0";
 				var subdir = string.Empty;
 				switch (TargetFrameworkIdentifier) {
 				case "Xamarin.iOS":
-					subdir = "xamarinios10";
+					subdir = platform == "iPhone" ? "ios-arm64" : "ios-x64";
 					break;
 				case "Xamarin.TVOS":
-					subdir = "xamarintvos10";
+					subdir = platform == "iPhone" ? "tvos-arm64" : "tvos-x64";
 					break;
 				case "Xamarin.WatchOS":
-					subdir = "xamarinwatchos10";
+					subdir = platform == "iPhone" ? "watchos-arm" : "watchos-x86";
 					break;
 				default:
 					throw new NotImplementedException ($"Unknown TargetFrameworkIdentifier: {TargetFrameworkIdentifier}");
@@ -424,10 +439,6 @@ namespace Xamarin.iOS.Tasks
 
 		public void Dotnet (string command, string project, Dictionary<string, string> properties)
 		{
-			if (properties == null)
-				properties = new Dictionary<string, string> ();
-			properties.Add ("XamarinMacFrameworkRoot", Configuration.SdkRootXM);
-			properties.Add ("MD_MTOUCH_SDK_ROOT", Configuration.SdkRootXI);
 			DotNet.Execute (command, project, properties, out var _, assert_success: true);
 		}
 
