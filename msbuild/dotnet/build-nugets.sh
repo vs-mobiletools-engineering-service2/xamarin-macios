@@ -148,8 +148,11 @@ copy_ios_native_libs_to_runtime_pack "watchOS" "Xamarin.WatchSimulator"    0 "x8
 
 copy_macos_native_libs_to_runtime_pack ()
 {
-	local platform=macOS
+	local platform=$1
 	local sdk=$2
+	local fat=$3
+	local rid_family=$4
+	local architectures=$5
 	local rid_family=osx
 	local architectures=x86_64
 	#shellcheck disable=SC2155
@@ -157,9 +160,9 @@ copy_macos_native_libs_to_runtime_pack ()
 	local rid=osx-x64
 	local packageid=Microsoft.$platform.Runtime.$rid
 	local destdir=$DOTNET_DESTDIR/$packageid/runtimes/$rid/native
-	local current_dir="$TOP/_mac-build/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/"
-	local lib_dir="$current_dir/lib/"
-	local include_dir="$current_dir/include/"
+	local sdk_dir="$TOP/_mac-build/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/SDKs/$sdk.sdk"
+	local lib_dir="$sdk_dir/lib/"
+	local include_dir="$sdk_dir/include/"
 
 	mkdir -p "$destdir"
 
@@ -181,7 +184,7 @@ copy_macos_native_libs_to_runtime_pack ()
 
 	$cp -r "$include_dir/xamarin" "$destdir/"
 }
-copy_macos_native_libs_to_runtime_pack "macOS"     "MonoTouch.iphoneos"        1 "arm64" "arm64"
+copy_macos_native_libs_to_runtime_pack "macOS"     "Xamarin.macOS"        0 "osx" "x86_64"
 
 # the Xamarin.*OS.Sdk nugets
 create_sdk_nugets ()
