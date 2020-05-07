@@ -7,22 +7,22 @@
 	<Import Project="Xamarin.Shared.Sdk.TargetFrameworkInference.targets" />
 
 	<PropertyGroup>
-		<_TargetsDiriOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_TargetsDiriOS>
-		<_TargetsDirtvOS>$(XamarinSdkRootDirectory)\tools\msbuild\TVOS</_TargetsDirtvOS>
-		<_TargetsDirwatchOS>$(XamarinSdkRootDirectory)\tools\msbuild\WatchOS</_TargetsDirwatchOS>
-		<_TargetsDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild</_TargetsDirmacOS>
-		<_TargetsDir Condition="'$(_PlatformName)' == 'iOS'">$(_TargetsDiriOS)\</_TargetsDir>
-		<_TargetsDir Condition="'$(_PlatformName)' == 'tvOS'">$(_TargetsDirtvOS)\</_TargetsDir>
-		<_TargetsDir Condition="'$(_PlatformName)' == 'watchOS'">$(_TargetsDirwatchOS)\</_TargetsDir>
-		<_TargetsDir Condition="'$(_PlatformName)' == 'macOS'">$(_TargetsDirmacOS)\</_TargetsDir>
+		<_AssemblyFileDiriOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDiriOS>
+		<_AssemblyFileDirtvOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDirtvOS>
+		<_AssemblyFileDirwatchOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDirwatchOS>
+		<_AssemblyFileDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild</_AssemblyFileDirmacOS>
+		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'iOS'">$(_AssemblyFileDiriOS)\</_AssemblyFileDir>
+		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'tvOS'">$(_AssemblyFileDirtvOS)\</_AssemblyFileDir>
+		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'watchOS'">$(_AssemblyFileDirwatchOS)\</_AssemblyFileDir>
+		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'macOS'">$(_AssemblyFileDirmacOS)\</_AssemblyFileDir>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<_TaskAssemblyName Condition="'$(_PlatformName)' == 'iOS' Or '$(_PlatformName)' == 'tvOS' Or '$(_PlatformName)' == 'watchOS'">Xamarin.iOS.Tasks.dll</_TaskAssemblyName>
 		<_TaskAssemblyName Condition="'$(_PlatformName)' == 'macOS'">Xamarin.Mac.Tasks.dll</_TaskAssemblyName>
 	</PropertyGroup>
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.CompileExecutable" AssemblyFile="$(_TargetsDir)$(_TaskAssemblyName)" />
-	<UsingTask TaskName="Xamarin.iOS.Tasks.Mlaunch" AssemblyFile="$(_TargetsDir)$(_TaskAssemblyName)" Condition=" '$(_PlatformName)' != 'macOS' " />
+	<UsingTask TaskName="Xamarin.MacDev.Tasks.CompileExecutable" AssemblyFile="$(_AssemblyFileDir)$(_TaskAssemblyName)" />
+	<UsingTask TaskName="Xamarin.iOS.Tasks.Mlaunch" AssemblyFile="$(_AssemblyFileDir)$(_TaskAssemblyName)" Condition=" '$(_PlatformName)' != 'macOS' " />
 
 	<!-- Automatically supply project capabilities for IDE use -->
 	<ItemGroup>
@@ -391,6 +391,10 @@
 		<_TargetsDirtvOS>$(XamarinSdkRootDirectory)\tools\msbuild\TVOS</_TargetsDirtvOS>
 		<_TargetsDirwatchOS>$(XamarinSdkRootDirectory)\tools\msbuild\WatchOS</_TargetsDirwatchOS>
 		<_TargetsDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild</_TargetsDirmacOS>
+		<_TargetsDir Condition="'$(_PlatformName)' == 'iOS'">$(_TargetsDiriOS)\</_TargetsDir>
+		<_TargetsDir Condition="'$(_PlatformName)' == 'tvOS'">$(_TargetsDirtvOS)\</_TargetsDir>
+		<_TargetsDir Condition="'$(_PlatformName)' == 'watchOS'">$(_TargetsDirwatchOS)\</_TargetsDir>
+		<_TargetsDir Condition="'$(_PlatformName)' == 'macOS'">$(_TargetsDirmacOS)\</_TargetsDir>
 	</PropertyGroup>
 
 	<Import Project="$(_TargetsDir)Xamarin.iOS.$(_ProjectLanguage).targets"              Condition="'$(_ProjectType)' == 'iOSExecutableProject' Or '$(_ProjectType)' == 'iOSClassLibrary' " />
