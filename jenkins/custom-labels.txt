@@ -2,5 +2,11 @@
 # Do not merge this file into master (or any other release branch) if it has any labels in it.
 # This is used to adjust what we build when we're building a branch (since we can't apply labels to branches).
 
+# skip stuff we don't need yet for .NET 5 work
+skip-signing
+skip-packages
+skip-external-tests
+
+# only run the msbuild tests for now
 skip-all-tests
 run-ios-msbuild-tests
