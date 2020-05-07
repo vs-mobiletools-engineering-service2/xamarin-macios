@@ -71,6 +71,8 @@
 
     <_XamarinSdkToolsDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools'))</_XamarinSdkToolsDirectory>
 
+    <!-- We always require the linker -->
+    <PublishTrimmed Condition="'$(PublishTrimmed)' == ''">true</PublishTrimmed>
     <!-- We're not using an app host -->
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
     <!-- We don't need runtime configuration files -->

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-	<PropertyGroup>
-	    <!-- We always require the linker, and we need to set this before including the Microsoft.NET.Sdk targets -->
-	    <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(_CanOutputAppBundle)' == 'true'">true</PublishTrimmed>
-	</PropertyGroup>
-
 	<Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
 	<!-- Default item includes (globs and implicit references) -->
