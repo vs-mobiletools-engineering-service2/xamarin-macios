@@ -1,7 +1,7 @@
 TOP=../../../..
 include $(TOP)/Make.config
 
-TEST_CONFIG=Debug
+TEST_CONFIG?=Debug
 
 all: publish
 
