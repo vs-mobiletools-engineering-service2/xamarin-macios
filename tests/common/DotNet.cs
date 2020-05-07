@@ -19,6 +19,23 @@ namespace Xamarin.Tests {
 
 		static Dictionary<string, string> downloaded = new Dictionary<string, string> ();
 
+		static DotNet ()
+		{
+			var dotnet_version = Configuration.GetVariable ("DOTNET_VERSION", null);
+			var dotnet_url = Configuration.GetVariable ("DOTNET_URL", null);
+			if (dotnet_version != null && dotnet_url != null) {
+				versions [dotnet_version] = new Tuple<string, string> (dotnet_url, null);
+				default_version = dotnet_version;
+			}
+
+			dotnet_version = Configuration.GetVariable ("DOTNET5_VERSION", null);
+			dotnet_url = Configuration.GetVariable ("DOTNET5_URL", null);
+			if (dotnet_version != null && dotnet_url != null) {
+				versions [dotnet_version] = new Tuple<string, string> (dotnet_url, null);
+				default_version = dotnet_version;
+			}
+		}
+
 		static bool VerifyChecksum (string file, string checksum)
 		{
 			using (var provider = new System.Security.Cryptography.SHA512CryptoServiceProvider ()) {
@@ -114,8 +131,7 @@ namespace Xamarin.Tests {
 
 		public static string Executable {
 			get {
-				return "dotnet";
-				//return Path.Combine (DownloadPackage (), "dotnet");
+				return Path.Combine (DownloadPackage (), "dotnet");
 			}
 		}
 

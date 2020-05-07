@@ -183,7 +183,7 @@ namespace Xamarin.Tests
 			}
 		}
 
-		static string GetVariable (string variable, string @default)
+		public static string GetVariable (string variable, string @default)
 		{
 			var result = Environment.GetEnvironmentVariable (variable);
 			if (string.IsNullOrEmpty (result))
