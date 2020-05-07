@@ -115,7 +115,6 @@ namespace Xamarin {
 
 				// subs.Add (new PreserveSoapHttpClients ());
 				// subs.Add (new CoreHttpMessageHandler ());
-				// subs.Add (new InlinerSubStep ());
 
 				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
 				break;
