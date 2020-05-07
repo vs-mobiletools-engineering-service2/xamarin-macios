@@ -59,6 +59,13 @@ namespace Xamarin {
 		protected override void Process ()
 		{
 			DerivedLinkContext.Instance.Context = Context;
+
+			// if (options.WarnOnTypeRef.Count > 0)
+			// 	pipeline.Append (new PreLinkScanTypeReferenceStep (options.WarnOnTypeRef));
+
+			// partially implemented upstream - but we need it for [LinkerSafe] support
+			// pipeline.Append (new CustomizeIOSActions (options.LinkMode, options.SkippedAssemblies));
+
 			// we need to store the Field attribute in annotations, since it may end up removed.
 			InsertAfter (new ProcessExportedFields (), "TypeMapStep");
 
@@ -116,6 +123,18 @@ namespace Xamarin {
 				// subs.Add (new CoreHttpMessageHandler ());
 
 				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
+
+
+				var postlink_subs = new MobileSubStepDispatcher ();
+				InsertAfter (postlink_subs, "CleanStep");
+
+				// if (options.Application.Optimizations.ForceRejectedTypesRemoval == true)
+				// 	sub.Add (new RemoveRejectedTypesStep ());
+				// if (!options.DebugBuild) {
+				// 	sub.Add (new MetadataReducerSubStep ());
+				// 	if (options.Application.Optimizations.SealAndDevirtualize == true)
+				// 		sub.Add (new SealerSubStep ());
+
 				break;
 			case LinkMode.All:
 				break;
@@ -124,6 +143,9 @@ namespace Xamarin {
 			}
 
 			// InsertAfter (new ListExportedSymbols (options.MarshalNativeExceptionsState), "OutputStep");
+
+			// if (options.WarnOnTypeRef.Count > 0)
+			// 	pipeline.Append (new PostLinkScanTypeReferenceStep (options.WarnOnTypeRef));
 
 			if (Configuration.InsertTimestamps) {
 				// note: some steps (e.g. BlacklistStep) dynamically adds steps to the pipeline
