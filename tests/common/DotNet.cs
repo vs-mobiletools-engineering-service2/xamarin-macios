@@ -58,17 +58,23 @@ namespace Xamarin.Tests {
 				var checksum = info.Item2; // shasum -a 512
 				var fn = Path.GetFileName (info.Item1);
 				var cache_dir = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "Library", "Caches", "xamarin-macios");
+				var cached_tmp = Path.Combine (cache_dir, fn + ".tmp");
 				var cached = Path.Combine (cache_dir, fn);
 				var download = true;
 
-				if (File.Exists (cached) && VerifyChecksum (cached, checksum))
+				if (File.Exists (cached) && (checksum == null || VerifyChecksum (cached, checksum)))
 					download = false;
 
 				if (download) {
 					using (var wc = new System.Net.WebClient ()) {
-						wc.DownloadFile (url, cached);
-						if (!VerifyChecksum (cached, checksum))
-							throw new Exception ($"Download of url {url} into {cached} failed sha512 checksum {checksum}");
+						if (File.Exists (cached_tmp))
+							File.Delete (cached_tmp);
+						wc.DownloadFile (url, cached_tmp);
+						if (checksum != null && !VerifyChecksum (cached_tmp, checksum))
+							throw new Exception ($"Download of url {url} into {cached_tmp} failed sha512 checksum {checksum}");
+						if (File.Exists (cached))
+							File.Delete (cached);
+						File.Move (cached_tmp, cached);
 					}
 				}
 
