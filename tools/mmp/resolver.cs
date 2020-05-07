@@ -64,26 +64,19 @@ namespace Xamarin.Bundler {
 				if (assembly != null)
 					return assembly;
 			}
-
-			if (FrameworkDirectory != null) {
-				assembly = SearchDirectory (name, FrameworkDirectory);
-				if (assembly != null)
-					return assembly;
-
-				var pclPath = Path.Combine (FrameworkDirectory, "Facades");
-				if (Directory.Exists (pclPath)) {
-					assembly = SearchDirectory (name, pclPath);
-					if (assembly != null)
-						return assembly;
-				}
-			}
-
-			assembly = SearchDirectory (name, RootDirectory, ".exe");
+			
+			assembly = SearchDirectory (name, FrameworkDirectory);
 			if (assembly != null)
 				return assembly;
 
-			// The entry assembly may be a library
-			assembly = SearchDirectory (name, RootDirectory);
+			if (FrameworkDirectory != null) {
+				var pclPath = Path.Combine (FrameworkDirectory, "Facades");
+				assembly = SearchDirectory (name, pclPath);
+				if (assembly != null)
+					return assembly;
+			}
+
+			assembly = SearchDirectory (name, RootDirectory, ".exe");
 			if (assembly != null)
 				return assembly;
 

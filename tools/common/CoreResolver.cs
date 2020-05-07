@@ -116,6 +116,7 @@ namespace Xamarin.Bundler {
 		{
 			if (!Directory.Exists (directory))
 				return null;
+
 			var file = DirectoryGetFile (directory, name + extension);
 			if (file.Length > 0)
 				return Load (file);

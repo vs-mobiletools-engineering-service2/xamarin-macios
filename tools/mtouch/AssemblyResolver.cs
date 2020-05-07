@@ -84,11 +84,9 @@ namespace MonoTouch.Tuner {
 
 			if (FrameworkDirectory != null) {
 				var facadeDir = Path.Combine (FrameworkDirectory, "Facades");
-				if (Directory.Exists (facadeDir)) {
-					assembly = SearchDirectory (aname, facadeDir);
-					if (assembly != null)
-						return assembly;
-				}
+				assembly = SearchDirectory (aname, facadeDir);
+				if (assembly != null)
+					return assembly;
 			}
 
 			if (ArchDirectory != null) {

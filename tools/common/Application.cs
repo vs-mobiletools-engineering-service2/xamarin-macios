@@ -418,7 +418,6 @@ namespace Xamarin.Bundler {
 
 			var ps = new ReaderParameters ();
 			ps.AssemblyResolver = resolver;
-
 			foreach (var reference in References) {
 				var r = resolver.Load (reference);
 				if (r == null)
