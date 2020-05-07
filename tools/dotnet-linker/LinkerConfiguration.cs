@@ -10,6 +10,8 @@ namespace Xamarin.Linker {
 		public string PlatformAssembly { get; private set; }
 		public LinkMode LinkMode { get; private set; }
 
+		public bool DebugBuild { get; private set; }
+
 		public bool InsertTimestamps { get; private set; } = true;
 
 		public bool InsaneVerbosity { get; private set; } = true;

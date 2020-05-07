@@ -11,6 +11,7 @@ using MonoTouch.Tuner;
 using Xamarin.Bundler;
 using Xamarin.Linker;
 using Xamarin.Linker.Steps;
+using Xamarin.Tuner;
 
 namespace Xamarin {
 
@@ -57,12 +58,16 @@ namespace Xamarin {
 
 		protected override void Process ()
 		{
+			DerivedLinkContext.Instance.Context = Context;
 			// we need to store the Field attribute in annotations, since it may end up removed.
 			InsertAfter (new ProcessExportedFields (), "TypeMapStep");
 
 			var prelink_subs = new MobileSubStepDispatcher ();
 			prelink_subs.Add (new RemoveUserResourcesSubStep ());
 			InsertAfter (prelink_subs, "RemoveSecurityStep");
+
+			// https://github.com/mono/linker/issues/1045
+			// InsertAfter (new RemoveBitcodeIncompatibleCodeStep (), "MarkStep");
 
 			switch (Configuration.LinkMode) {
 			case LinkMode.None:
@@ -104,7 +109,7 @@ namespace Xamarin {
 				prelink_subs.Add (new ApplyPreserveAttribute ());
 
 				// subs.Add (new OptimizeGeneratedCodeSubStep ());
-				// subs.Add (new RemoveAttributes ());
+				prelink_subs.Add (new RemoveAttributes ());
 
 				prelink_subs.Add (new MarkNSObjects ());
 
@@ -119,6 +124,8 @@ namespace Xamarin {
 			case LinkMode.Platform:
 				throw new NotSupportedException ();
 			}
+
+			// InsertAfter (new ListExportedSymbols (options.MarshalNativeExceptionsState), "OutputStep");
 
 			if (Configuration.InsertTimestamps) {
 				// note: some steps (e.g. BlacklistStep) dynamically adds steps to the pipeline

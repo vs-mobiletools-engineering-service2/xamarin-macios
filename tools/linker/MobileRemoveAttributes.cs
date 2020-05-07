@@ -7,7 +7,11 @@ namespace Xamarin.Linker {
 	public class MobileRemoveAttributes : RemoveAttributesBase {
 
 		protected virtual bool DebugBuild {
+#if NET
+			get { return false; }
+#else
 			get { return context.LinkSymbols; }
+#endif
 		}
 
 		protected override bool IsRemovedAttribute (CustomAttribute attribute)

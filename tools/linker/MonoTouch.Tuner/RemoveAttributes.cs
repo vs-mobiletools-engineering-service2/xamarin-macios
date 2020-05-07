@@ -126,7 +126,11 @@ namespace MonoTouch.Tuner {
 		public override void Initialize (LinkContext context)
 		{
 			base.Initialize (context);
+#if NET
+			debug_build = LinkerConfiguration.Instance.DebugBuild;
+#else
 			debug_build = context.GetParameter ("debug-build") == "True";
+#endif
 		}
 
 		protected override bool DebugBuild {

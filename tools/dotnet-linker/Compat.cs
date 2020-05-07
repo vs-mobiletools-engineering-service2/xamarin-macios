@@ -58,7 +58,9 @@ namespace Xamarin.Linker {
 	}
 
 	public class App {
-		public Optimizations Optimizations { get; } = new Optimizations ();
+		public Optimizations Optimizations { get; } = new Optimizations () {
+			CustomAttributesRemoval = true,
+		};
 	}
 
 

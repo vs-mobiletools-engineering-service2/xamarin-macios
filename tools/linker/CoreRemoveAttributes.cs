@@ -11,7 +11,11 @@ namespace Xamarin.Linker {
 		
 		protected DerivedLinkContext LinkContext {
 			get {
+#if NET
+				return DerivedLinkContext.Instance;
+#else
 				return (DerivedLinkContext) base.context;
+#endif
 			}
 		}
 

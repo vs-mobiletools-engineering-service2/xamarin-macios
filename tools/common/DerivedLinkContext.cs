@@ -47,6 +47,21 @@ namespace Xamarin.Tuner
 #if NET
 		public static DerivedLinkContext Instance { get; } = new DerivedLinkContext ();
 		public App App { get; } = new App ();
+
+		public LinkContext Context { get; set; }
+		public AnnotationStore Annotations => Context.Annotations;
+
+		Dictionary<object, Dictionary<IMetadataTokenProvider, object>> custom_annotations = new Dictionary<object, Dictionary<IMetadataTokenProvider, object>> ();
+
+		public Dictionary<IMetadataTokenProvider, object> GetCustomAnnotations (object key)
+		{
+			if (custom_annotations.TryGetValue (key, out var slots))
+				return slots;
+
+			slots = new Dictionary<IMetadataTokenProvider, object> ();
+			custom_annotations.Add (key, slots);
+			return slots;
+		}
 #else
 		public Application App {
 			get {
@@ -64,6 +79,11 @@ namespace Xamarin.Tuner
 				}
 				return corlib;
 			}
+		}
+
+		public Dictionary<IMetadataTokenProvider, object> GetCustomAnnotations (object key)
+		{
+			return Annotations?.GetCustomAnnotations (key);
 		}
 #endif
 		public HashSet<TypeDefinition> CachedIsNSObject { get; set; }
@@ -105,15 +125,16 @@ namespace Xamarin.Tuner
 		{
 			UserAction = AssemblyAction.Link;
 		}
+#endif
 
 		public Dictionary<IMetadataTokenProvider, object> GetAllCustomAttributes (string storage_name)
 		{
-			return Annotations?.GetCustomAnnotations (storage_name);
+			return GetCustomAnnotations (storage_name);
 		}
 
 		public List<ICustomAttribute> GetCustomAttributes (ICustomAttributeProvider provider, string storage_name)
 		{
-			var annotations = Annotations?.GetCustomAnnotations (storage_name);
+			var annotations = GetCustomAnnotations (storage_name);
 			object storage = null;
 			if (annotations?.TryGetValue (provider, out storage) != true)
 				return null;
@@ -124,7 +145,7 @@ namespace Xamarin.Tuner
 		// inspected even if it's linked away.
 		public void StoreCustomAttribute (ICustomAttributeProvider provider, CustomAttribute attribute, string storage_name)
 		{
-			var dict = Annotations.GetCustomAnnotations (storage_name);
+			var dict = GetCustomAnnotations (storage_name);
 			List<ICustomAttribute> attribs;
 			object attribObjects;
 			if (!dict.TryGetValue (provider, out attribObjects)) {
@@ -156,7 +177,7 @@ namespace Xamarin.Tuner
 
 		public void StoreProtocolMethods (TypeDefinition type)
 		{
-			var attribs = Annotations.GetCustomAnnotations ("ProtocolMethods");
+			var attribs = GetCustomAnnotations ("ProtocolMethods");
 			object value;
 			if (!attribs.TryGetValue (type, out value))
 				attribs [type] = type.Methods.ToArray (); // Make a copy of the collection, since the linker may remove methods from it.
@@ -164,13 +185,14 @@ namespace Xamarin.Tuner
 
 		public IList<MethodDefinition> GetProtocolMethods (TypeDefinition type)
 		{
-			var attribs = Annotations.GetCustomAnnotations ("ProtocolMethods");
+			var attribs = GetCustomAnnotations ("ProtocolMethods");
 			object value;
 			if (attribs.TryGetValue (type, out value))
 				return (MethodDefinition []) value;
 			return null;
 		}
 
+#if !NET
 		public void AddLinkedAwayType (TypeDefinition td)
 		{
 			var latr = new LinkedAwayTypeReference (td);
@@ -214,6 +236,7 @@ namespace Xamarin.Tuner
 
 			return null;
 		}
+#endif
 
 		class AttributeStorage : ICustomAttribute
 		{
@@ -262,6 +285,5 @@ namespace Xamarin.Tuner
 				set { scope = value; }
 			}
 		}
-#endif
 	}
 }
