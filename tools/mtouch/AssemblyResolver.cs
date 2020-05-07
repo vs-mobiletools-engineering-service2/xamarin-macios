@@ -32,7 +32,6 @@ namespace MonoTouch.Tuner {
 				if (File.Exists (fn))
 					file = fn;
 			}
-
 			return base.Load (file);
 		}
 	}

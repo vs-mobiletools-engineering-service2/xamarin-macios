@@ -1890,7 +1890,7 @@ namespace Xamarin.Bundler {
 			case AssemblyBuildTarget.DynamicLibrary:
 				return Path.Combine (Driver.GetMonoLibraryDirectory (this), "libmonosgen-2.0.dylib");
 			case AssemblyBuildTarget.Framework:
-				return Path.Combine (Driver.GetMonoFrameworkDirectory (this), "Mono.framework");
+				return Path.Combine (Driver.GetMonoFrameworksDirectory (this), "Mono.framework");
 			default:
 				throw ErrorHelper.CreateError (100, Errors.MT0100, build_target);
 			}

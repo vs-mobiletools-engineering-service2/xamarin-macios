@@ -883,12 +883,6 @@ namespace Xamarin.Bundler {
 			return GetProductFrameworksDirectory (app);
 		}
 
-		// This is the directory where Mono.framework is
-		public static string GetMonoFrameworkDirectory (Application app)
-		{
-			return GetProductFrameworksDirectory (app);
-		}
-
 		public static string GetProductFrameworksDirectory (Application app)
 		{
 			return Path.Combine (GetProductSdkDirectory (app), "Frameworks");
@@ -939,6 +933,7 @@ namespace Xamarin.Bundler {
 		}
 
 		// /Library/Frameworks/Xamarin.*.framework/Versions/Current/SDKs/*.sdk/Frameworks
+		// This is the directory where Mono.framework is
 		public static string GetMonoFrameworksDirectory (Application app)
 		{
 #if MMP
