@@ -48,6 +48,7 @@ namespace Xamarin.iOS.Tasks {
 		//[TestCase ("MySpriteKitGame")]
 		//[TestCase ("MyTabbedApplication")]
 		//[TestCase ("MyTVApp")]
+		[TestCase ("MyTVMetalGame")]
 		//[TestCase ("MyWatch2Container")]
 		//[TestCase ("MyWebViewApp")]
 		//[TestCase ("MyXamarinFormsApp")]
@@ -70,6 +71,7 @@ namespace Xamarin.iOS.Tasks {
 					Assert.Ignore ("The iOS Simulator does not support metal. Build for a device instead.");
 				break;
 			case "MyTVApp":
+			case "MyTVMetalGame":
 				tfi = "Xamarin.TVOS";
 				break;
 			}
