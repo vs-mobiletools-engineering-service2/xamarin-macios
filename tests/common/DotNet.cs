@@ -29,7 +29,7 @@ namespace Xamarin.Tests {
 			}
 
 			dotnet_version = Configuration.GetVariable ("DOTNET5_VERSION", null);
-			dotnet_url = Configuration.GetVariable ("DOTNET5_URL", null);
+			dotnet_url = Configuration.GetVariable ("DOTNET5_TARBALL", null);
 			if (dotnet_version != null && dotnet_url != null) {
 				versions [dotnet_version] = new Tuple<string, string> (dotnet_url, null);
 				default_version = dotnet_version;
