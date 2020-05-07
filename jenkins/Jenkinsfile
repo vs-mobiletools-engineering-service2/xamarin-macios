@@ -86,6 +86,35 @@ def githubGetPullRequestLabels ()
     return github_pull_request_labels
 }
 
+custom_labels = null
+def getCustomLabels ()
+{
+    if (custom_labels == null) {
+        custom_labels = []
+        def custom_labels_file = "${workspace}/xamarin-macios/jenkins/custom-labels.txt"
+        if (fileExists (custom_labels_file)) {
+            def contents = sh (script: "grep -v '^[[:space:]]*#' ${custom_labels_file} | grep -v '^[[:space:]]*\$' | tr \$'\n' ' ' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*\$//'", returnStdout: true)
+            custom_labels += contents.tokenize (' ')
+            echo ("Found labels ${custom_labels} in ${custom_labels_file}")
+        } else {
+            echo ("The custom labels file ${custom_labels_file} does not exist")
+        }
+    }
+    return custom_labels
+}
+
+labels = null
+def getLabels ()
+{
+    if (labels == null) {
+        labels = []
+        labels += githubGetPullRequestLabels ()
+        labels += getCustomLabels ()
+        echo ("Found labels: ${labels}")
+    }
+    return labels
+}
+
 def githubAddComment (url, markdown)
 {
     if (markdown.length () > 32768) {
@@ -439,8 +468,8 @@ timestamps {
                     }
 
                     if (isPr) {
-                        def hasBuildPackage = githubGetPullRequestLabels ().contains ("build-package")
-                        def hasRunInternalTests = githubGetPullRequestLabels ().contains ("run-internal-tests")
+                        def hasBuildPackage = getLabels ().contains ("build-package")
+                        def hasRunInternalTests = getLabels ().contains ("run-internal-tests")
 
                         if (!hasBuildPackage && !hasRunInternalTests) {
                             // don't add a comment to the pull request, since the public jenkins will also add comments, which ends up being too much.
@@ -701,7 +730,7 @@ timestamps {
                                 def vsts_branch = isPr ? "pull-request" : branchName;
                                 if (true) {
                                     echo "Currently not launching external tests due to .NET 5 work"
-                                } else if (isPr && !githubGetPullRequestLabels ().contains ("trigger-device-tests")) {
+                                } else if (isPr && !getLabels ().contains ("trigger-device-tests")) {
                                     echo "Currently not launching external tests for pull requests"
                                 } else {
                                     def outputFile = "${workspace}/xamarin-macios/wrench-launch-external.output.tmp"
@@ -718,7 +747,7 @@ timestamps {
                                     }
                                 }
 
-                                if (isPr && githubGetPullRequestLabels ().contains ("run-sample-tests")) {
+                                if (isPr && getLabels ().contains ("run-sample-tests")) {
                                     def outputFile = "${workspace}/xamarin-macios/wrench-launch-external.output.tmp"
                                     try {
                                         withCredentials ([string (credentialsId: 'macios_provisionator_pat', variable: 'PROVISIONATOR_VSTS_PAT')]) {
