@@ -179,7 +179,7 @@ namespace Xamarin.Tests {
 				return lst
 					.Where (v => !v.StartsWith ("System.")) // there will be different BCL assemblies included
 					.Where (v => !v.StartsWith ("Microsoft.")) // more BCL assemblies
-					.Where (v => v != "netstandard.dll" && v != "WindowsBase.dll") // even more BCL assemblies
+					.Where (v => v != "netstandard.dll" && v != "WindowsBase.dll" && v != "mscorlib.dll") // even more BCL assemblies
 					.Where (v => !v.StartsWith ("Mono.")) // mono assemblies
 					.Where (v => !v.EndsWith (".pdb")) // FIXME: haven't figured out the pdb story yet
 					.Where (v => !v.EndsWith (".dylib")) // ignore dylibs, they're not the same
