@@ -7,11 +7,6 @@ using Mono.Tuner;
 using Xamarin.Linker;
 
 namespace MonoMac.Tuner {
-	
 	public class OptimizeGeneratedCodeSubStep : CoreOptimizeGeneratedCode {
-		
-		public OptimizeGeneratedCodeSubStep ()
-		{
-		}
 	}
 }

@@ -11,10 +11,6 @@ namespace MonoTouch.Tuner {
 
 		bool product;
 
-		public RemoveCode ()
-		{
-		}
-
 		protected override string Name { get; } = "Code Remover";
 		protected override int ErrorCode { get; } = 2050;
 

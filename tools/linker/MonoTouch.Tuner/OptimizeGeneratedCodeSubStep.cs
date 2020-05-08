@@ -7,13 +7,7 @@ using Xamarin.Linker;
 using Xamarin.Bundler;
 
 namespace MonoTouch.Tuner {
-	
 	public class OptimizeGeneratedCodeSubStep : CoreOptimizeGeneratedCode {
-		
-		public OptimizeGeneratedCodeSubStep ()
-		{
-		}
-
 		public bool Device {
 			get { return LinkContext.App.IsDeviceBuild; }
 		}
