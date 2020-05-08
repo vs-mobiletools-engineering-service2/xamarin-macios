@@ -49,7 +49,7 @@ namespace Xamarin.iOS.Tasks
 			var rv = Configuration.CloneTestDirectory (testSourceDirectory, mode);
 
 			if (mode == "dotnet") {
-				var dir = Path.Combine (Configuration.SourceRoot, "msbuild", "dotnet");
+				var dir = Path.Combine (Configuration.SourceRoot, "dotnet");
 				var args = new [] {
 					"-C",
 					dir,
