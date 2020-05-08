@@ -25,6 +25,11 @@ namespace MySingleView
 		{
 			base.ViewDidLoad ();
 			
+			if (IntPtr.Size == 8)
+				MyButton.SetTitle ("64bits", UIControlState.Normal);
+			else
+				MyButton.SetTitle ("32bits", UIControlState.Normal);
+
 			// Perform any additional setup after loading the view, typically from a nib.
 		}
 

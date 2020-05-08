@@ -4,14 +4,23 @@
 // Manual changes to this file may not be handled correctly.
 //
 using Foundation;
+using System.CodeDom.Compiler;
 
 namespace MySingleView
 {
 	[Register ("MySingleViewViewController")]
 	partial class MySingleViewViewController
 	{
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		UIKit.UIButton MyButton { get; set; }
+
 		void ReleaseDesignerOutlets ()
 		{
+			if (MyButton != null) {
+				MyButton.Dispose ();
+				MyButton = null;
+			}
 		}
 	}
 }

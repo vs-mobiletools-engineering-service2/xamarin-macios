@@ -7,7 +7,7 @@
     <scenes>
         <scene sceneID="0">
             <objects>
-                <viewController id="1" sceneMemberID="viewController" customClass="">
+                <viewController id="1" sceneMemberID="viewController" customClass="MySingleViewViewController">
                     <view key="view" contentMode="scaleToFill" id="2">
                         <rect key="frame" x="0.0" y="20" width="320" height="460"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -27,6 +27,9 @@
                             </button>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="MyButton" destination="5" id="name-outlet-5"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
