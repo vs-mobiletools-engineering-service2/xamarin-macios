@@ -77,6 +77,11 @@ namespace Xamarin.MacDev.Tasks {
 				case "_WriteZStream":
 					// FIXME: investigate why the linker can't find these (do we even need them?)
 					continue;
+				case "_xamarin_start_wwan":
+					// _xamarin_start_wwan only exists for iOS
+					if (Platform != ApplePlatform.iOS)
+						continue;
+					break;
 				}
 				arguments.Add ("-u");
 				arguments.Add (symbol);
