@@ -12,6 +12,9 @@ if test -z "$MONOTOUCH_PREFIX"; then echo "MONOTOUCH_PREFIX not set"; exit 1; fi
 
 cp="cp -c"
 
+make -C "$TOP/tools/mtouch" dotnet -j
+make -C "$TOP/tools/mmp" dotnet -j
+
 # the Xamarin.*OS.Ref nuget
 create_ref_nuget ()
 {
@@ -134,8 +137,6 @@ copy_ios_native_libs_to_runtime_pack ()
 	$cp "$TOP"/tools/mtouch/simlauncher.mm "$destdir"
 
 	$cp -r "$include_dir/xamarin" "$destdir/"
-
-	make -C "$TOP/tools/mtouch" dotnet -j
 }
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm64" "arm64"
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm"   "armv7 armv7s"
@@ -171,8 +172,6 @@ copy_macos_native_libs_to_runtime_pack ()
 	inputs+=("$lib_dir"/libxammac.dylib)
 	inputs+=("$lib_dir"/libxammac-debug.a)
 	inputs+=("$lib_dir"/libxammac-debug.dylib)
-
-	make -C "$TOP/tools/mmp" dotnet -j
 
 	for element in "${inputs[@]}"; do
 		#shellcheck disable=SC2155
