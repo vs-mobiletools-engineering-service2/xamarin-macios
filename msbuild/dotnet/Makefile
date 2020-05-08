@@ -13,8 +13,6 @@ endif
 Q_PACK     =$(if $(V),,@echo "PACK      $@";)
 Q_NUGET_ADD=$(if $(V),,@echo "NUGET ADD $@";)
 
-TEST_FEED_PATH=test/feed
-
 PLATFORMS=iOS tvOS watchOS macOS
 
 IOS_RIDS=arm64 arm x86 x64
