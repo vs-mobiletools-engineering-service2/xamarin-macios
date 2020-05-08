@@ -21,92 +21,10 @@ WATCHOS_RIDS=arm x86
 MACOS_RIDS=x64
 
 DIRECTORIES += \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/Sdk \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/Sdk \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/Sdk \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/lib/Xamarin.iOS \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/lib/Xamarin.TVOS \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/lib/Xamarin.WatchOS \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/Sdk \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/lib/Xamarin.Mac \
-
-IOS_TARGETS = \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/Sdk/Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/Sdk/Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Microsoft.iOS.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Microsoft.iOS.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Microsoft.iOS.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Microsoft.iOS.Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.Sdk.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.Sdk.props \
-
-TVOS_TARGETS = \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/Sdk/Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/Sdk/Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Microsoft.tvOS.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Microsoft.tvOS.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Microsoft.tvOS.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Microsoft.tvOS.Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.Sdk.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.Sdk.props \
-
-WATCHOS_TARGETS = \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/Sdk/Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/Sdk/Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Microsoft.watchOS.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Microsoft.watchOS.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Microsoft.watchOS.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Microsoft.watchOS.Sdk.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.Sdk.TargetFrameworkInference.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.props \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.Sdk.targets \
-	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.Sdk.props \
-
-MACOS_TARGETS = \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/Sdk/Sdk.props \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/Sdk/Sdk.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Microsoft.macOS.TargetFrameworkInference.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Microsoft.macOS.Sdk.DefaultItems.props \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Microsoft.macOS.Sdk.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Microsoft.macOS.Sdk.props \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.Sdk.TargetFrameworkInference.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.props \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.Sdk.DefaultItems.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.Sdk.targets \
-	$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.Sdk.props \
 
 TARGETS += $(IOS_TARGETS) $(TVOS_TARGETS) $(WATCHOS_TARGETS) $(MACOS_TARGETS)
 
 install-local::
-
-$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/%: % | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/%: % | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.iOS.Sdk/targets/Xamarin.Shared.%: targets/Xamarin.Shared.% | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.tvOS.Sdk/targets/Xamarin.Shared.%: targets/Xamarin.Shared.% | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/dotnet/Microsoft.watchOS.Sdk/targets/Xamarin.Shared.%: targets/Xamarin.Shared.% | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/dotnet/Microsoft.macOS.Sdk/targets/Xamarin.Shared.%: targets/Xamarin.Shared.% | $(DIRECTORIES)
-	$(Q) $(CP) $< $@
 
 $(DIRECTORIES):
 	$(Q) mkdir -p $@
@@ -143,11 +61,6 @@ nupkgs/Microsoft.iOS.%.nupkg: CURRENT_VERSION=$(IOS_NUGET_VERSION_NO_METADATA)
 nupkgs/Microsoft.tvOS.%.nupkg: CURRENT_VERSION=$(TVOS_NUGET_VERSION_NO_METADATA)
 nupkgs/Microsoft.watchOS.%.nupkg: CURRENT_VERSION=$(WATCHOS_NUGET_VERSION_NO_METADATA)
 nupkgs/Microsoft.macOS.%.nupkg: CURRENT_VERSION=$(MACOS_NUGET_VERSION_NO_METADATA)
-
-nupkgs/Xamarin.iOS.%.nupkg: CURRENT_VERSION=$(IOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Xamarin.tvOS.%.nupkg: CURRENT_VERSION=$(TVOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Xamarin.watchOS.%.nupkg: CURRENT_VERSION=$(WATCHOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Xamarin.macOS.%.nupkg: CURRENT_VERSION=$(MACOS_NUGET_VERSION_NO_METADATA)
 
 nupkgs/%.nupkg: prepare $(TEMPLATED_FILES)
 	$(Q) rm -f $@ nupkgs/$*.*.nupkg
