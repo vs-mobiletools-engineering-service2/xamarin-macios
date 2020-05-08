@@ -79,6 +79,8 @@ namespace Xamarin.Tests {
 				var cached = Path.Combine (cache_dir, fn);
 				var download = true;
 
+				Directory.CreateDirectory (cache_dir);
+
 				if (File.Exists (cached) && (checksum == null || VerifyChecksum (cached, checksum)))
 					download = false;
 
