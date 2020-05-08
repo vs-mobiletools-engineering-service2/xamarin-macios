@@ -12,15 +12,13 @@ publish: nugets
 	dotnet publish --self-contained true /v:diag /bl:MySingleView-publish.binlog /p:Configuration=$(TEST_CONFIG)
 
 clean:
-	rm -Rf ~/.nuget/packages/xamarin.ios.* ~/.nuget/packages/microsoft.ios.*
-	cd ../../.. && git clean -xfdq
-	rm -Rf $(TOP)/_build
+	rm -Rf ~/.nuget/packages/microsoft.ios.* ~/.nuget/packages/microsoft.tvos.* ~/.nuget/packages/microsoft.watchos.* ~/.nuget/packages/microsoft.macos.*
+	cd $(TOP)/msbuild && git clean -xfdq
+	make clean -C $(TOP)/msbuild/dotnet
 
 nugets: clean
 	make all install -C $(TOP)/tools/dotnet-linker
-	make all install -j -C ../../..
-	make -C ../.. packsimple test/global.json test/NuGet.config -j
-	make -C ../.. install-nugets
+	make all install -j -C $(TOP)/msbuild
 
 run: run-sim
 
