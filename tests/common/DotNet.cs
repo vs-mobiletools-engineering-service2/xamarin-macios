@@ -84,13 +84,11 @@ namespace Xamarin.Tests {
 
 				if (download) {
 					using (var wc = new System.Net.WebClient ()) {
-						if (File.Exists (cached_tmp))
-							File.Delete (cached_tmp);
+						File.Delete (cached_tmp);
 						wc.DownloadFile (url, cached_tmp);
 						if (checksum != null && !VerifyChecksum (cached_tmp, checksum))
 							throw new Exception ($"Download of url {url} into {cached_tmp} failed sha512 checksum {checksum}");
-						if (File.Exists (cached))
-							File.Delete (cached);
+						File.Delete (cached);
 						File.Move (cached_tmp, cached);
 					}
 				}
