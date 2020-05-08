@@ -1,5 +1,4 @@
 TOP = ..
-SUBDIRS=dotnet
 
 include $(TOP)/Make.config
 include $(TOP)/mk/rules.mk

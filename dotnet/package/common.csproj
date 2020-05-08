@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <_RepositoryPath>$(MSBuildThisFileDirectory)/../../..</_RepositoryPath>
+    <_RepositoryPath>$(MSBuildThisFileDirectory)/../..</_RepositoryPath>
     <_buildPath>$(_RepositoryPath)/_build</_buildPath>
     <_packagePath>$(_buildPath)\$(PackageId)\</_packagePath>
 

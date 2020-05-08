@@ -204,9 +204,9 @@ create_sdk_nugets ()
 	$cp "$legacy_destdir/Version" "$destdir/"
 	$cp "$legacy_destdir/buildinfo" "$destdir/tools/"
 
-	$cp "$TOP/msbuild/dotnet/Microsoft.$platform.Sdk/Sdk/"* "$destdir/Sdk/"
-	$cp "$TOP/msbuild/dotnet/targets/"* "$destdir/targets/"
-	$cp "$TOP/msbuild/dotnet/Microsoft.$platform.Sdk/targets/"* "$destdir/targets/"
+	$cp "$TOP/dotnet/Microsoft.$platform.Sdk/Sdk/"* "$destdir/Sdk/"
+	$cp "$TOP/dotnet/targets/"* "$destdir/targets/"
+	$cp "$TOP/dotnet/Microsoft.$platform.Sdk/targets/"* "$destdir/targets/"
 
 	$cp -r "$legacy_destdir/lib/msbuild" "$destdir/tools/"
 
