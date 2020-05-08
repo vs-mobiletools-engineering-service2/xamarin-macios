@@ -106,27 +106,8 @@ namespace Xamarin.Tests {
 
 				downloaded [requested_dotnet_version] = local_path;
 
-				if (install_sdks)
-					InstallSdks (actual_dotnet_version);
-
 				return local_path;
 			}
-		}
-
-		public static void InstallSdks (string dotnet_version)
-		{
-			var install_script = Path.Combine (Configuration.RootPath, "msbuild", "dotnet", "install-into-dotnet.sh");
-			var env = new Dictionary<string, string> () {
-				{ "DOTNET_PATH", Path.Combine (DownloadPackage (dotnet_version, out var actual_version), "sdk", actual_version, "Sdks") },
-				{ "IOS_TARGETDIR", Configuration.IOS_DESTDIR },
-				{ "MAC_TARGETDIR", Configuration.MAC_DESTDIR },
-			};
-			var output = new StringBuilder ();
-			var rv = ExecutionHelper.Execute (install_script, new string [] { }, timeout: TimeSpan.FromSeconds (10), environmentVariables: env, stdout: output, stderr: output);
-			Console.WriteLine ($"{string.Join (" ", env.Select ((v) => $"{v.Key}={v.Value}"))} {install_script}");
-			Console.WriteLine (output);
-			if (rv != 0)
-				throw new Exception ($"Failed to install into custom dotnet location, exit code: {rv}.");
 		}
 
 		public static string Executable {
