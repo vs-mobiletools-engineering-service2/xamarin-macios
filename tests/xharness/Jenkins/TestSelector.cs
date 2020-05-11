@@ -179,12 +179,16 @@ namespace Xharness.Jenkins {
 			}
 
 			var custom_labels_file = Path.Combine (Harness.RootDirectory, "..", "jenkins", "custom-labels.txt");
-			var custom_labels = File.ReadAllLines (custom_labels_file).Select ((v) => v.Trim ()).Where (v => v.Length > 0 && v [0] != '#');
-			if (custom_labels.Count () > 0) {
-				labels.UnionWith (custom_labels);
-				MainLog.WriteLine ($"Found {custom_labels.Count ()} label(s) in {custom_labels_file}: {string.Join (", ", custom_labels)}");
+			if (File.Exists (custom_labels_file)) {
+				var custom_labels = File.ReadAllLines (custom_labels_file).Select ((v) => v.Trim ()).Where (v => v.Length > 0 && v [0] != '#');
+				if (custom_labels.Count () > 0) {
+					labels.UnionWith (custom_labels);
+					MainLog.WriteLine ($"Found {custom_labels.Count ()} label(s) in {custom_labels_file}: {string.Join (", ", custom_labels)}");
+				} else {
+					MainLog.WriteLine ($"No labels were in {custom_labels_file}.");
+				}
 			} else {
-				MainLog.WriteLine ($"No labels were in {custom_labels_file}.");
+				MainLog.WriteLine ($"The custom labels file {custom_labels_file} does not exist.");
 			}
 
 			MainLog.WriteLine ($"In total found {labels.Count ()} label(s): {string.Join (", ", labels.ToArray ())}");
