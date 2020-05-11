@@ -31,7 +31,7 @@
 
 **NOTE: Fix all your paths in the .json and .rsp files !**
 
-The content of the `.rsp` (resonse) file should be what `msbuild` gives to the `ILLink` task. You can get it from build logs (console or binary).
+The content of the `.rsp` (response) file should be what `msbuild` gives to the `ILLink` task. You can get it from build logs (console or binary).
 
 Right now an environment variable `CUSTOM_LINKER_OPTIONS_FILE` is used to provide extra configuration to the XI/XM linker steps. This is created by the msbuild files and must be part of the `launch.json` file.
 
@@ -41,21 +41,18 @@ You might also need to define the `build` task (reference from `launch.json`). A
 
 ```json
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "0.1.0",
-    "command": "dotnet",
-    "isShellCommand": true,
-    "args": [],
-    "tasks": [
-        {
-            "taskName": "build",
-            "args": [ ],
-            "isBuildCommand": true,
-            "showOutput": "silent",
-            "problemMatcher": "$msCompile"
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+			],
+			"problemMatcher": "$msCompile"
+		}
+	]
 }
 ```
 
@@ -65,13 +62,4 @@ Without it you'll need to build manually before debugging in vscode.
 
 ## MSBuild Binary and Structured Log Viewer
 
-While it's not quite clear on its home page the [MSBuild Binary and Structured Log Viewer](https://msbuildlog.com) works on macOS.
-
-Clone it from [GitHub](https://github.com/KirillOsenkov/MSBuildStructuredLog) then build it and run it from the command-line (even if it's a GUI app).
-
-```shell
-cd StructuredLogViewer.Avalonia/
-msbuild
-cd bin/StructuredLogViewer.Avalonia/Debug/netcoreapp3.0
-dotnet StructuredLogViewer.Avalonia.dll
-```
+[Instruction for macOS](https://github.com/KirillOsenkov/MSBuildStructuredLog#running-the-avalonia-version-on-mac)
