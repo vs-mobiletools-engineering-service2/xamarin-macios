@@ -1,4 +1,4 @@
-TOP=../../../..
+TOP=../../..
 include $(TOP)/Make.config
 
 TEST_CONFIG?=Debug
@@ -14,11 +14,12 @@ publish: nugets
 clean:
 	rm -Rf ~/.nuget/packages/microsoft.ios.* ~/.nuget/packages/microsoft.tvos.* ~/.nuget/packages/microsoft.watchos.* ~/.nuget/packages/microsoft.macos.*
 	cd $(TOP)/msbuild && git clean -xfdq
-	make clean -C $(TOP)/msbuild/dotnet
+	make clean -C $(TOP)/dotnet
 
 nugets: clean
 	make all install -C $(TOP)/tools/dotnet-linker
 	make all install -j -C $(TOP)/msbuild
+	make all install -j -C $(TOP)/dotnet
 
 run: run-sim
 
