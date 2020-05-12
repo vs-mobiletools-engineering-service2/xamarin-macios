@@ -1,41 +1,10 @@
 extern alias SystemMSBuild;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
 namespace Microsoft.Build.Tasks
 {
-	public abstract class DeleteBase : Task
+	public abstract class DeleteBase : SystemMSBuild.Microsoft.Build.Tasks.Delete
 	{
-		readonly SystemMSBuild.Microsoft.Build.Tasks.Delete delete = new SystemMSBuild.Microsoft.Build.Tasks.Delete ();
-
 		public string SessionId { get; set; }
-
-		[Required]
-		public ITaskItem[] Files
-		{
-			get { return delete.Files; }
-			set { delete.Files = value; }
-		}
-
-		public bool TreatErrorsAsWarnings
-		{
-			get { return delete.TreatErrorsAsWarnings; }
-			set { delete.TreatErrorsAsWarnings = value; }
-		}
-
-		[Output]
-		public ITaskItem[] DeletedFiles
-		{
-			get { return delete.DeletedFiles; }
-			set { delete.DeletedFiles = value; }
-		}
-
-		public override bool Execute ()
-		{
-			delete.BuildEngine = this.BuildEngine;
-			return delete.Execute ();
-		}
 	}
 }
 
