@@ -69,6 +69,8 @@ namespace Xamarin.Bundler {
 		public bool? EnableCoopGC;
 		public bool EnableSGenConc;
 		public bool EnableProfiling;
+		public bool? DebugTrack;
+
 		public MarshalObjectiveCExceptionMode MarshalObjectiveCExceptions;
 		public MarshalManagedExceptionMode MarshalManagedExceptions;
 
@@ -396,6 +398,12 @@ namespace Xamarin.Bundler {
 			}
 #endif
 
+			if (!DebugTrack.HasValue) {
+				DebugTrack = false;
+			} else if (DebugTrack.Value && !EnableDebug) {
+				ErrorHelper.Warning (32, Errors.MT0032);
+			}
+
 			Optimizations.Initialize (this);
 		}
 
@@ -679,5 +687,33 @@ namespace Xamarin.Bundler {
 
 			return string.Join (", ", res.ToArray ());
 		}
+
+		public string MonoGCParams {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					// Configure sgen to use a small nursery
+					string ret = "nursery-size=512k";
+					if (IsTodayExtension || Platform == ApplePlatform.WatchOS) {
+						// A bit test shows different behavior
+						// Sometimes apps are killed with ~100mb allocated,
+						// but I've seen apps allocate up to 240+mb as well
+						ret += ",soft-heap-limit=8m";
+					}
+					if (EnableSGenConc)
+						ret += ",major=marksweep-conc";
+					else
+						ret += ",major=marksweep";
+					return ret;
+				case ApplePlatform.MacOSX:
+					return EnableSGenConc ? "major=marksweep-conc" : "major=marksweep";
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
+
 	}
 }

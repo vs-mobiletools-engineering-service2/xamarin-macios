@@ -83,8 +83,6 @@ namespace Xamarin.Bundler {
 		public bool DebugAll;
 		public List<string> DebugAssemblies = new List<string> ();
 
-		public bool? DebugTrack;
-
 		public string Compiler = string.Empty;
 		public string CompilerPath;
 
@@ -515,24 +513,6 @@ namespace Xamarin.Bundler {
 				return false;
 			default:
 				throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, "Xamarin.iOS");
-			}
-		}
-
-		public string MonoGCParams {
-			get {
-				// Configure sgen to use a small nursery
-				string ret = "nursery-size=512k";
-				if (IsTodayExtension || Platform == ApplePlatform.WatchOS) {
-					// A bit test shows different behavior
-					// Sometimes apps are killed with ~100mb allocated,
-					// but I've seen apps allocate up to 240+mb as well
-					ret += ",soft-heap-limit=8m";
-				}
-				if (EnableSGenConc)
-					ret += ",major=marksweep-conc";
-				else
-					ret += ",major=marksweep";
-				return ret;
 			}
 		}
 
@@ -1007,12 +987,6 @@ namespace Xamarin.Bundler {
 			if (IsLLVM && Platform == ApplePlatform.WatchOS && BitCodeMode != BitCodeMode.LLVMOnly) {
 				ErrorHelper.Warning (111, Errors.MT0111);
 				BitCodeMode = BitCodeMode.LLVMOnly;
-			}
-
-			if (!DebugTrack.HasValue) {
-				DebugTrack = false;
-			} else if (DebugTrack.Value && !EnableDebug) {
-				ErrorHelper.Warning (32, Errors.MT0032);
 			}
 
 			if (EnableAsmOnlyBitCode)
