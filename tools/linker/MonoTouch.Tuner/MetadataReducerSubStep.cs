@@ -3,6 +3,7 @@
 using System;
 using Mono.Cecil;
 using Mono.Linker;
+using Mono.Linker.Steps;
 using Mono.Tuner;
 
 namespace Xamarin.Linker.Steps {
@@ -25,14 +26,25 @@ namespace Xamarin.Linker.Steps {
 		public override void Initialize (LinkContext context)
 		{
 			base.Initialize (context);
+#if NET
+			// we cannot (safely) detect the usage of ParameterInfo since we're not shipping the BCL
+			// so assume, for now, that there's reflection
+			// FIXME: make ReflectedParameterNames opt-in / opt-out / smart-like-before ?
+			ReflectedParameterNames = true;
+#else
 			// is some user code depending (or not) on reflection to get method's parameters names ?
 			// note: member references will still exists (even if not marked) until the assembly is saved
 			// so we need this to be pre-computed at the marking stage
 			ReflectedParameterNames = Annotations.GetCustomAnnotations ("ParameterInfo").Count > 0;
+#endif
 		}
 
 		public override bool IsActiveFor (AssemblyDefinition assembly)
 		{
+#if NET
+			if (LinkerConfiguration.Instance.DebugBuild)
+				return false;
+#endif
 			return Annotations.GetAction (assembly) == AssemblyAction.Link;
 		}
 

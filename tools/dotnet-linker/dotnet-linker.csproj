@@ -76,5 +76,8 @@
     <Compile Include="..\linker\MonoTouch.Tuner\RemoveAttributes.cs">
       <Link>RemoveAttributes.cs</Link>
     </Compile>
+    <Compile Include="..\linker\MonoTouch.Tuner\MetadataReducerSubStep.cs">
+      <Link>MetadataReducerSubStep.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

@@ -131,7 +131,8 @@ namespace Xamarin {
 				// if (options.Application.Optimizations.ForceRejectedTypesRemoval == true)
 				// 	sub.Add (new RemoveRejectedTypesStep ());
 				// if (!options.DebugBuild) {
-				// 	sub.Add (new MetadataReducerSubStep ());
+				postlink_subs.Add (new MetadataReducerSubStep ());
+
 				// 	if (options.Application.Optimizations.SealAndDevirtualize == true)
 				// 		sub.Add (new SealerSubStep ());
 
