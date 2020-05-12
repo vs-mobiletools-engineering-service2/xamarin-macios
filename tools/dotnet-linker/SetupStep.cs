@@ -63,8 +63,9 @@ namespace Xamarin {
 			// if (options.WarnOnTypeRef.Count > 0)
 			// 	pipeline.Append (new PreLinkScanTypeReferenceStep (options.WarnOnTypeRef));
 
-			// partially implemented upstream - but we need it for [LinkerSafe] support
-			// pipeline.Append (new CustomizeIOSActions (options.LinkMode, options.SkippedAssemblies));
+			// partially implemented upstream - but we need a subset of it to support
+			// [assembly:LinkerSafe] and [assembly:Preserve] attributes in user code
+			InsertAfter (new CustomizeActions (), "LoadReferencesStep");
 
 			// we need to store the Field attribute in annotations, since it may end up removed.
 			InsertAfter (new ProcessExportedFields (), "TypeMapStep");
@@ -124,13 +125,12 @@ namespace Xamarin {
 
 				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
 
-
 				var postlink_subs = new MobileSubStepDispatcher ();
 				InsertAfter (postlink_subs, "CleanStep");
 
 				// if (options.Application.Optimizations.ForceRejectedTypesRemoval == true)
 				// 	sub.Add (new RemoveRejectedTypesStep ());
-				// if (!options.DebugBuild) {
+
 				postlink_subs.Add (new MetadataReducerSubStep ());
 
 				// 	if (options.Application.Optimizations.SealAndDevirtualize == true)
