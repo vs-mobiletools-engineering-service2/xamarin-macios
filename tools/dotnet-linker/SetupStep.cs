@@ -60,12 +60,14 @@ namespace Xamarin {
 		{
 			DerivedLinkContext.Instance.Context = Context;
 
-			// if (options.WarnOnTypeRef.Count > 0)
-			// 	pipeline.Append (new PreLinkScanTypeReferenceStep (options.WarnOnTypeRef));
-
 			// partially implemented upstream - but we need a subset of it to support
 			// [assembly:LinkerSafe] and [assembly:Preserve] attributes in user code
 			InsertAfter (new CustomizeActions (), "LoadReferencesStep");
+
+			if (LinkerConfiguration.Instance.WarnOnTypeRef.Count > 0) {
+				InsertAfter (new PreLinkScanTypeReferenceStep (), "LoadReferencesStep");
+				InsertAfter (new PostLinkScanTypeReferenceStep (), "OutputStep");
+			}
 
 			// we need to store the Field attribute in annotations, since it may end up removed.
 			InsertAfter (new ProcessExportedFields (), "TypeMapStep");
@@ -144,9 +146,6 @@ namespace Xamarin {
 			}
 
 			// InsertAfter (new ListExportedSymbols (options.MarshalNativeExceptionsState), "OutputStep");
-
-			// if (options.WarnOnTypeRef.Count > 0)
-			// 	pipeline.Append (new PostLinkScanTypeReferenceStep (options.WarnOnTypeRef));
 
 			if (Configuration.InsertTimestamps) {
 				// note: some steps (e.g. BlacklistStep) dynamically adds steps to the pipeline

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Xamarin.Bundler;
@@ -15,6 +16,8 @@ namespace Xamarin.Linker {
 		public bool InsertTimestamps { get; private set; } = true;
 
 		public bool InsaneVerbosity { get; private set; } = true;
+
+		public List<string> WarnOnTypeRef { get; } = new List<string> ();
 
 		static LinkerConfiguration linker_configuration;
 		public static LinkerConfiguration Instance {

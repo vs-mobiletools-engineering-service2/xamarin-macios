@@ -9,7 +9,7 @@
     <DefineConstants>TRACE;NET;IOS;DEBUG;NETCOREAPP;NETCOREAPP3_0;MTOUCH</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.ILLink" Version="5.0.0-preview.3.20254.2" />
+    <PackageReference Include="Microsoft.NET.ILLink" Version="5.0.0-preview.3.20261.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\linker\MobileResolveMainAssemblyStep.cs">
@@ -79,5 +79,22 @@
     <Compile Include="..\linker\MonoTouch.Tuner\MetadataReducerSubStep.cs">
       <Link>MetadataReducerSubStep.cs</Link>
     </Compile>
+    <Compile Include="..\linker\ScanTypeReferenceStep.cs">
+      <Link>ScanTypeReferenceStep.cs</Link>
+    </Compile>
+    <Compile Include="..\mtouch\Errors.Designer.cs">
+      <Link>Errors.Designer.cs</Link>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\mtouch\Errors.resx">
+      <Link>Errors.resx</Link>
+      <XlfSourceFormat>Resx</XlfSourceFormat>
+      <XlfOutputItem>EmbeddedResource</XlfOutputItem>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Xamarin.Bundler</CustomToolNamespace>
+      <LogicalName>Errors.mtouch.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
