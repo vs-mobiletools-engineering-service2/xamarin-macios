@@ -48,9 +48,12 @@
 		<_Is64BitBuild Condition=" '(_Is32BitBuild)' != 'true' ">true</_Is64BitBuild>
 	</PropertyGroup>
 
-	<!-- Override overridable targets -->
+	<!-- Inject our targets after the Build target -->
 	<PropertyGroup>
-		<_BuildAppTargets>
+		<!-- ILLink depends on the output of ComputeFilesToPublish, so we must run that before running ILLink -->
+		<!-- We re-use CopyFilesToPublishDirectory to copy files to the .app -->
+		<BuildDependsOn>
+			$(BuildDependsOn);
 			_EarlyAppBundleTasks;
 			_ComputeLinkerArguments;
 			ComputeFilesToPublish;
@@ -64,11 +67,8 @@
 			Codesign;
 			CreateIpa;
 			Archive;
-		</_BuildAppTargets>
+		</BuildDependsOn>
 	</PropertyGroup>
-
-	<!-- Inject our build app target -->
-	<Target Name="_BuildApp" AfterTargets="Build" BeforeTargets="AfterBuild" Condition="'$(_CanOutputAppBundle)' == 'true'" DependsOnTargets="$(_BuildAppTargets)" />
 
 	<!-- Actual implementations for what we need to do -->
 
