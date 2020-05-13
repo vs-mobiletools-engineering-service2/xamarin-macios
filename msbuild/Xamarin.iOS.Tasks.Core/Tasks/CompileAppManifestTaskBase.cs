@@ -32,11 +32,6 @@ namespace Xamarin.iOS.Tasks
 
 		public string TargetArchitectures { get; set; }
 
-		public TargetFramework TargetFramework { get { return TargetFramework.Parse (TargetFrameworkMoniker); } }
-
-		[Required]
-		public string TargetFrameworkMoniker { get; set; }
-
 		[Required]
 		public bool Debug { get; set; }
 
@@ -52,10 +47,6 @@ namespace Xamarin.iOS.Tasks
 		public string DeploymentTarget { get; set; }
 
 		#endregion
-
-		public ApplePlatform Framework {
-			get { return PlatformFrameworkHelper.GetFramework (TargetFrameworkMoniker); }
-		}
 
 		TargetArchitecture architectures;
 		IPhoneDeviceType supportedDevices;
@@ -84,7 +75,7 @@ namespace Xamarin.iOS.Tasks
 				return false;
 			}
 
-			switch (Framework) {
+			switch (Platform) {
 			case ApplePlatform.iOS:
 				IsIOS = true;
 				break;
@@ -93,7 +84,7 @@ namespace Xamarin.iOS.Tasks
 			case ApplePlatform.TVOS:
 				break;
 			default:
-				throw new InvalidOperationException (string.Format ("Invalid framework: {0}", Framework));
+				throw new InvalidOperationException (string.Format ("Invalid platform: {0}", Platform));
 			}
 
 			if (!string.IsNullOrEmpty (TargetArchitectures) && !Enum.TryParse (TargetArchitectures, out architectures)) {
@@ -106,10 +97,10 @@ namespace Xamarin.iOS.Tasks
 
 		bool Compile (PDictionary plist)
 		{
-			var currentSDK = IPhoneSdks.GetSdk (Framework);
+			var currentSDK = IPhoneSdks.GetSdk (Platform);
 
 			if (!currentSDK.SdkIsInstalled (sdkVersion, SdkIsSimulator)) {
-				Log.LogError (null, null, null, null, 0, 0, 0, 0, MSBStrings.E0013, Framework, sdkVersion);
+				Log.LogError (null, null, null, null, 0, 0, 0, 0, MSBStrings.E0013, Platform, sdkVersion);
 				return false;
 			}
 
@@ -199,7 +190,7 @@ namespace Xamarin.iOS.Tasks
 
 			if (UseFakeWatchOS4_3Sdk) {
 				// This is a workaround for https://github.com/xamarin/xamarin-macios/issues/4810
-				if (Framework == ApplePlatform.WatchOS) {
+				if (Platform == ApplePlatform.WatchOS) {
 					if (dtPlatformBuild != null)
 						dtPlatformBuild = "15T212";
 					if (dtPlatformVersion != null)
@@ -233,7 +224,7 @@ namespace Xamarin.iOS.Tasks
 
 			if (IsWatchExtension) {
 				// Note: Only watchOS1 Extensions target Xamarin.iOS
-				if (Framework == ApplePlatform.iOS) {
+				if (Platform == ApplePlatform.iOS) {
 					PObject value;
 
 					if (!plist.TryGetValue (ManifestKeys.UIRequiredDeviceCapabilities, out value)) {
@@ -361,7 +352,7 @@ namespace Xamarin.iOS.Tasks
 
 		void SetDeviceFamily (PDictionary plist)
 		{
-			switch (Framework) {
+			switch (Platform) {
 			case ApplePlatform.iOS:
 				SetIOSDeviceFamily (plist);
 				break;

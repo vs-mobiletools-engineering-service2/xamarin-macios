@@ -6,13 +6,19 @@ using Microsoft.Build.Utilities;
 using Xamarin.Utils;
 
 namespace Xamarin.MacDev.Tasks {
-	// This is a clone of XamarinToolTask, except that it subclasses Task instead of ToolTask
+	// This is the same as XamarinToolTask, except that it subclasses Task instead.
 	public abstract class XamarinTask : Task {
 
 		public string SessionId { get; set; }
 
-		[Required]
 		public string TargetFrameworkMoniker { get; set; }
+
+		void VerifyTargetFrameworkMoniker ()
+		{
+			if (!string.IsNullOrEmpty (TargetFrameworkMoniker))
+				return;
+			Log.LogError ($"The task {GetType ().Name} requires TargetFrameworkMoniker to be set.");
+		}
 
 		public string Product {
 			get {
@@ -32,8 +38,10 @@ namespace Xamarin.MacDev.Tasks {
 		ApplePlatform? platform;
 		public ApplePlatform Platform {
 			get {
-				if (!platform.HasValue)
+				if (!platform.HasValue) {
+					VerifyTargetFrameworkMoniker ();
 					platform = PlatformFrameworkHelper.GetFramework (TargetFrameworkMoniker);
+				}
 				return platform.Value;
 			}
 		}
@@ -41,8 +49,10 @@ namespace Xamarin.MacDev.Tasks {
 		TargetFramework? target_framework;
 		public TargetFramework TargetFramework {
 			get {
-				if (!target_framework.HasValue)
+				if (!target_framework.HasValue) {
+					VerifyTargetFrameworkMoniker ();
 					target_framework = TargetFramework.Parse (TargetFrameworkMoniker);
+				}
 				return target_framework.Value;
 			}
 		}

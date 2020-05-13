@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 using Microsoft.Build.Framework;
@@ -7,13 +7,19 @@ using Microsoft.Build.Utilities;
 using Xamarin.Utils;
 
 namespace Xamarin.MacDev.Tasks {
-	// This is a clone of XamarinTask, except that it subclasses ToolTask instead of Task
+	// This is the same as XamarinTask, except that it subclasses ToolTask instead.
 	public abstract class XamarinToolTask : ToolTask {
 
 		public string SessionId { get; set; }
 
-		[Required]
 		public string TargetFrameworkMoniker { get; set; }
+
+		void VerifyTargetFrameworkMoniker ()
+		{
+			if (!string.IsNullOrEmpty (TargetFrameworkMoniker))
+				return;
+			Log.LogError ($"The task {GetType ().Name} requires TargetFrameworkMoniker to be set.");
+		}
 
 		public string Product {
 			get {
@@ -25,8 +31,7 @@ namespace Xamarin.MacDev.Tasks {
 				case ApplePlatform.MacOSX:
 					return "Xamarin.Mac";
 				default:
-					// FIXME: better error
-					throw new NotImplementedException ($"Invalid platform: {Platform}");
+					throw new InvalidOperationException ($"Invalid platform: {Platform}");
 				}
 			}
 		}
@@ -43,8 +48,10 @@ namespace Xamarin.MacDev.Tasks {
 		TargetFramework? target_framework;
 		public TargetFramework TargetFramework {
 			get {
-				if (!target_framework.HasValue)
+				if (!target_framework.HasValue) {
+					VerifyTargetFrameworkMoniker ();
 					target_framework = TargetFramework.Parse (TargetFrameworkMoniker);
+				}
 				return target_framework.Value;
 			}
 		}
@@ -61,8 +68,7 @@ namespace Xamarin.MacDev.Tasks {
 				case ApplePlatform.MacOSX:
 					return "macOS";
 				default:
-					// FIXME: better error
-					throw new NotImplementedException ($"Invalid platform: {Platform}");
+					throw new InvalidOperationException ($"Invalid platform: {Platform}");
 				}
 			}
 		}
@@ -77,8 +83,7 @@ namespace Xamarin.MacDev.Tasks {
 			case ApplePlatform.MacOSX:
 				return Path.Combine (appBundlePath, "Contents", "Info.plist");
 			default:
-				throw new NotImplementedException ($"Unknown platform: {Platform}"); // FIXME: better error
-
+				throw new InvalidOperationException ($"Invalid platform: {Platform}");
 			}
 		}
 
@@ -94,8 +99,7 @@ namespace Xamarin.MacDev.Tasks {
 			case ApplePlatform.MacOSX:
 				return plist.GetMinimumSystemVersion ();
 			default:
-				throw new NotImplementedException ($"Unknown platform: {Platform}"); // FIXME: better error
-
+				throw new InvalidOperationException ($"Invalid platform: {Platform}");
 			}
 		}
 	}

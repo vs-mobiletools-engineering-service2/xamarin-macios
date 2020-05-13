@@ -3,16 +3,6 @@ TOP = ..
 include $(TOP)/Make.config
 include $(TOP)/mk/rules.mk
 
-ifeq ($(V),)
-DOTNET_PACK_VERBOSITY=--verbosity:quiet --nologo
-NUGET_VERBOSITY=-verbosity quiet
-else
-DOTNET_PACK_VERBOSITY=--verbosity:detailed
-NUGET_VERBOSITY=-verbosity detailed
-endif
-Q_PACK     =$(if $(V),,@echo "PACK      $@";)
-Q_NUGET_ADD=$(if $(V),,@echo "NUGET ADD $@";)
-
 PLATFORMS=iOS tvOS watchOS macOS
 
 IOS_RIDS=arm64 arm x86 x64
@@ -46,20 +36,20 @@ targets/%.props: targets/%.template.props Makefile $(TOP)/Make.config.inc
 TEMPLATED_FILES = \
 	targets/Xamarin.Shared.Sdk.Versions.props \
 
-nupkgs/Microsoft.iOS.%.nupkg: CURRENT_VERSION_NO_METADATA=$(IOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Microsoft.tvOS.%.nupkg: CURRENT_VERSION_NO_METADATA=$(TVOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Microsoft.watchOS.%.nupkg: CURRENT_VERSION_NO_METADATA=$(WATCHOS_NUGET_VERSION_NO_METADATA)
-nupkgs/Microsoft.macOS.%.nupkg: CURRENT_VERSION_NO_METADATA=$(MACOS_NUGET_VERSION_NO_METADATA)
+nupkgs/$(IOS_NUGET).%.nupkg: CURRENT_VERSION_NO_METADATA=$(IOS_NUGET_VERSION_NO_METADATA)
+nupkgs/$(TVOS_NUGET).%.nupkg: CURRENT_VERSION_NO_METADATA=$(TVOS_NUGET_VERSION_NO_METADATA)
+nupkgs/$(WATCHOS_NUGET).%.nupkg: CURRENT_VERSION_NO_METADATA=$(WATCHOS_NUGET_VERSION_NO_METADATA)
+nupkgs/$(MACOS_NUGET).%.nupkg: CURRENT_VERSION_NO_METADATA=$(MACOS_NUGET_VERSION_NO_METADATA)
 
-nupkgs/Microsoft.iOS.%.nupkg: CURRENT_VERSION_FULL=$(IOS_NUGET_VERSION_FULL)
-nupkgs/Microsoft.tvOS.%.nupkg: CURRENT_VERSION_FULL=$(TVOS_NUGET_VERSION_FULL)
-nupkgs/Microsoft.watchOS.%.nupkg: CURRENT_VERSION_FULL=$(WATCHOS_NUGET_VERSION_FULL)
-nupkgs/Microsoft.macOS.%.nupkg: CURRENT_VERSION_FULL=$(MACOS_NUGET_VERSION_FULL)
+nupkgs/$(IOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(IOS_NUGET_VERSION_FULL)
+nupkgs/$(TVOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(TVOS_NUGET_VERSION_FULL)
+nupkgs/$(WATCHOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(WATCHOS_NUGET_VERSION_FULL)
+nupkgs/$(MACOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(MACOS_NUGET_VERSION_FULL)
 
 # Create the nuget in a temporary directory (nupkgs/)
 nupkgs/%.nupkg: prepare $(TEMPLATED_FILES)
 	$(Q) rm -f $@
-	$(Q_PACK) $(DOTNET) pack package/$(shell echo $(notdir $@) | sed 's/[.]$(CURRENT_VERSION_FULL).*//')/package.csproj --output "$(dir $@)" $(DOTNET_PACK_VERBOSITY)
+	$(Q_PACK) $(DOTNET5) pack package/$(shell echo $(notdir $@) | sed 's/[.]$(CURRENT_VERSION_FULL).*//')/package.csproj --output "$(dir $@)" $(DOTNET_PACK_VERBOSITY)
 	@# Nuget pack doesn't add the metadata to the filename, but we want that, so rename nuget to contain the full name
 	$(Q) mv "nupkgs/$(shell echo $(notdir $@) | sed -e 's/[+]$(NUGET_BUILD_METADATA)//')" "$@"
 	@# Add the nupkg to our local feed
@@ -69,22 +59,22 @@ nupkgs/%.nupkg: prepare $(TEMPLATED_FILES)
 $(DOTNET_NUPKG_DIR)/%.nupkg: nupkgs/%.nupkg | $(DOTNET_NUPKG_DIR)
 	$(Q) cp $< $@
 
-RUNTIME_PACKS_IOS = $(foreach rid,$(IOS_RIDS),$(DOTNET_NUPKG_DIR)/Microsoft.iOS.Runtime.ios-$(rid).$(IOS_NUGET_VERSION_FULL).nupkg)
-RUNTIME_PACKS_TVOS = $(foreach rid,$(TVOS_RIDS),$(DOTNET_NUPKG_DIR)/Microsoft.tvOS.Runtime.tvos-$(rid).$(TVOS_NUGET_VERSION_FULL).nupkg)
-RUNTIME_PACKS_WATCHOS = $(foreach rid,$(WATCHOS_RIDS),$(DOTNET_NUPKG_DIR)/Microsoft.watchOS.Runtime.watchos-$(rid).$(WATCHOS_NUGET_VERSION_FULL).nupkg)
-RUNTIME_PACKS_MACOS = $(foreach rid,$(MACOS_RIDS),$(DOTNET_NUPKG_DIR)/Microsoft.macOS.Runtime.osx-$(rid).$(MACOS_NUGET_VERSION_FULL).nupkg)
+RUNTIME_PACKS_IOS = $(foreach rid,$(IOS_RIDS),$(DOTNET_NUPKG_DIR)/$(IOS_NUGET).Runtime.ios-$(rid).$(IOS_NUGET_VERSION_FULL).nupkg)
+RUNTIME_PACKS_TVOS = $(foreach rid,$(TVOS_RIDS),$(DOTNET_NUPKG_DIR)/$(TVOS_NUGET).Runtime.tvos-$(rid).$(TVOS_NUGET_VERSION_FULL).nupkg)
+RUNTIME_PACKS_WATCHOS = $(foreach rid,$(WATCHOS_RIDS),$(DOTNET_NUPKG_DIR)/$(WATCHOS_NUGET).Runtime.watchos-$(rid).$(WATCHOS_NUGET_VERSION_FULL).nupkg)
+RUNTIME_PACKS_MACOS = $(foreach rid,$(MACOS_RIDS),$(DOTNET_NUPKG_DIR)/$(MACOS_NUGET).Runtime.osx-$(rid).$(MACOS_NUGET_VERSION_FULL).nupkg)
 RUNTIME_PACKS = $(RUNTIME_PACKS_IOS) $(RUNTIME_PACKS_TVOS) $(RUNTIME_PACKS_WATCHOS) $(RUNTIME_PACKS_MACOS)
 
-REF_PACK_IOS = $(DOTNET_NUPKG_DIR)/Microsoft.iOS.Ref.$(IOS_NUGET_VERSION_FULL).nupkg
-REF_PACK_TVOS = $(DOTNET_NUPKG_DIR)/Microsoft.tvOS.Ref.$(TVOS_NUGET_VERSION_FULL).nupkg
-REF_PACK_WATCHOS = $(DOTNET_NUPKG_DIR)/Microsoft.watchOS.Ref.$(WATCHOS_NUGET_VERSION_FULL).nupkg
-REF_PACK_MACOS = $(DOTNET_NUPKG_DIR)/Microsoft.macOS.Ref.$(MACOS_NUGET_VERSION_FULL).nupkg
+REF_PACK_IOS = $(DOTNET_NUPKG_DIR)/$(IOS_NUGET).Ref.$(IOS_NUGET_VERSION_FULL).nupkg
+REF_PACK_TVOS = $(DOTNET_NUPKG_DIR)/$(TVOS_NUGET).Ref.$(TVOS_NUGET_VERSION_FULL).nupkg
+REF_PACK_WATCHOS = $(DOTNET_NUPKG_DIR)/$(WATCHOS_NUGET).Ref.$(WATCHOS_NUGET_VERSION_FULL).nupkg
+REF_PACK_MACOS = $(DOTNET_NUPKG_DIR)/$(MACOS_NUGET).Ref.$(MACOS_NUGET_VERSION_FULL).nupkg
 REF_PACKS = $(REF_PACK_IOS) $(REF_PACK_TVOS) $(REF_PACK_WATCHOS) $(REF_PACK_MACOS)
 
-SDK_PACK_IOS = $(DOTNET_NUPKG_DIR)/Microsoft.iOS.Sdk.$(IOS_NUGET_VERSION_FULL).nupkg
-SDK_PACK_TVOS = $(DOTNET_NUPKG_DIR)/Microsoft.tvOS.Sdk.$(TVOS_NUGET_VERSION_FULL).nupkg
-SDK_PACK_WATCHOS = $(DOTNET_NUPKG_DIR)/Microsoft.watchOS.Sdk.$(WATCHOS_NUGET_VERSION_FULL).nupkg
-SDK_PACK_MACOS = $(DOTNET_NUPKG_DIR)/Microsoft.macOS.Sdk.$(MACOS_NUGET_VERSION_FULL).nupkg
+SDK_PACK_IOS = $(DOTNET_NUPKG_DIR)/$(IOS_NUGET).Sdk.$(IOS_NUGET_VERSION_FULL).nupkg
+SDK_PACK_TVOS = $(DOTNET_NUPKG_DIR)/$(TVOS_NUGET).Sdk.$(TVOS_NUGET_VERSION_FULL).nupkg
+SDK_PACK_WATCHOS = $(DOTNET_NUPKG_DIR)/$(WATCHOS_NUGET).Sdk.$(WATCHOS_NUGET_VERSION_FULL).nupkg
+SDK_PACK_MACOS = $(DOTNET_NUPKG_DIR)/$(MACOS_NUGET).Sdk.$(MACOS_NUGET_VERSION_FULL).nupkg
 SDK_PACKS = $(SDK_PACK_IOS) $(SDK_PACK_TVOS) $(SDK_PACK_WATCHOS) $(SDK_PACK_MACOS)
 
 pack-ios: $(RUNTIME_PACKS_IOS) $(REF_PACK_IOS) $(SDK_PACK_IOS)

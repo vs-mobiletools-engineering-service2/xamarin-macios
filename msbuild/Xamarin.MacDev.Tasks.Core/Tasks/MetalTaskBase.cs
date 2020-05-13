@@ -12,11 +12,9 @@ using Xamarin.Localization.MSBuild;
 
 namespace Xamarin.MacDev.Tasks
 {
-	public abstract class MetalTaskBase : ToolTask
+	public abstract class MetalTaskBase : XamarinToolTask
 	{
 		#region Inputs
-
-		public string SessionId { get; set; }
 
 		public ITaskItem AppManifest { get; set; }
 
@@ -43,11 +41,6 @@ namespace Xamarin.MacDev.Tasks
 
 		[Required]
 		public ITaskItem SourceFile { get; set; }
-
-		public TargetFramework TargetFramework { get { return TargetFramework.Parse (TargetFrameworkMoniker); } }
-
-		[Required]
-		public string TargetFrameworkMoniker { get; set; }
 
 		#endregion
 

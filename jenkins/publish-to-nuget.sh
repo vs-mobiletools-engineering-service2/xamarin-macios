@@ -12,8 +12,14 @@ INITIAL_CD=$(pwd)
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 WORKSPACE=$(pwd)
 
+CONFIG_FILE=.nuget.config.tmp
+
 report_error ()
 {
+	# remove config
+	rm -f $CONFIG_FILE
+
+	# Show error
 	printf "🔥 [Failed to publish to nuget](%s/console) 🔥\\n" "$BUILD_URL" >> "$WORKSPACE/jenkins/pr-comments.md"
 }
 trap report_error ERR
@@ -77,7 +83,6 @@ if [[ "x${#NUGETS[@]}" == "x0" ]]; then
 fi
 
 # create empty config for auth
-CONFIG_FILE=.nuget.config.tmp
 echo '<?xml version="1.0" encoding="utf-8"?><configuration></configuration>' > $CONFIG_FILE
 
 # add the feed
