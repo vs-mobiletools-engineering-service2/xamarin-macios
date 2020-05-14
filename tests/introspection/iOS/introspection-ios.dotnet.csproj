@@ -4,10 +4,11 @@
     <TargetFramework>netcoreapp5.0</TargetFramework>
     <RuntimeIdentifier>ios-x64</RuntimeIdentifier>
     <OutputType>Exe</OutputType>
-    <DefineConstants>XAMCORE_2_0;NET</DefineConstants>
+    <DefineConstants>NET</DefineConstants>
     <LangVersion>latest</LangVersion>
     <RootNamespace>Introspection</RootNamespace>
     <AssemblyName>introspection</AssemblyName>
+    <MtouchLink>None</MtouchLink>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,17 @@
     <Reference Include="MonoTouch.Dialog">
       <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\Debug\MonoTouch.Dialog.dll</HintPath>
     </Reference>
+    <!-- MonoTouch.Dialog references System.Json, which isn't shipped with .NET5, so reference the NuGet instead -->
+    <PackageReference Include="System.Json" Version="4.7.1" />
+    <!-- The linker resolves some assembly references too eagerly, and fails when it can't find them, so work around this by referencing the missing assemblies-->
+    <!-- ref: https://github.com/mono/linker/issues/1139 -->
+    <PackageReference Include="System.Security.Permissions" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.Threading.AccessControl" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="5.0.0-preview.2.20160.6" />
+    <PackageReference Include="System.IO.Ports" Version="5.0.0-preview.2.20160.6" />
   </ItemGroup>
 
   <ItemGroup>
