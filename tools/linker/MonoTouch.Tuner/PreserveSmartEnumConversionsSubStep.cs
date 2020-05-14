@@ -4,16 +4,15 @@ using System;
 using System.Collections.Generic;
 
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 using Mono.Linker;
 using Mono.Tuner;
-using MonoTouch.Tuner;
 
 using Xamarin.Bundler;
 
 #if NET
-using System.IO;
 using Mono.Linker.Steps;
+#else
+using MonoTouch.Tuner;
 #endif
 
 namespace Xamarin.Linker.Steps
@@ -75,7 +74,8 @@ namespace Xamarin.Linker.Steps
 
 				if (ca.ConstructorArguments.Count != 1) {
 #if NET
-					ErrorHelper.Show (ErrorHelper.CreateWarning (4124, provider, "Errors.MT4124_E", provider.AsString (), ca.ConstructorArguments.Count));
+					var s = "warning MT4124: " + String.Format (Errors.MT4124_E, provider.AsString (), ca.ConstructorArguments.Count);
+					Context.LogMessage (MessageContainer.CreateInfoMessage (s));
 #else
 					ErrorHelper.Show (ErrorHelper.CreateWarning (LinkContext.Target.App, 4124, provider, Errors.MT4124_E, provider.AsString (), ca.ConstructorArguments.Count));
 #endif
@@ -86,7 +86,8 @@ namespace Xamarin.Linker.Steps
 				var managedEnumType = managedType?.GetElementType ().Resolve ();
 				if (managedEnumType == null) {
 #if NET
-					ErrorHelper.Show (ErrorHelper.CreateWarning (4124, provider, "Errors.MT4124_H", provider.AsString (), managedType?.FullName));
+					var s = "warning MT4124: " + String.Format (Errors.MT4124_H, provider.AsString (), managedType?.FullName);
+					Context.LogMessage (MessageContainer.CreateInfoMessage (s));
 #else
 					ErrorHelper.Show (ErrorHelper.CreateWarning (LinkContext.Target.App, 4124, provider, Errors.MT4124_H, provider.AsString (), managedType?.FullName));
 #endif
@@ -115,7 +116,7 @@ namespace Xamarin.Linker.Steps
 					break;
 				}
 				if (extensionType == null) {
-					Driver.Log (1, $"Could not find a smart extension type for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
+					Log (1, $"Could not find a smart extension type for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
 					continue;
 				}
 
@@ -144,12 +145,12 @@ namespace Xamarin.Linker.Steps
 				}
 
 				if (getConstant == null) {
-					Driver.Log (1, $"Could not find the GetConstant method on the supposedly smart extension type {extensionType.FullName} for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
+					Log (1, $"Could not find the GetConstant method on the supposedly smart extension type {extensionType.FullName} for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
 					continue;
 				}
 
 				if (getValue == null) {
-					Driver.Log (1, $"Could not find the GetValue method on the supposedly smart extension type {extensionType.FullName} for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
+					Log (1, $"Could not find the GetValue method on the supposedly smart extension type {extensionType.FullName} for the enum {managedEnumType.FullName} (due to BindAs attribute on {provider.AsString ()}): most likely this is because the enum isn't a smart enum.");
 					continue;
 				}
 
@@ -159,6 +160,15 @@ namespace Xamarin.Linker.Steps
 				cache.Add (managedEnumType, pair);
 				Preserve (pair, conditionA, conditionB);
 			}
+		}
+
+		void Log (int logLevel, string message)
+		{
+#if NET
+			Context.LogMessage (MessageContainer.CreateInfoMessage (message));
+#else
+			Driver.Log (logLevel, message);
+#endif
 		}
 
 		protected override void Process (MethodDefinition method)

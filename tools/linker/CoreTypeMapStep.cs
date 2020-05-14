@@ -162,7 +162,8 @@ namespace MonoTouch.Tuner {
 		void Show2107 (AssemblyDefinition assembly, MemberReference mr)
 		{
 #if NET
-			ErrorHelper.Show (ErrorHelper.CreateWarning (2107, null, "2107: {0}{1}{2}{3}", assembly.Name.Name, mr.DeclaringType.FullName, mr.Name, string.Join (", ", ((MethodReference) mr).Parameters.Select ((v) => v.ParameterType.FullName))));
+			var s = "warning MT2107: " + String.Format (Errors.MM2107, assembly.Name.Name, mr.DeclaringType.FullName, mr.Name, string.Join (", ", ((MethodReference) mr).Parameters.Select ((v) => v.ParameterType.FullName)));
+			Context.LogMessage (MessageContainer.CreateInfoMessage (s));
 #else
 			ErrorHelper.Warning (2107, Errors.MM2107, assembly.Name.Name, mr.DeclaringType.FullName, mr.Name, string.Join (", ", ((MethodReference) mr).Parameters.Select ((v) => v.ParameterType.FullName)));
 #endif
@@ -181,7 +182,12 @@ namespace MonoTouch.Tuner {
 				// If dynamic registration is not required, and removal of the dynamic registrar hasn't already
 				// been disabled, then we can remove it!
 				LinkContext.App.Optimizations.RemoveDynamicRegistrar = !dynamic_registration_support_required;
+#if NET
+				var state = LinkContext.App.Optimizations.RemoveDynamicRegistrar.Value ? "enabled" : "disabled";
+				Context.LogMessage (MessageContainer.CreateInfoMessage ($"Optimization dynamic registrar removal: {state}"));
+#else
 				Driver.Log (4, "Optimization dynamic registrar removal: {0}", LinkContext.App.Optimizations.RemoveDynamicRegistrar.Value ? "enabled" : "disabled");
+#endif
 #if MTOUCH && !NET
 				var app = LinkContext.App;
 				if (app.IsCodeShared) {

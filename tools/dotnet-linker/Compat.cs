@@ -1,5 +1,3 @@
-#if true
-
 // Compat.cs: might not be ideal but ease code sharing with existing implementation
 
 using System;
@@ -22,26 +20,9 @@ namespace Xamarin.Linker {
 			return new NotFiniteNumberException (message);
 		}
 
-		public static Exception CreateWarning (int code, ICustomAttributeProvider provider, string message, params object [] args)
-		{
-			return new NotFiniteNumberException (String.Format (message, args));
-		}
-
 		public static void Show (Exception exception)
 		{
 			Console.WriteLine (exception.ToString ());
-		}
-	}
-
-	public static class Driver {
-		public static void Log (int logLevel, string message)
-		{
-			Console.WriteLine (message);
-		}
-
-		public static void Log (int logLevel, string message, params object [] args)
-		{
-			Console.WriteLine (message, args);
 		}
 	}
 
@@ -142,5 +123,3 @@ namespace Xamarin.Linker {
 		}
 	}
 }
-
-#endif
