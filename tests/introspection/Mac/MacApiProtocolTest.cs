@@ -9,14 +9,9 @@
 
 using System;
 
-#if XAMCORE_2_0
 using Foundation;
 using AppKit;
 using CoreImage;
-#else
-using MonoMac.AppKit;
-using MonoMac.CoreImage;
-#endif
 
 using NUnit.Framework;
 using Xamarin.Tests;
