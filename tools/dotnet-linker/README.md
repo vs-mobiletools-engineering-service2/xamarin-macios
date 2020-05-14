@@ -47,9 +47,7 @@ You might also need to define the `build` task (reference from `launch.json`). A
 			"label": "build",
 			"command": "dotnet",
 			"type": "process",
-			"args": [
-				"build",
-			],
+			"args": [ "build" ],
 			"problemMatcher": "$msCompile"
 		}
 	]
@@ -62,4 +60,4 @@ Without it you'll need to build manually before debugging in vscode.
 
 ## MSBuild Binary and Structured Log Viewer
 
-[Instruction for macOS](https://github.com/KirillOsenkov/MSBuildStructuredLog#running-the-avalonia-version-on-mac)
+[Instructions for macOS](https://github.com/KirillOsenkov/MSBuildStructuredLog#running-the-avalonia-version-on-mac)
