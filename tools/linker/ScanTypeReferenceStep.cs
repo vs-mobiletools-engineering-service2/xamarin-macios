@@ -53,9 +53,8 @@ namespace Xamarin.Linker.Steps {
 		protected override void Report (string typeName, AssemblyDefinition assembly)
 		{
 #if NET
-			var s = String.Format (Errors.MX1502, typeName, assembly);
-			var m = MessageContainer.CreateWarningMessage (s, 2502, LinkerConfiguration.Instance.Platform.ToString ());
-			Context.LogMessage (m);
+			var s = "warning MT1502: " + String.Format (Errors.MX1502, typeName, assembly);
+			Context.LogMessage (MessageContainer.CreateInfoMessage (s));
 #else
 			ErrorHelper.Show (new ProductException (1502, false, Errors.MX1502, typeName, assembly));
 #endif
@@ -77,9 +76,8 @@ namespace Xamarin.Linker.Steps {
 		protected override void Report (string typeName, AssemblyDefinition assembly)
 		{
 #if NET
-			var s = String.Format (Errors.MX1503, typeName, assembly);
-			var m = MessageContainer.CreateWarningMessage (s, 2503, LinkerConfiguration.Instance.Platform.ToString ());
-			Context.LogMessage (m);
+			var s = "warning MT1503: " + String.Format (Errors.MX1503, typeName, assembly);
+			Context.LogMessage (MessageContainer.CreateInfoMessage (s));
 #else
 			ErrorHelper.Show (new ProductException (1503, false, Errors.MX1503, typeName, assembly));
 #endif
