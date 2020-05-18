@@ -2111,17 +2111,19 @@ namespace Xharness.Jenkins {
 														if (line.StartsWith ("Tests run:", StringComparison.Ordinal)) {
 															summary = line;
 														} else if (line.StartsWith ("[FAIL]", StringComparison.Ordinal)) {
-															fails.Add (line);
+															if (fails.Count < 100) {
+																fails.Add (line);
+															} else if (fails.Count == 100) {
+																fails.Add ("...");
+															}
 														}
 													}
+													if (test.Finished)
+														log_data [log] = data;
 												} else {
 													var data_tuple = (Tuple<string, List<string>>) data.Item2;
 													summary = data_tuple.Item1;
 													fails = data_tuple.Item2;
-												}
-												if (fails.Count > 100) {
-													fails.Add ("...");
-													break;
 												}
 											}
 											if (fails.Count > 0) {
