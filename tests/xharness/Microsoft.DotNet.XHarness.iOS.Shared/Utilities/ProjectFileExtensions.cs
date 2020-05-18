@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			// Make sure there's a top-level version too.
 			var property_group = csproj.SelectSingleNode("/*/*[local-name() = 'PropertyGroup' and not(@Condition)]");
 
-			var intermediateOutputPath = csproj.CreateElement ("IntermediateOutputPath", MSBuild_Namespace);
+			var intermediateOutputPath = csproj.CreateElement ("IntermediateOutputPath", csproj.GetNamespace ());
 			intermediateOutputPath.InnerText = value;
 			property_group.AppendChild (intermediateOutputPath);
 		}
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			}
 			else
 			{
-				var mea = csproj.CreateElement (key, MSBuild_Namespace);
+				var mea = csproj.CreateElement (key, csproj.GetNamespace ());
 				mea.InnerText = value;
 				firstPropertyGroups.AppendChild (mea);
 			}
@@ -270,11 +270,11 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			var type_node = csproj.SelectSingleNode ($"//*[local-name() = '{type}']");
 			var item_group = type_node?.ParentNode ?? csproj.SelectSingleNode ($"//*[local-name() = 'ItemGroup'][last()]");
 
-			var node = csproj.CreateElement (type, MSBuild_Namespace);
+			var node = csproj.CreateElement (type, csproj.GetNamespace ());
 			var include_attribute = csproj.CreateAttribute ("Include");
 			include_attribute.Value = include;
 			node.Attributes.Append (include_attribute);
-			var linkElement = csproj.CreateElement ("Link", MSBuild_Namespace);
+			var linkElement = csproj.CreateElement ("Link", csproj.GetNamespace ());
 			linkElement.InnerText = link;
 			node.AppendChild (linkElement);
 			if (prepend)
@@ -291,7 +291,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 		public static void AddInterfaceDefinition (this XmlDocument csproj, string include)
 		{
 			var itemGroup = csproj.CreateItemGroup ();
-			var id = csproj.CreateElement ("InterfaceDefinition", MSBuild_Namespace);
+			var id = csproj.CreateElement ("InterfaceDefinition", csproj.GetNamespace ());
 			var attrib = csproj.CreateAttribute ("Include");
 			attrib.Value = include;
 			id.Attributes.Append (attrib);
@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				if (!EvaluateCondition (pg, platform, configuration))
 					continue;
 
-				var mea = csproj.CreateElement (node, MSBuild_Namespace);
+				var mea = csproj.CreateElement (node, csproj.GetNamespace ());
 				mea.InnerText = value;
 				pg.AppendChild (mea);
 			}
@@ -402,7 +402,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				if (!EvaluateCondition (pg, platform, configuration))
 					continue;
 
-				var mea = csproj.CreateElement (node, MSBuild_Namespace);
+				var mea = csproj.CreateElement (node, csproj.GetNamespace ());
 				mea.InnerText = value;
 				pg.AppendChild (mea);
 			}
@@ -556,11 +556,23 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 
 				var logicalName = import.SelectSingleNode ("./*[local-name() = 'LogicalName']");
 				if (logicalName == null) {
-					logicalName = csproj.CreateElement ("LogicalName", MSBuild_Namespace);
+					logicalName = csproj.CreateElement ("LogicalName", csproj.GetNamespace ());
 					import.AppendChild (logicalName);
 				}
 				logicalName.InnerText = "Info.plist";
 			}
+		}
+
+		public static string GetNamespace (this XmlDocument csproj)
+		{
+			return IsDotNetProject (csproj) ? null : MSBuild_Namespace;
+		}
+
+		public static bool IsDotNetProject (this XmlDocument csproj)
+		{
+			var project = csproj.SelectSingleNode ("./*[local-name() = 'Project']");
+			var attrib = project.Attributes ["Sdk"];
+			return attrib != null;
 		}
 
 		static XmlNode GetInfoPListNode (this XmlDocument csproj, bool throw_if_not_found = false)
@@ -639,14 +651,14 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 		public static void CreateProjectReferenceValue (this XmlDocument csproj, string existingInclude, string path, string guid, string name)
 		{
 			var referenceNode = csproj.SelectSingleNode ("//*[local-name() = 'Reference' and @Include = '" + existingInclude + "']");
-			var projectReferenceNode = csproj.CreateElement ("ProjectReference", MSBuild_Namespace);
+			var projectReferenceNode = csproj.CreateElement ("ProjectReference", csproj.GetNamespace ());
 			var includeAttribute = csproj.CreateAttribute ("Include");
 			includeAttribute.Value = path.Replace ('/', '\\');
 			projectReferenceNode.Attributes.Append (includeAttribute);
-			var projectNode = csproj.CreateElement ("Project", MSBuild_Namespace);
+			var projectNode = csproj.CreateElement ("Project", csproj.GetNamespace ());
 			projectNode.InnerText = guid;
 			projectReferenceNode.AppendChild (projectNode);
-			var nameNode = csproj.CreateElement ("Name", MSBuild_Namespace);
+			var nameNode = csproj.CreateElement ("Name", csproj.GetNamespace ());
 			nameNode.InnerText = name;
 			projectReferenceNode.AppendChild (nameNode);
 
@@ -655,7 +667,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				itemGroup = referenceNode.ParentNode;
 				referenceNode.ParentNode.RemoveChild (referenceNode);
 			} else {
-				itemGroup = csproj.CreateElement ("ItemGroup", MSBuild_Namespace);
+				itemGroup = csproj.CreateElement ("ItemGroup", csproj.GetNamespace ());
 				csproj.SelectSingleNode ("//*[local-name() = 'Project']").AppendChild (itemGroup);
 			}
 			itemGroup.AppendChild (projectReferenceNode);
@@ -664,7 +676,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 		static XmlNode CreateItemGroup (this XmlDocument csproj)
 		{
 			var lastItemGroup = csproj.SelectSingleNode ("//*[local-name() = 'ItemGroup'][last()]");
-			var newItemGroup = csproj.CreateElement ("ItemGroup", MSBuild_Namespace);
+			var newItemGroup = csproj.CreateElement ("ItemGroup", csproj.GetNamespace ());
 			lastItemGroup.ParentNode.InsertAfter (newItemGroup, lastItemGroup);
 			return newItemGroup;
 		}
@@ -674,7 +686,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			var mainPropertyGroup = csproj.SelectSingleNode ("//*[local-name() = 'PropertyGroup' and not(@Condition)]");
 			var mainDefine = mainPropertyGroup.SelectSingleNode ("*[local-name() = 'DefineConstants']");
 			if (mainDefine == null) {
-				mainDefine = csproj.CreateElement ("DefineConstants", MSBuild_Namespace);
+				mainDefine = csproj.CreateElement ("DefineConstants", csproj.GetNamespace ());
 				mainDefine.InnerText = value;
 				mainPropertyGroup.AppendChild (mainDefine);
 			} else {
@@ -743,7 +755,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				if (!IsNodeApplicable (xmlnode, platform, configuration))
 					continue;
 
-				var defines = csproj.CreateElement ("DefineConstants", MSBuild_Namespace);
+				var defines = csproj.CreateElement ("DefineConstants", csproj.GetNamespace ());
 				defines.InnerText = "$(DefineConstants);" + value;
 				xmlnode.AppendChild (defines);
 				return;
@@ -899,7 +911,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 					var ln = node.SelectElementNodes ("LogicalName")?.SingleOrDefault ();
 					var links = node.SelectElementNodes ("Link");
 					if (!skipLogicalName && ln == null && !links.Any ()) {
-						ln = csproj.CreateElement ("LogicalName", MSBuild_Namespace);
+						ln = csproj.CreateElement ("LogicalName", csproj.GetNamespace ());
 						node.AppendChild (ln);
 
 						string logicalName = a.Value;
