@@ -104,19 +104,6 @@
     <Compile Include="..\ApiTypeTest.cs">
       <Link>ApiTypeTest.cs</Link>
     </Compile>
-
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\Contents.json" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\Icon-app-60%403x.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-57.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-57%402x.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-60%402x.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-72.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-72%402x.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-76.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-76%402x.png" />
-    <ImageAsset Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.WatchOS'" Include="Assets.xcassets\AppIcons.appiconset\icon-app-83.5%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="..\xamarin1.png">
@@ -125,37 +112,5 @@
     <BundleResource Include="..\..\..\tools\mtouch\simlauncher64-sgen.frameworks">
       <Link>simlauncher64-sgen.frameworks</Link>
     </BundleResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-60%402x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-60%402x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-72%402x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-72%402x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\Icon-app-60%403x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\Icon-app-60%403x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-83.5%402x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-83.5%402x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-76%402x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-76%402x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-57.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-57.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-72.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-72.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-57%402x.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-57%402x.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\icon-app-76.png">
-      <Link>Assets.xcassets\AppIcons.appiconset\icon-app-76.png</Link>
-    </ImageAsset>
-    <ImageAsset Update="Assets.xcassets\AppIcons.appiconset\Contents.json">
-      <Link>Assets.xcassets\AppIcons.appiconset\Contents.json</Link>
-    </ImageAsset>
   </ItemGroup>
 </Project>
