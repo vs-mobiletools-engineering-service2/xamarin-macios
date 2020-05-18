@@ -409,6 +409,8 @@ namespace Xharness.Jenkins {
 			foreach (var task in tests) {
 				if (string.IsNullOrEmpty (task.Variation))
 					task.Variation = task.ProjectConfiguration.Contains ("Debug") ? "Debug" : "Release";
+				if (task.TestProject.IsDotNetProject)
+					task.Variation += " [dotnet]";
 			}
 
 			var rv = new List<T> (tests);
@@ -507,6 +509,8 @@ namespace Xharness.Jenkins {
 					newVariation.BuildOnly = task.BuildOnly;
 					newVariation.TimeoutMultiplier = task.TimeoutMultiplier;
 					newVariation.KnownFailure = known_failure;
+					if (newVariation.TestProject.IsDotNetProject)
+						newVariation.Variation += " [dotnet]";
 					rv.Add (newVariation);
 				}
 			}
