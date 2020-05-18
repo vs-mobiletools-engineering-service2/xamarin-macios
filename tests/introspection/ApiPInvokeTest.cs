@@ -210,6 +210,14 @@ namespace Introspection
 						// load from executable
 						path = null;
 						break;
+#if NET
+					case "libhostpolicy": // not shipped with .NET 5 (yet?)
+					case "libSystem.Globalization.Native": // not shipped with .NET 5 (yet?)
+						continue;
+					case "libSystem.Native":
+						path += ".dylib";
+						break;
+#endif
 					case "libc":
 						// we still have some rogue/not-fully-qualified DllImport
 						path = "/usr/lib/libSystem.dylib";

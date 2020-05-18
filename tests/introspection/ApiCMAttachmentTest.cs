@@ -225,6 +225,11 @@ namespace Introspection {
 			case "CGColorConverter":
 			case "OSLog": // c api, no need to check
 				return true;
+#if NET
+			case "SecTrust": // System.EntryPointNotFoundException : AppleCryptoNative_X509ImportCertificate
+			case "SecTrust2": // System.EntryPointNotFoundException : AppleCryptoNative_X509ImportCertificate
+				return true;
+#endif
 			default:
  				return false;
 			}
