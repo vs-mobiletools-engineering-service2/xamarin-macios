@@ -6,7 +6,8 @@ TEST_CONFIG?=Debug
 all: publish
 
 build: nugets
-	msbuild /r $(TOP)/external/Touch.Unit/Touch.Client/Touch.Client.csproj
+	msbuild /r $(TOP)/external/Touch.Unit/Touch.Client/Touch.Client-iOS.csproj
+	msbuild /r $(TOP)/external/Touch.Unit/Touch.Client/Touch.Client-tvOS.csproj
 	dotnet build *dotnet* /bl:introspection.binlog /p:Configuration=$(TEST_CONFIG)
 
 clean:

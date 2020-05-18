@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.iOS.Sdk">
+<Project Sdk="Microsoft.tvOS.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp5.0</TargetFramework>
-    <RuntimeIdentifier>ios-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>tvos-x64</RuntimeIdentifier>
     <OutputType>Exe</OutputType>
     <DefineConstants>NET</DefineConstants>
     <LangVersion>latest</LangVersion>
@@ -16,10 +16,10 @@
     <!-- <PackageReference Include="MonoTouch.Dialog" Version="2.0.0-pre1" /> -->
     <!-- The MonoTouch.Dialog nuget isn't compatible with .net5 (yet?) -->
     <Reference Include="Touch.Client">
-      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\iOS\Debug\Touch.Client.dll</HintPath>
+      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\tvOS\Debug\Touch.Client.dll</HintPath>
     </Reference>
     <Reference Include="MonoTouch.Dialog">
-      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\iOS\Debug\MonoTouch.Dialog.dll</HintPath>
+      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\tvOS\Debug\MonoTouch.Dialog.dll</HintPath>
     </Reference>
     <!-- MonoTouch.Dialog references System.Json, which isn't shipped with .NET5, so reference the NuGet instead -->
     <PackageReference Include="System.Json" Version="4.7.1" />
