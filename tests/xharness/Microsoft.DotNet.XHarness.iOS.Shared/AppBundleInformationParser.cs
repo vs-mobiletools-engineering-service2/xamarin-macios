@@ -30,9 +30,17 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 
 			var platform = target.IsSimulator () ? "iPhoneSimulator" : "iPhone";
 
-			string appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),
-				csproj.GetOutputPath (platform, buildConfiguration).Replace ('\\', Path.DirectorySeparatorChar),
-				appName + (extension != null ? ".appex" : ".app"));
+			string appPath;
+
+			if (csproj.IsDotNetProject ()) {
+				appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),
+					"bin", platform, buildConfiguration, "netcoreapp5.0", "ios-x64",
+					appName + (extension != null ? ".appex" : ".app"));
+			} else {
+				appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),
+					csproj.GetOutputPath (platform, buildConfiguration).Replace ('\\', Path.DirectorySeparatorChar),
+					appName + (extension != null ? ".appex" : ".app"));
+			}
 
 			if (!Directory.Exists (appPath))
 				throw new DirectoryNotFoundException ($"The app bundle directory `{appPath}` does not exist");

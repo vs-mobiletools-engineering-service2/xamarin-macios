@@ -435,7 +435,7 @@ namespace Xharness.Jenkins {
 					var clone = task.TestProject.Clone ();
 					var clone_task = Task.Run (async () => {
 						await task.BuildTask.InitialTask; // this is the project cloning above
-						await clone.CreateCopyAsync (task);
+						await clone.CreateCopyAsync (MainLog, processManager, task);
 
 						var isMac = false;
 						var canSymlink = false;
@@ -496,13 +496,18 @@ namespace Xharness.Jenkins {
 						clone.Xml.Save (clone.Path);
 					});
 
-					var build = new MSBuildTask (jenkins: this, testProject: clone, processManager: processManager) {
-						ProjectConfiguration = configuration,
-						ProjectPlatform = task.ProjectPlatform,
-						Platform = task.Platform,
-						InitialTask = clone_task,
-						TestName = clone.Name,
-					};
+					MSBuildTask build;
+					if (clone.IsDotNetProject) {
+						build = new DotNetBuildTask (jenkins: this, testProject: clone, processManager: processManager);
+					} else {
+						build = new MSBuildTask (jenkins: this, testProject: clone, processManager: processManager);
+					}
+					build.ProjectConfiguration = configuration;
+					build.ProjectPlatform = task.ProjectPlatform;
+					build.Platform = task.Platform;
+					build.InitialTask = clone_task;
+					build.TestName = clone.Name;
+
 					T newVariation = creator (build, task, candidates);
 					newVariation.Variation = variation;
 					newVariation.Ignored = ignored ?? task.Ignored;
@@ -545,15 +550,20 @@ namespace Xharness.Jenkins {
 					configurations = new string [] { "Debug" };
 				foreach (var config in configurations) {
 					foreach (var pair in ps) {
-						var derived = new MSBuildTask (jenkins: this, testProject: project, processManager: processManager) {
-							ProjectConfiguration = config,
-							ProjectPlatform = "iPhoneSimulator",
-							Platform = pair.Item2,
-							Ignored = pair.Item3,
-							TestName = project.Name,
-							Dependency = project.Dependency,
-						};
-						derived.CloneTestProject (pair.Item1);
+						MSBuildTask derived;
+						if (project.IsDotNetProject) {
+							derived = new DotNetBuildTask (jenkins: this, testProject: project, processManager: processManager);
+						} else {
+							derived = new MSBuildTask (jenkins: this, testProject: project, processManager: processManager);
+						}
+						derived.ProjectConfiguration = config;
+						derived.ProjectPlatform = "iPhoneSimulator";
+						derived.Platform = pair.Item2;
+						derived.Ignored = pair.Item3;
+						derived.TestName = project.Name;
+						derived.Dependency = project.Dependency;
+
+						derived.CloneTestProject (MainLog, processManager, pair.Item1);
 						var simTasks = CreateRunSimulatorTaskAsync (derived);
 						runSimulatorTasks.AddRange (simTasks);
 						foreach (var task in simTasks) {
@@ -609,7 +619,7 @@ namespace Xharness.Jenkins {
 						Platform = TestPlatform.iOS_Unified64,
 						TestName = project.Name,
 					};
-					build64.CloneTestProject (project);
+					build64.CloneTestProject (MainLog, processManager, project);
 					projectTasks.Add (new RunDeviceTask (
 						jenkins: this,
 						devices: devices,
@@ -625,7 +635,7 @@ namespace Xharness.Jenkins {
 						Platform = TestPlatform.iOS_Unified32,
 						TestName = project.Name,
 					};
-					build32.CloneTestProject (project);
+					build32.CloneTestProject (MainLog, processManager, project);
 					projectTasks.Add (new RunDeviceTask (
 						jenkins: this,
 						devices: devices,
@@ -642,7 +652,7 @@ namespace Xharness.Jenkins {
 						Platform = TestPlatform.iOS_TodayExtension64,
 						TestName = project.Name,
 					};
-					buildToday.CloneTestProject (todayProject);
+					buildToday.CloneTestProject (MainLog, processManager, todayProject);
 					projectTasks.Add (new RunDeviceTask (
 						jenkins: this,
 						devices: devices,
@@ -661,7 +671,7 @@ namespace Xharness.Jenkins {
 						Platform = TestPlatform.tvOS,
 						TestName = project.Name,
 					};
-					buildTV.CloneTestProject (tvOSProject);
+					buildTV.CloneTestProject (MainLog, processManager, tvOSProject);
 					projectTasks.Add (new RunDeviceTask (
 						jenkins: this,
 						devices: devices,
@@ -681,7 +691,7 @@ namespace Xharness.Jenkins {
 							Platform = TestPlatform.watchOS_32,
 							TestName = project.Name,
 						};
-						buildWatch32.CloneTestProject (watchOSProject);
+						buildWatch32.CloneTestProject (MainLog, processManager, watchOSProject);
 						projectTasks.Add (new RunDeviceTask (
 							jenkins: this,
 							devices: devices,
@@ -699,7 +709,7 @@ namespace Xharness.Jenkins {
 							Platform = TestPlatform.watchOS_64_32,
 							TestName = project.Name,
 						};
-						buildWatch64_32.CloneTestProject (watchOSProject);
+						buildWatch64_32.CloneTestProject (MainLog, processManager, watchOSProject);
 						projectTasks.Add (new RunDeviceTask (
 							jenkins: this,
 							devices: devices,
@@ -824,9 +834,14 @@ namespace Xharness.Jenkins {
 					throw new NotImplementedException (project.TargetFrameworkFlavors.ToString ());
 				}
 				foreach (var config in configurations) {
-					MSBuildTask build = new MSBuildTask (jenkins: this, testProject: project, processManager: processManager);
+					BuildProjectTask build;
+					if (project.IsDotNetProject) {
+						build = new DotNetBuildTask (jenkins: this, testProject: project, processManager: processManager);
+					} else {
+						build = new MSBuildTask (jenkins: this, testProject: project, processManager: processManager);
+					}
 					build.Platform = platform;
-					build.CloneTestProject (project);
+					build.CloneTestProject (MainLog, processManager, project);
 					build.SolutionPath = project.SolutionPath;
 					build.ProjectConfiguration = config;
 					build.ProjectPlatform = project.Platform;
@@ -836,7 +851,17 @@ namespace Xharness.Jenkins {
 					RunTestTask exec;
 					IEnumerable<RunTestTask> execs;
 					var ignored_main = ignored;
-					if (project.IsNUnitProject) {
+					if (project.IsDotNetProject) {
+						exec = new DotNetTestTask (this, (DotNetBuildTask) build, processManager) {
+							TestProject = build.TestProject,
+							Platform = build.Platform,
+							TestName = project.Name,
+							Ignored = ignored_main,
+							Timeout = TimeSpan.FromMinutes (120),
+							Mode = "macOS",
+						};
+						execs = new [] { exec };
+					} else if (project.IsNUnitProject) {
 						var dll = Path.Combine (Path.GetDirectoryName (build.TestProject.Path), project.Xml.GetOutputAssemblyPath (build.ProjectPlatform, build.ProjectConfiguration).Replace ('\\', '/'));
 						exec = new NUnitExecuteTask (this, build, processManager) {
 							Ignored = ignored_main,
@@ -2122,8 +2147,10 @@ namespace Xharness.Jenkins {
 															}
 														}
 													}
-													if (test.Finished)
+													if (test.Finished) {
+														data = new Tuple<long, object> (reader.BaseStream.Length, new Tuple<string, List<string>> (summary, fails));
 														log_data [log] = data;
+													}
 												} else {
 													var data_tuple = (Tuple<string, List<string>>) data.Item2;
 													summary = data_tuple.Item1;

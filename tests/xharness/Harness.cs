@@ -284,16 +284,17 @@ namespace Xharness {
 			MacTestProjects.Add (new MacTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "introspection", "Mac", "introspection-mac.csproj")), targetFrameworkFlavor: MacFlavors.Modern) { Name = "introspection" });
 
 			var hard_coded_test_suites = new [] {
-				new { Directory = "mmptest", ProjectFile = "mmptest", Name = "mmptest", IsNUnit = true, Configurations = (string[]) null, Platform = "x86", Flavors = MacFlavors.Console, },
-				new { Directory = "msbuild-mac", ProjectFile = "msbuild-mac", Name = "MSBuild tests", IsNUnit = true, Configurations = (string[]) null, Platform = "x86", Flavors = MacFlavors.Console, },
-				new { Directory = "xammac_tests", ProjectFile = "xammac_tests", Name = "xammac tests", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "AnyCPU", Flavors = MacFlavors.Modern, },
-				new { Directory = "linker/mac/link all", ProjectFile = "link all-mac", Name = "link all", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "x86", Flavors = MacFlavors.Modern, },
-				new { Directory = "linker/mac/link sdk", ProjectFile = "link sdk-mac", Name = "link sdk", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "x86", Flavors = MacFlavors.Modern, },
+				new { Directory = "mmptest", ProjectFile = "mmptest", Name = "mmptest", IsNUnit = true, Configurations = (string[]) null, Platform = "x86", Flavors = MacFlavors.Console, IsDotNetProject = false, },
+				new { Directory = "msbuild-mac", ProjectFile = "msbuild-mac", Name = "MSBuild tests", IsNUnit = true, Configurations = (string[]) null, Platform = "x86", Flavors = MacFlavors.Console, IsDotNetProject = false, },
+				new { Directory = "xammac_tests", ProjectFile = "xammac_tests", Name = "xammac tests", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "AnyCPU", Flavors = MacFlavors.Modern, IsDotNetProject = false, },
+				new { Directory = "linker/mac/link all", ProjectFile = "link all-mac", Name = "link all", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "x86", Flavors = MacFlavors.Modern, IsDotNetProject = false, },
+				new { Directory = "linker/mac/link sdk", ProjectFile = "link sdk-mac", Name = "link sdk", IsNUnit = false, Configurations = new string [] { "Debug", "Release" }, Platform = "x86", Flavors = MacFlavors.Modern, IsDotNetProject = false, },
 			};
 			foreach (var p in hard_coded_test_suites) {
 				MacTestProjects.Add (new MacTestProject (Path.GetFullPath (Path.Combine (RootDirectory, p.Directory, p.ProjectFile + ".csproj")), targetFrameworkFlavor: p.Flavors) {
 					Name = p.Name,
 					IsNUnitProject = p.IsNUnit,
+					IsDotNetProject = p.IsDotNetProject,
 					SolutionPath = Path.GetFullPath (Path.Combine (RootDirectory, "tests-mac.sln")),
 					Configurations = p.Configurations,
 					Platform = p.Platform,
@@ -402,6 +403,7 @@ namespace Xharness {
 				IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, p + "/" + p + ".fsproj")), false) { Name = p });
 
 			IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "introspection", "iOS", "introspection-ios.csproj"))) { Name = "introspection" });
+			IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "introspection", "iOS", "introspection-ios.dotnet.csproj"))) { Name = "introspection", IsDotNetProject = true, SkipiOSVariation = true, SkiptvOSVariation = true, SkipwatchOSVariation = true, });
 			IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "linker", "ios", "dont link", "dont link.csproj"))) { Configurations = new string [] { "Debug", "Release" } });
 			IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "linker", "ios", "link all", "link all.csproj"))) { Configurations = new string [] { "Debug", "Release" } });
 			IOSTestProjects.Add (new iOSTestProject (Path.GetFullPath (Path.Combine (RootDirectory, "linker", "ios", "link sdk", "link sdk.csproj"))) { Configurations = new string [] { "Debug", "Release" } });
