@@ -834,6 +834,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				new string [] { "None", "Include" },
 				new string [] { "Compile", "Include" },
 				new string [] { "Compile", "Exclude" },
+				new string [] { "Compile", "Remove" },
 				new string [] { "ProjectReference", "Include" },
 				new string [] { "InterfaceDefinition", "Include" },
 				new string [] { "BundleResource", "Include" },
@@ -907,6 +908,9 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 					if (!found)
 						continue;
 					
+					if (attrib == "Remove")
+						skipLogicalName = true;
+
 					// Fix any default LogicalName values (but don't change existing ones).
 					var ln = node.SelectElementNodes ("LogicalName")?.SingleOrDefault ();
 					var links = node.SelectElementNodes ("Link");
