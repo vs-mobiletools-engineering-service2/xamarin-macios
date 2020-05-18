@@ -27,10 +27,15 @@ namespace Xharness.Jenkins.TestTasks {
 				envManager: this,
 				errorKnowledgeBase: Jenkins.ErrorKnowledgeBase);
 
+		protected virtual void BeforeBuild ()
+		{
+		}
+
 		protected override async Task ExecuteAsync ()
 		{
 			using var resource = await NotifyAndAcquireDesktopResourceAsync ();
 			BuildLog = Logs.Create ($"build-{Platform}-{Timestamp}.txt", LogType.BuildLog.ToString ());
+			BeforeBuild ();
 			(ExecutionResult, KnownFailure) = await MSBuild.ExecuteAsync (
 				projectPlatform: ProjectPlatform,
 				projectConfiguration: ProjectConfiguration,

@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+
 using Microsoft.DotNet.XHarness.iOS.Shared;
 using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
+using Microsoft.DotNet.XHarness.iOS.Shared.Logging;
 
 using Xharness.TestTasks;
 
@@ -43,6 +46,25 @@ namespace Xharness.Jenkins.TestTasks {
 			environment ["MSBuildSDKsPath"] = null;
 			environment ["TargetFrameworkFallbackSearchPaths"] = null;
 			environment ["MSBuildExtensionsPathFallbackPathsOverride"] = null;
+		}
+
+		public static void CopyDotNetTestFiles (ILog log, string target_directory)
+		{
+			// The global.json and NuGet.config files make sure we use the locally built packages.
+			var dotnet_test_dir = Path.Combine (Xharness.Harness.RootDirectory, "..", "dotnet", "test");
+			var global_json = Path.Combine (dotnet_test_dir, "global.json");
+			var nuget_config = Path.Combine (dotnet_test_dir, "NuGet.config");
+			File.Copy (global_json, Path.Combine (Path.GetDirectoryName (target_directory), Path.GetFileName (global_json)), true);
+			log.WriteLine ($"Copied {global_json} to {target_directory}");
+			File.Copy (nuget_config, Path.Combine (Path.GetDirectoryName (target_directory), Path.GetFileName (nuget_config)), true);
+			log.WriteLine ($"Copied {nuget_config} to {target_directory}");
+		}
+
+		protected override void BeforeBuild ()
+		{
+			base.BeforeBuild ();
+
+			CopyDotNetTestFiles (BuildLog, Path.GetDirectoryName (TestProject.Path));
 		}
 	}
 }

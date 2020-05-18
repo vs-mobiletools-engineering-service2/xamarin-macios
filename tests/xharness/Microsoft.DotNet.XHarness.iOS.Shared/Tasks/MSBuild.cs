@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
@@ -54,6 +55,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Tasks {
 			using (var xbuild = new Process ()) {
 				xbuild.StartInfo.FileName = msbuildPath;
 				xbuild.StartInfo.Arguments = StringUtils.FormatArguments (GetToolArguments (projectPlatform, projectConfiguration, projectFile, buildLog));
+				xbuild.StartInfo.WorkingDirectory = Path.GetDirectoryName (projectFile);
 				EnviromentManager.SetEnvironmentVariables (xbuild);
 				xbuild.StartInfo.EnvironmentVariables ["MSBuildExtensionsPath"] = null;
 				EventLogger.LogEvent (buildLog, "Building {0} ({1})", TestName, Mode);
