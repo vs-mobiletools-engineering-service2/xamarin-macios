@@ -7,11 +7,6 @@ using Xamarin.Bundler;
 #if NET
 using Mono.Linker;
 #else
-#if MTOUCH
-using ProductException = Xamarin.Bundler.MonoTouchException;
-#else
-using ProductException = Xamarin.Bundler.MonoMacException;
-#endif
 #endif
 
 namespace Xamarin.Linker.Steps {

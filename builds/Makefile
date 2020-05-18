@@ -71,7 +71,8 @@ downloads/%: downloads/%.zip
 	$(Q) mv $@.tmp $@
 	$(Q) echo "Unzipped $*."
 
-.stamp-download-mono: download-mono $(TOP)/Make.config $(TOP)/mk/mono.mk
+.stamp-download-mono: $(TOP)/Make.config $(TOP)/mk/mono.mk
+	$(MAKE) download-mono
 	$(Q) touch $@
 
 DOTNET_DOWNLOADS = \

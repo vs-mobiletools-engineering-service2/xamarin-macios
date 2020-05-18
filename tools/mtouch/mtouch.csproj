@@ -467,6 +467,9 @@
       <Link>Xamarin.Linker\MobileSubStepDispatcher.cs</Link>
     </Compile>
     <Compile Include="UnresolvedSymbols.cs" />
+    <Compile Include="..\common\ErrorHelper.tools.cs">
+      <Link>tools\common\ErrorHelper.tools.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
