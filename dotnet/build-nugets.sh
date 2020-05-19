@@ -14,31 +14,7 @@ cp="cp -c"
 
 make -C "$TOP/tools/mtouch" dotnet -j
 make -C "$TOP/tools/mmp" dotnet -j
-
-# the Xamarin.*OS.Ref nuget
-create_ref_nuget ()
-{
-	local platform=$1
-	local assembly_infix=$2
-	#shellcheck disable=SC2155
-	local platform_lower=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
-	local packageid=Microsoft.$platform.Ref
-	local destdir=$DOTNET_DESTDIR/$packageid
-
-	rm -Rf "$destdir"
-	mkdir -p "$destdir/data"
-	mkdir -p "$destdir/ref/netcoreapp5.0"
-
-	$cp "$TOP/src/build/dotnet/$platform_lower/ref/Xamarin.$assembly_infix.dll" "$destdir/ref/netcoreapp5.0/"
-	# FrameworkList.xml is generated
-	#$cp "$TOP/msbuild/dotnet/package/$packageid/FrameworkList.xml" "$destdir/data/"
-
-	chmod -R +r "$destdir"
-}
-create_ref_nuget "iOS"     "iOS"
-create_ref_nuget "tvOS"    "TVOS"
-create_ref_nuget "watchOS" "WatchOS"
-create_ref_nuget "macOS"   "Mac"
+make -C "$TOP/src" dotnet -j
 
 # the Microsoft.*OS.Runtime.<RID> nugets
 create_runtime_packs ()
