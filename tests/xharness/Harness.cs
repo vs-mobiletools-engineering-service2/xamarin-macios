@@ -538,20 +538,26 @@ namespace Xharness {
 					unified.Execute ();
 					unified_targets.Add (unified);
 
-					var today = new TodayExtensionTarget {
-						TemplateProjectPath = file,
-						Harness = this,
-						TestProject = proj,
-					};
-					today.Execute ();
-					today_targets.Add (today);
+					if (!proj.IsDotNetProject) {
+						var today = new TodayExtensionTarget {
+							TemplateProjectPath = file,
+							Harness = this,
+							TestProject = proj,
+						};
+						today.Execute ();
+						today_targets.Add (today);
+					}
 				}
 			}
 
 			SolutionGenerator.CreateSolution (this, watchos_targets, "watchos");
 			SolutionGenerator.CreateSolution (this, tvos_targets, "tvos");
 			SolutionGenerator.CreateSolution (this, today_targets, "today");
-			MakefileGenerator.CreateMakefile (this, unified_targets, tvos_targets, watchos_targets, today_targets);
+			var makefile_unified_targets = unified_targets.Where (v => !v.TestProject.IsDotNetProject);
+			var makefile_tvos_targets = tvos_targets.Where (v => !v.TestProject.IsDotNetProject);
+			var makefile_watchos_targets = watchos_targets.Where (v => !v.TestProject.IsDotNetProject);
+			var makefile_today_targets = today_targets.Where (v => !v.TestProject.IsDotNetProject);
+			MakefileGenerator.CreateMakefile (this, makefile_unified_targets, makefile_tvos_targets, makefile_watchos_targets, makefile_today_targets);
 
 			return rv;
 		}

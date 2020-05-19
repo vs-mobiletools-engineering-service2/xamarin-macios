@@ -185,22 +185,23 @@ namespace Xharness.Targets
 				inputProject.LoadWithoutNetworkAccess (TemplateProjectPath);
 	
 				outputType = inputProject.GetOutputType ();
-	
-				switch (inputProject.GetImport ()) {
-				case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.CSharp.targets":
-				case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.FSharp.targets":
-				case "$(MSBuildExtensionsPath)\\Xamarin\\Mac\\Xamarin.Mac.CSharp.targets":
-				case "$(MSBuildExtensionsPath":
-				case "$(MSBuildBinPath)\\Microsoft.CSharp.targets":
-					IsBindingProject = false;
-					break;
-				case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.ObjCBinding.CSharp.targets":
-				case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.ObjCBinding.FSharp.targets":
-				case "$(MSBuildExtensionsPath)\\Xamarin\\Mac\\Xamarin.Mac.ObjcBinding.CSharp":	
-					IsBindingProject = true;
-					break;
-				default:
-					throw new Exception (string.Format ("Unknown Imports: {0} in {1}", inputProject.GetImport (), TemplateProjectPath));
+				if (!inputProject.IsDotNetProject ()) {
+					switch (inputProject.GetImport ()) {
+					case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.CSharp.targets":
+					case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.FSharp.targets":
+					case "$(MSBuildExtensionsPath)\\Xamarin\\Mac\\Xamarin.Mac.CSharp.targets":
+					case "$(MSBuildExtensionsPath":
+					case "$(MSBuildBinPath)\\Microsoft.CSharp.targets":
+						IsBindingProject = false;
+						break;
+					case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.ObjCBinding.CSharp.targets":
+					case "$(MSBuildExtensionsPath)\\Xamarin\\iOS\\Xamarin.iOS.ObjCBinding.FSharp.targets":
+					case "$(MSBuildExtensionsPath)\\Xamarin\\Mac\\Xamarin.Mac.ObjcBinding.CSharp":
+						IsBindingProject = true;
+						break;
+					default:
+						throw new Exception (string.Format ("Unknown Imports: {0} in {1}", inputProject.GetImport (), TemplateProjectPath));
+					}
 				}
 
 				ExecuteInternal ();
