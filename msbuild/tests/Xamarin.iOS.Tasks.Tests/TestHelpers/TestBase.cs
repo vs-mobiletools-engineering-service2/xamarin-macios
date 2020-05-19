@@ -151,7 +151,7 @@ namespace Xamarin.iOS.Tasks
 			string binPath;
 			string objPath;
 			if (use_dotnet) {
-				var targetPlatform = "netcoreapp5.0";
+				var targetPlatform = "net5.0";
 				var subdir = string.Empty;
 				switch (TargetFrameworkIdentifier) {
 				case "Xamarin.iOS":

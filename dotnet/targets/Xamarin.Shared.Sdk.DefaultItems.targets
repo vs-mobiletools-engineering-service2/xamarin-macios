@@ -143,7 +143,7 @@
 
   <ItemGroup Condition="'$(XamarinReplaceBuildTarget)' == 'false'">
     <KnownFrameworkReference Include="Microsoft.$(_PlatformName)"
-                            TargetFramework="netcoreapp5.0"
+                            TargetFramework="net5.0"
                             RuntimeFrameworkName="Microsoft.$(_PlatformName)"
                             DefaultRuntimeFrameworkVersion="$(_ShortPackageVersion)"
                             LatestRuntimeFrameworkVersion="$(_ShortPackageVersion)"
