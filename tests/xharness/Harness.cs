@@ -706,7 +706,7 @@ namespace Xharness {
 
 		private AppRunner CreateAppRunner (TestProject project)
 		{
-			return new AppRunner (processManager,
+			var rv = new AppRunner (processManager,
 				new AppBundleInformationParser (),
 				new SimulatorLoaderFactory (processManager),
 				new SimpleListenerFactory (UseTcpTunnel ? TunnelBore : null),
@@ -721,6 +721,8 @@ namespace Xharness {
 				new Logs (LogDirectory),
 				project.Path,
 				buildConfiguration);
+			rv.InitializeAsync ().Wait ();
+			return rv;
 		}
 	}
 }

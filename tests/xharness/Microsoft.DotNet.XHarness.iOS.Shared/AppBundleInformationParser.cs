@@ -1,15 +1,19 @@
-﻿using System.IO;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
+using Microsoft.DotNet.XHarness.iOS.Shared.Logging;
 using Microsoft.DotNet.XHarness.iOS.Shared.Utilities;
 
 namespace Microsoft.DotNet.XHarness.iOS.Shared {
 
 	public interface IAppBundleInformationParser {
-		AppBundleInformation ParseFromProject (string projectFilePath, TestTarget target, string buildConfiguration);
+		Task<AppBundleInformation> ParseFromProjectAsync (ILog log, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration);
 	}
 
 	public class AppBundleInformationParser : IAppBundleInformationParser {
-		public AppBundleInformation ParseFromProject (string projectFilePath, TestTarget target, string buildConfiguration)
+		public async Task<AppBundleInformation> ParseFromProjectAsync (ILog log, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration)
 		{
 			var csproj = new XmlDocument ();
 			csproj.LoadWithoutNetworkAccess (projectFilePath);
@@ -33,8 +37,13 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			string appPath;
 
 			if (csproj.IsDotNetProject ()) {
+				var properties = new Dictionary<string, string> {
+					{ "Configuration", buildConfiguration },
+					{ "Platform", platform },
+				};
+				var appBundlePath = await csproj.GetPropertyByMSBuildEvaluationAsync (log, processManager, projectFilePath, "OutputPath", "_GenerateAppBundleName;_GenerateAppExBundleName", properties);
 				appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),
-					"bin", platform, buildConfiguration, "netcoreapp5.0", "ios-x64",
+					appBundlePath,
 					appName + (extension != null ? ".appex" : ".app"));
 			} else {
 				appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),

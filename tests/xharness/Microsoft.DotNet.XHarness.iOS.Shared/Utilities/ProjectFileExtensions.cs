@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
+
+using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
+using Microsoft.DotNet.XHarness.iOS.Shared.Logging;
 
 namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 	public static class ProjectFileExtensions {
@@ -238,6 +243,52 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 		public static string GetAssemblyName (this XmlDocument csproj)
 		{
 			return csproj.SelectSingleNode ("/*/*/*[local-name() = 'AssemblyName']").InnerText;
+		}
+
+		public static async Task<string> GetPropertyByMSBuildEvaluationAsync (this XmlDocument csproj, ILog log, IProcessManager processManager, string projectPath, string property, string dependsOnTargets = "", Dictionary<string, string> properties = null)
+		{
+			var xml = @"<Project DefaultTargets='WriteProperty' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+	<!-- Import the project we want to inspect -->
+	<Import Project='$(ProjectFile)' Condition=""'$(ProjectFile)' != ''"" />
+	<!-- Target to write out the property we want -->
+	<Target Name='WriteProperty' DependsOnTargets='%DEPENDSONTARGETS%'>
+		<PropertyGroup>
+			<_Properties>$(%PROPERTY%)</_Properties>
+		</PropertyGroup>
+		<Error Text='The ProjectFile variable must be set.' Condition=""'$(ProjectFile)' == ''"" />
+		<Error Text='The OutputFile variable must be set.' Condition=""'$(OutputFile)' == ''"" />
+		<WriteLinesToFile File='$(OutputFile)' Lines='$(_Properties)' Overwrite='true' />
+	</Target>
+</Project>
+";
+
+			var dir = Path.GetDirectoryName (projectPath);
+			var inspector = Path.Combine (dir, "PropertyInspector.csproj");
+			var output = Path.Combine (dir, "PropertyInspector.txt");
+			try {
+				File.WriteAllText (inspector, xml.Replace ("%PROPERTY%", property).Replace ("%DEPENDSONTARGETS%", dependsOnTargets));
+				using (var proc = new Process ()) {
+					var isDotNetProject = csproj.IsDotNetProject ();
+					proc.StartInfo.FileName = isDotNetProject ? "dotnet" : "msbuild";
+					var args = new List<string> ();
+					if (isDotNetProject)
+						args.Add ("build");
+					args.Add ("/p:ProjectFile=" + projectPath);
+					args.Add ("/p:OutputFile=" + output);
+					foreach (var prop in properties)
+						args.Add ($"/p:{prop.Key}={prop.Value}");
+					args.Add (inspector);
+					proc.StartInfo.Arguments = string.Join (" ", args);
+					proc.StartInfo.WorkingDirectory = dir;
+					var rv = await processManager.RunAsync (proc, log, timeout: TimeSpan.FromSeconds (15));
+					if (!rv.Succeeded)
+						throw new Exception ($"Unable to evaluate the property {property}.");
+					return File.ReadAllText (output).Trim ();
+				}
+			} finally {
+				File.Delete (inspector);
+				File.Delete (output);
+			}
 		}
 
 		public static void SetPlatformAssembly (this XmlDocument csproj, string value)
