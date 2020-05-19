@@ -19,8 +19,12 @@ skip-packages
 skip-external-tests
 #
 # only run the msbuild tests for now
-skip-all-tests
-run-ios-msbuild-tests
+skip-watchos-tests
+skip-bcl-tests
+skip-mmp-tests
+skip-mtouch-tests
+skip-xtro-tests
+skip-mac-binding-project-tests
 #
 #
 #
