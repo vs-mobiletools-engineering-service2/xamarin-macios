@@ -1142,9 +1142,9 @@ $(BUILD_DIR)/common/NativeTypes/%.cs: $(TOP)/src/NativeTypes/%.tt | $(BUILD_DIR)
 $(COMMON_TARGET_DIRS):
 	$(Q) mkdir -p $@
 
-$(DOTNET_COMPILER): Makefile $(TOP)/Make.config
+$(DOTNET_COMPILER): Makefile $(TOP)/Make.config | $(DOTNET_BUILD_DIR)
 	$(Q) echo "#!/bin/zsh -e" > $@
-	$(Q) echo "$(SYSTEM_CSC) $(DOTNET_FLAGS) \"\$$@\"" >> $@
+	$(Q) echo "exec $(SYSTEM_CSC) $(DOTNET_FLAGS) \"\$$@\"" >> $@
 	$(Q) chmod +x $@
 
 install-local:: $(INSTALL_TARGETS)
