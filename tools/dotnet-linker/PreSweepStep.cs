@@ -7,7 +7,7 @@ using Xamarin.Tuner;
 namespace Xamarin.Linker.Steps {
 
 	// Historical note:
-	// MobileSweepStep subclassed SweepStep in order to be notified if a
+	// CoreSweepStep subclassed SweepStep in order to be notified if a
 	// type was not marked (to be removed) and for unmarked interfaces.
 	// This is because the (removed) information is required later by the
 	// static registrar - but we still don't want it inside the final app

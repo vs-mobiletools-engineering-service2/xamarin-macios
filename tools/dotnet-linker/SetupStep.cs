@@ -127,11 +127,14 @@ namespace Xamarin {
 
 				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
 
+				// we can't subclass MarkStep and we need some information before it's executed
+				InsertAfter (new ExtraMarkStep (), "MarkStep");
+
 				// we can't subclass SweepStep and we need some information before it's executed
-				InsertAfter (new PreSweepStep (), "MarkStep");
+				InsertAfter (new PreSweepStep (), "ExtraMarkStep");
 
 				// extra stuff filed as https://github.com/mono/linker/issues/1188
-				// InsertAfter (new ExtraSweepStep (), "SweepStep");
+				InsertAfter (new ExtraSweepStep (), "SweepStep");
 
 				var postlink_subs = new MobileSubStepDispatcher ();
 				InsertAfter (postlink_subs, "CleanStep");
