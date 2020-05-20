@@ -29,7 +29,7 @@ DOWNLOADS = \
 # to avoid having to download it every time. The zip files have to be copied manually, otherwise
 # we'd end up filling up a lot of hard drives around the world.
 $(DOWNLOADS):
-	$(Q) mkdir -p $(dir $@)
+	$(Q) mkdir -p downloads
 	$(Q) echo "Downloading $(MONO_URL)..."
 	$(Q) if test -f ~/Library/Caches/xamarin-macios/$(notdir $@); then \
 		echo "Found a cached version of $(MONO_URL) in ~/Library/Caches/xamarin-macios/$(notdir $@)."; \
@@ -56,14 +56,6 @@ downloads/%: downloads/%.7z
 	$(Q) echo "Unzipped $*."
 
 downloads/%: downloads/%.nupkg
-	$(Q) echo "Unzipping $*..."
-	$(Q) rm -Rf $@.tmp
-	$(Q) unzip -d $@.tmp $<
-	$(Q) find $@.tmp -exec touch {} +
-	$(Q) mv $@.tmp $@
-	$(Q) echo "Unzipped $*."
-
-downloads/%: downloads/%.zip
 	$(Q) echo "Unzipping $*..."
 	$(Q) rm -Rf $@.tmp
 	$(Q) unzip -d $@.tmp $<
