@@ -17,51 +17,6 @@ make -C "$TOP/tools/mmp" dotnet -j
 make -C "$TOP/src" dotnet -j
 
 # the Microsoft.*OS.Runtime.<RID> nugets
-create_runtime_packs ()
-{
-	local platform=$1
-	local assembly_infix=$2
-	local arches=$3
-	local rid_platform=$4
-	#shellcheck disable=SC2155
-	local platform_lower=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
-
-	for arch in $arches; do
-		local rid=$rid_platform-$arch
-		local packageid=Microsoft.$platform.Runtime.$rid
-		local destdir=$DOTNET_DESTDIR/$packageid
-
-		rm -Rf "$destdir"
-		mkdir -p "$destdir/data"
-		mkdir -p "$destdir/runtimes/$rid/lib/net5.0"
-
-		local bitsize
-		case $arch in
-			arm64|x64)
-				bitsize=64
-				;;
-			arm|x86)
-				bitsize=32
-				;;
-			*)
-				echo "Unknown arch: $arch"
-				exit 1
-				;;
-		esac
-
-		$cp "$TOP/src/build/dotnet/$platform_lower/$bitsize/Xamarin.$assembly_infix.dll" "$destdir/runtimes/$rid/lib/net5.0"
-		$cp "$TOP/src/build/dotnet/$platform_lower/$bitsize/Xamarin.$assembly_infix.pdb" "$destdir/runtimes/$rid/lib/net5.0"
-		# RuntimeList.xml is generated
-		#$cp "$TOP/msbuild/dotnet/package/$packageid/RuntimeList.xml" "$destdir/data/"
-
-		chmod -R +r "$destdir"
-	done
-}
-create_runtime_packs  "iOS"     "iOS"     "arm64 arm x64 x86" "ios"
-create_runtime_packs  "tvOS"    "TVOS"    "arm64 x64"         "tvos"
-create_runtime_packs  "watchOS" "WatchOS" "arm x86"           "watchos"
-create_runtime_packs  "macOS"   "Mac"     "x64"               "osx"
-
 copy_ios_native_libs_to_runtime_pack ()
 {
 	local platform=$1
