@@ -43,7 +43,6 @@ namespace Xamarin.Linker.Steps {
 
 		void ProcessInterfaces (TypeDefinition type)
 		{
-			var dlc = DerivedLinkContext.Instance;
 			for (int i = type.Interfaces.Count - 1; i >= 0; i--) {
 				var iface = type.Interfaces [i];
 				if (Annotations.IsMarked (iface))
