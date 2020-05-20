@@ -34,6 +34,7 @@ namespace Xamarin.Tuner
 		// SDK candidates - they will be preserved only if the application (not the SDK) uses it
 		List<ICustomAttributeProvider> srs_data_contract = new List<ICustomAttributeProvider> ();
 		List<ICustomAttributeProvider> xml_serialization = new List<ICustomAttributeProvider> ();
+#endif
 
 		// Store interfaces the linker has linked away so that the static registrar can access them.
 		public Dictionary<TypeDefinition, List<TypeDefinition>> ProtocolImplementations { get; private set; } = new Dictionary<TypeDefinition, List<TypeDefinition>> ();
@@ -42,7 +43,6 @@ namespace Xamarin.Tuner
 		// The linked away TypeDefinitions lacks some information (it can't even find itself in the LinkedAwayTypes dictionary)
 		// so we need a second dictionary
 		Dictionary<TypeDefinition, LinkedAwayTypeReference> LinkedAwayTypeMap = new Dictionary<TypeDefinition, LinkedAwayTypeReference> ();
-#endif
 
 #if NET
 		public static DerivedLinkContext Instance { get; } = new DerivedLinkContext ();
@@ -192,7 +192,6 @@ namespace Xamarin.Tuner
 			return null;
 		}
 
-#if !NET
 		public void AddLinkedAwayType (TypeDefinition td)
 		{
 			var latr = new LinkedAwayTypeReference (td);
@@ -236,7 +235,6 @@ namespace Xamarin.Tuner
 
 			return null;
 		}
-#endif
 
 		class AttributeStorage : ICustomAttribute
 		{

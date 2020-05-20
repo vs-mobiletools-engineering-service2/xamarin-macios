@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 
 using Mono.Cecil;
 using Mono.Linker;
@@ -127,6 +127,12 @@ namespace Xamarin {
 
 				prelink_subs.Add (new PreserveSmartEnumConversionsSubStep ());
 
+				// we can't subclass SweepStep and we need some information before it's executed
+				InsertAfter (new PreSweepStep (), "MarkStep");
+
+				// extra stuff filed as https://github.com/mono/linker/issues/1188
+				// InsertAfter (new ExtraSweepStep (), "SweepStep");
+
 				var postlink_subs = new MobileSubStepDispatcher ();
 				InsertAfter (postlink_subs, "CleanStep");
 
@@ -135,6 +141,7 @@ namespace Xamarin {
 
 				postlink_subs.Add (new MetadataReducerSubStep ());
 
+				// FIXME: need to determine if/when this is enabled https://github.com/mono/linker/blob/ffec224a2a69f0cde4c43d9c90090dcb294ca6c6/src/linker/Linker.Steps/SealerStep.cs#L24
 				// 	if (options.Application.Optimizations.SealAndDevirtualize == true)
 				// 		sub.Add (new SealerSubStep ());
 

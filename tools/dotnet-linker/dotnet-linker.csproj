@@ -9,7 +9,7 @@
     <DefineConstants>TRACE;NET;IOS;DEBUG;NETCOREAPP;NETCOREAPP3_0;MTOUCH</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.ILLink" Version="5.0.0-preview.3.20261.2" />
+    <PackageReference Include="Microsoft.NET.ILLink" Version="5.0.0-preview.3.20268.5" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\linker\MobileResolveMainAssemblyStep.cs">
