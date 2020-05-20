@@ -297,6 +297,63 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Mac.Tasks.dll: Xa
 	$(Q) $(CP) $(dir $<)/*.dll $(dir $<)/*.pdb $(dir $@)
 
 ##
+## .NET targets ##
+##
+
+
+DOTNET_TARGETS = \
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))               \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))               \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(dll).dll)                        \
+	\
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))           \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))           \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(dll).dll)                    \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS/FrameworkList.xml                                                         \
+	$(foreach target,$(WATCH_TARGETS)             ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS/$(notdir $(target)))       \
+	\
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))              \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))              \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(dll).dll)                       \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS/FrameworkList.xml                                                               \
+	$(foreach target,$(TVOS_TARGETS)             ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS/$(notdir $(target)))              \
+	\
+	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/FrameworkList.xml                                                             \
+	$(foreach target,$(MAC_TARGETS)               ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(notdir $(target)))           \
+	$(foreach target,$(MAC_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(notdir $(target)))           \
+	$(foreach dll,$(MAC_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(dll).dll)                    \
+
+
+DOTNET_DIRECTORIES = \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/TVOS \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/WatchOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/WatchOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/TVOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS \
+	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS \
+
+$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/%: $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/% | $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS
+	$(Q) $(CP) $< $@
+
+$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+	$(Q) $(CP) $< $@
+
+$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+	$(Q) $(CP) $< $@
+
+$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+	$(Q) $(CP) $< $@
+
+ifdef ENABLE_DOTNET
+MSBUILD_DIRECTORIES += $(DOTNET_DIRECTORIES)
+MSBUILD_PRODUCTS += $(DOTNET_TARGETS)
+endif
+
+##
 ## Common targets ##
 ##
 
@@ -339,6 +396,8 @@ test run-test:
 clean-local::
 	git clean -xfdq
 	cd $(XAMARIN_MACDEV_PATH) && git clean -xfdq
+
+dotnet: $(DOTNET_TARGETS)
 
 # make will automatically consider files created in chained implicit rules as temporary files, and delete them afterwards
 # marking those files as .SECONDARY will prevent that deletion.

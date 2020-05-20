@@ -15,6 +15,7 @@ cp="cp -c"
 make -C "$TOP/tools/mtouch" dotnet -j
 make -C "$TOP/tools/mmp" dotnet -j
 make -C "$TOP/src" dotnet -j
+make -C "$TOP/msbuild" dotnet -j
 
 # the Microsoft.*OS.Runtime.<RID> nugets
 copy_ios_native_libs_to_runtime_pack ()
@@ -129,17 +130,9 @@ create_sdk_nugets ()
 	rm -Rf "$destdir"
 	mkdir -p "$destdir/tools/bin"
 	mkdir -p "$destdir/tools/lib"
-	mkdir -p "$destdir/targets"
-	mkdir -p "$destdir/Sdk"
 
 	$cp "$legacy_destdir/Version" "$destdir/"
 	$cp "$legacy_destdir/buildinfo" "$destdir/tools/"
-
-	$cp "$TOP/dotnet/Microsoft.$platform.Sdk/Sdk/"* "$destdir/Sdk/"
-	$cp "$TOP/dotnet/targets/"* "$destdir/targets/"
-	$cp "$TOP/dotnet/Microsoft.$platform.Sdk/targets/"* "$destdir/targets/"
-
-	$cp -r "$legacy_destdir/lib/msbuild" "$destdir/tools/"
 
 	# linker assembly
 	$cp -r "$TOP/tools/dotnet-linker/bin/Debug/netcoreapp3.0" "$destdir/tools/dotnet-linker"
