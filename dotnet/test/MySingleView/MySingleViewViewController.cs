@@ -15,7 +15,7 @@ namespace MySingleView
 		{
 			base.ViewDidLoad ();
 			
-			MyButton.SetTitle ("Hello net5!", UIControlState.Normal);
+			MyButton.SetTitle ("net5!", UIControlState.Normal);
 		}
 
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
