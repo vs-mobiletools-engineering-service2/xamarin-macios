@@ -36,8 +36,8 @@ IOS_TARGETS =                                                      \
 
 IOS_BINDING_TARGETS = $(wildcard Xamarin.ObjcBinding.Tasks/*.targets)
 
-IOS_TASK_ASSEMBLIES = Xamarin.iOS.Tasks
 LOCALIZATION_ASSEMBLIES = Xamarin.Localization.MSBuild
+IOS_TASK_ASSEMBLIES = Xamarin.iOS.Tasks $(LOCALIZATION_ASSEMBLIES)
 
 IOS_DIRECTORIES =                                                                                           \
 	$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/mono/Xamarin.iOS                                                  \
@@ -148,7 +148,7 @@ endif
 MAC_TARGETS = $(wildcard Xamarin.Mac.Tasks/*.props) $(wildcard Xamarin.Mac.Tasks/*.targets) $(wildcard Xamarin.Shared/Xamarin.*.targets)
 MAC_BINDING_TARGETS =
 
-MAC_TASK_ASSEMBLIES = Xamarin.Mac.Tasks
+MAC_TASK_ASSEMBLIES = Xamarin.Mac.Tasks $(LOCALIZATION_ASSEMBLIES)
 
 MAC_DIRECTORIES =                                                                                           \
 	$(MAC_DESTDIR)/Library/Frameworks/Mono.framework/External/xbuild/Xamarin                                \
