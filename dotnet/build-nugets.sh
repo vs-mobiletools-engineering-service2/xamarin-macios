@@ -127,7 +127,6 @@ create_sdk_nugets ()
 	local packageid=Microsoft.$platform.Sdk
 	local destdir=$DOTNET_DESTDIR/$packageid
 
-	rm -Rf "$destdir"
 	mkdir -p "$destdir/tools/bin"
 	mkdir -p "$destdir/tools/lib"
 
