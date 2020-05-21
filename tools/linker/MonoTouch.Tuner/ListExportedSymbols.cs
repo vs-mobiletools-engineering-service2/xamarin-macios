@@ -32,6 +32,8 @@ namespace MonoTouch.Tuner
 
 		protected override void ProcessAssembly (AssemblyDefinition assembly)
 		{
+			base.ProcessAssembly (assembly);
+
 			if (Annotations.GetAction (assembly) == AssemblyAction.Delete)
 				return;
 
@@ -112,7 +114,8 @@ namespace MonoTouch.Tuner
 					}
 				}
 
-				Console.WriteLine ($"{pinfo.EntryPoint} -> {pinfo.Module.Name} from {method.FullName} ({method.Module.Assembly.FullName})");
+				if (Driver.IsDotNet)
+					Console.WriteLine ($"{pinfo.EntryPoint} -> {pinfo.Module.Name} from {method.FullName} ({method.Module.Assembly.FullName})");
 
 				switch (pinfo.Module.Name) {
 				case "__Internal":
@@ -125,9 +128,8 @@ namespace MonoTouch.Tuner
 					DerivedLinkContext.RequiredSymbols.AddFunction (pinfo.EntryPoint).AddMember (method);
 					break;
 				default:
-					if (is_bcl_assembly && Driver.IsDotNet) {
+					if (is_bcl_assembly && Driver.IsDotNet)
 						DerivedLinkContext.RequiredSymbols.AddField (pinfo.EntryPoint).AddMember (method);
-					}
 					break;
 				}
 			}
