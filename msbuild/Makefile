@@ -302,50 +302,50 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Mac.Tasks.dll: Xa
 
 
 DOTNET_TARGETS = \
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))               \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))               \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS/$(dll).dll)                        \
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))               \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))               \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                        \
 	\
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))           \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))           \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS/$(dll).dll)                    \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS/FrameworkList.xml                                                         \
-	$(foreach target,$(WATCH_TARGETS)             ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS/$(notdir $(target)))       \
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))           \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))           \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                    \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS/FrameworkList.xml                                                         \
+	$(foreach target,$(WATCH_TARGETS)             ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS/$(notdir $(target)))       \
 	\
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))              \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(notdir $(target)))              \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS/$(dll).dll)                       \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS/FrameworkList.xml                                                               \
-	$(foreach target,$(TVOS_TARGETS)             ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS/$(notdir $(target)))              \
+	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))              \
+	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))              \
+	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                       \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS/FrameworkList.xml                                                               \
+	$(foreach target,$(TVOS_TARGETS)             ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS/$(notdir $(target)))              \
 	\
-	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/FrameworkList.xml                                                             \
-	$(foreach target,$(MAC_TARGETS)               ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(notdir $(target)))           \
-	$(foreach target,$(MAC_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(notdir $(target)))           \
-	$(foreach dll,$(MAC_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/$(dll).dll)                    \
+	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/FrameworkList.xml                                                             \
+	$(foreach target,$(MAC_TARGETS)               ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(notdir $(target)))           \
+	$(foreach target,$(MAC_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(notdir $(target)))           \
+	$(foreach dll,$(MAC_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(dll).dll)                    \
 
 
 DOTNET_DIRECTORIES = \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/iOS \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/TVOS \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/WatchOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/iOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/TVOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/WatchOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/iOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/TVOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/WatchOS \
-	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/TVOS \
+	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/WatchOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS \
+	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/WatchOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/TVOS \
+	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS \
+	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS \
 
-$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS/%: $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/% | $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/macOS
+$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/%: $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/% | $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS
 	$(Q) $(CP) $< $@
 
-$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
 	$(Q) $(CP) $< $@
 
-$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
 	$(Q) $(CP) $< $@
 
-$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
+$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
 	$(Q) $(CP) $< $@
 
 ifdef ENABLE_DOTNET
