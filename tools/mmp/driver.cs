@@ -671,15 +671,6 @@ namespace Xamarin.Bundler {
 			Watch ("Extracted native link info", 1);
 		}
 
-		static string NativeLibraryDirectory {
-			get {
-				if (IsDotNet)
-					return Path.Combine (FrameworkDirectory, "tools", "lib");
-
-				return Path.Combine (FrameworkDirectory, "lib");
-			}
-		}
-
 		static string system_mono_directory;
 		static string SystemMonoDirectory {
 			get {
@@ -885,7 +876,7 @@ namespace Xamarin.Bundler {
 			}
 
 			var str_cflags = RunPkgConfig ("--cflags");
-			var libdir = GetMonoLibraryDirectory (App);
+			var libdir = RunPkgConfig ("--variable=libdir");
 
 			if (!StringUtils.TryParseArguments (str_cflags, out cflags, out var ex))
 				throw ErrorHelper.CreateError (147, ex, Errors.MM0147, str_cflags, ex.Message);
