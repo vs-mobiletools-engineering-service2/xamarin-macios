@@ -19,16 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Mac.Tasks.Core", "X
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Localization.MSBuild", "Xamarin.Localization.MSBuild\Xamarin.Localization.MSBuild.csproj", "{947E3C4C-8891-49D7-B665-23F785489D3F}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.MacDev.Shared", "..\external\Xamarin.MacDev\Xamarin.MacDev\Xamarin.MacDev.Shared.shproj", "{3682B815-854A-4895-9CC0-7E507B74D99B}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.iOS.Tasks.Core.Shared", "Xamarin.iOS.Tasks.Core\Xamarin.iOS.Tasks.Core.Shared.shproj", "{9D580281-4073-4463-AD83-CE64538CB8E6}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.MacDev.Tasks.Shared", "Xamarin.MacDev.Tasks\Xamarin.MacDev.Tasks.Shared.shproj", "{BD872FBC-908C-4908-B4BD-C75BB6573189}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.MacDev.Tasks.Core.Shared", "Xamarin.MacDev.Tasks.Core\Xamarin.MacDev.Tasks.Core.Shared.shproj", "{135D609C-544A-49E2-89BA-5D8B0F52B32E}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.Mac.Tasks.Core.Shared", "Xamarin.Mac.Tasks.Core\Xamarin.Mac.Tasks.Core.Shared.shproj", "{C38535D9-E059-4934-9D86-E21147732F29}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.MacDev", "..\external\Xamarin.MacDev\Xamarin.MacDev\Xamarin.MacDev.csproj", "{265E9890-3292-4B7E-A19F-EC2801A3DA84}"
 EndProject
 Global
