@@ -217,8 +217,10 @@ $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/iOS/%: Xamarin.Shared/% | $(IOS_DE
 	$(Q) install -m 644 $< $@
 
 $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/iOS/Xamarin.iOS.Tasks.dll: Xamarin.iOS.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.iOS.Tasks.dll | $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/iOS
-	$(Q) rm -f $(dir $@)/*.dll $(dir $@)/*.pdb
-	$(Q) $(CP) $(dir $<)/*.dll $(dir $<)/*.pdb $(dir $@)
+	$(Q) $(CP) $< $@
+
+$(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/iOS/Xamarin.Localization.MSBuild.dll: Xamarin.iOS.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Localization.MSBuild.dll | $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/iOS
+	$(Q) $(CP) $< $@
 
 ##
 ## XW
@@ -293,8 +295,10 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/%: Xamarin.Shared/% | $(M
 	$(Q) install -m 644 $< $@
 
 $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Mac.Tasks.dll: Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Mac.Tasks.dll | $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild
-	$(Q) rm -f $(dir $@)/*.dll $(dir $@)/*.pdb
-	$(Q) $(CP) $(dir $<)/*.dll $(dir $<)/*.pdb $(dir $@)
+	$(Q) $(CP) $< $@
+
+$(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Localization.MSBuild.dll: Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Localization.MSBuild.dll | $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild
+	$(Q) $(CP) $< $@
 
 ##
 ## .NET targets ##
