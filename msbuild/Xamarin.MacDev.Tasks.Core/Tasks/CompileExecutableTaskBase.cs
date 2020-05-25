@@ -92,8 +92,13 @@ namespace Xamarin.MacDev.Tasks {
 				arguments.Add ("-DDEBUG");
 			arguments.Add ("-DSIMLAUNCHER");
 			arguments.Add ("-DNET");
-			arguments.Add ("-DMONOTOUCH");
 			arguments.Add ($"-DXAMARIN_EXECUTABLE_NAME={AssemblyName}.dll");
+
+			if (Platform == ApplePlatform.MacOSX) {
+				arguments.Add ("-DMONOMAC");
+			} else {
+				arguments.Add ("-DMONOTOUCH");
+			}
 
 			// warnings
 			arguments.Add ("-Wl,-w");
@@ -135,7 +140,8 @@ namespace Xamarin.MacDev.Tasks {
 			// _LibMono
 			var lib_mono_name = "libmono.a";
 			var lib_mono = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_mono_name);
-			arguments.Add (lib_mono.ItemSpec);
+			if (lib_mono != null)
+				arguments.Add (lib_mono.ItemSpec);
 
 			// _LibXamarin
 			var lib_xamarin_name = IsDebug ? "libxamarin-debug.a" : "libxamarin.a";
@@ -166,7 +172,8 @@ namespace Xamarin.MacDev.Tasks {
 			// _LibApp
 			var lib_app_name = "libapp.a"; // FIXME: extensions
 			var lib_app = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_app_name);
-			arguments.Add (lib_app.ItemSpec);
+			if (lib_app != null)
+				arguments.Add (lib_app.ItemSpec);
 
 			// includes
 			var runtime_tools_dir = Path.Combine (lib_xamarin.GetMetadata ("RootDir"), lib_xamarin.GetMetadata ("Directory"));
