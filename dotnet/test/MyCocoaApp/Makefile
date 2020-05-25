@@ -1,21 +1,25 @@
-TOP=../../../..
+TOP=../../..
 include $(TOP)/Make.config
+
+TEST_CONFIG?=Debug
 
 all: publish
 
-publish: build
-	dotnet publish -r osx-x64 --self-contained true -p:PublishTrimmed=true -p:MonoAOT=true /v:diag /bl:MySingleView-x64.binlog /p:UseAppHost=false
+build: nugets
+	dotnet build /v:diag /bl:build.binlog /p:Configuration=$(TEST_CONFIG)
+
+publish: nugets
+	dotnet publish --self-contained true /v:diag /bl:publish.binlog /p:Configuration=$(TEST_CONFIG)
 
 clean:
-	rm -Rf ~/.nuget/packages/xamarin.ios.* ~/.nuget/packages/microsoft.ios.*
-	cd ../.. && git clean -xfd
-	rm -Rf $(TOP)/_build
+	rm -Rf ~/.nuget/packages/microsoft.ios.* ~/.nuget/packages/microsoft.tvos.* ~/.nuget/packages/microsoft.watchos.* ~/.nuget/packages/microsoft.macos.*
+	cd $(TOP)/msbuild && git clean -xfdq
+	make clean -C $(TOP)/dotnet
 
-build: clean
-	make all install -j -C ../../..
-	make -C ../.. pack-macOS test/global.json test/NuGet.config -j
-	make -C ../.. install-nugets
+nugets: clean
+	make all install -C $(TOP)/tools/dotnet-linker
+	make all install -j -C $(TOP)/msbuild
+	make all install -j -C $(TOP)/dotnet
 
-run: publish
+run: build
 	dotnet run
-
