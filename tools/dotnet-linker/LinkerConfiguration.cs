@@ -56,16 +56,16 @@ namespace Xamarin.Linker {
 				case "platform=macos":
 					Platform = ApplePlatform.MacOSX;
 					break;
-				case "mtouchlink=full":
+				case "linkmode=full":
 					LinkMode = LinkMode.All;
 					break;
-				case "mtouchlink=sdkonly":
+				case "linkmode=sdkonly":
 					LinkMode = LinkMode.SDKOnly;
 					break;
-				case "mtouchlink=platform":
+				case "linkmode=platform":
 					LinkMode = LinkMode.Platform;
 					break;
-				case "mtouchlink=none":
+				case "linkmode=none":
 					LinkMode = LinkMode.None;
 					break;
 				case string _ when line.StartsWith ("PlatformAssembly=", StringComparison.Ordinal):

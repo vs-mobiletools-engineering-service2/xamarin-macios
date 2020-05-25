@@ -113,11 +113,15 @@
 			<!-- add any linker substitution files we might have -->
 			<_ExtraTrimmerArgs>$(_ExtraTrimmerArgs) $(_LinkerSubstitutionsCommand)</_ExtraTrimmerArgs>
 
+			<!-- The Xamarin.Mac targets files use 'LinkMode', while the Xamarin.iOS targets files use 'MtouchLink' -->
+			<_LinkMode Condition="'$(_PlatformName)' == 'macOS'">$(LinkMode)</_LinkMode>
+			<_LinkMode Condition="'$(_PlatformName)' != 'macOS'">$(MtouchLink)</_LinkMode>
+
 			<_CustomLinkerOptionsFile>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)custom-linker-options.txt'))</_CustomLinkerOptionsFile>
 			<_CustomLinkerOptions>
 				Platform=$(_PlatformName)
 				PlatformAssembly=$(_PlatformAssemblyName).dll
-				MtouchLink=$(MtouchLink)
+				LinkMode=$(_LinkMode)
 			</_CustomLinkerOptions>
 		</PropertyGroup>
 		<ItemGroup>
