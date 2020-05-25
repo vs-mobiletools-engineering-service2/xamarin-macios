@@ -205,7 +205,7 @@
 		<Copy SourceFiles="@(_AssembliesToAOT)" DestinationFolder="$(_AOTInputDirectory)" />
 	</Target>
 	<Target Name="_AOTCompile"
-			Condition="'$(_SdkIsSimulator)' != 'true'"
+			Condition="'$(_SdkIsSimulator)' != 'true' And '$(_PlatformName)' != 'macOS'"
 			DependsOnTargets="_SetVariables;_PreAOTCompile;"
 			Inputs="@(_AssembliesToAOT)"
 			Outputs="@(_AssembliesToAOT->'$(_AOTOutputDirectory)%(Filename)%(Extension).s')">
