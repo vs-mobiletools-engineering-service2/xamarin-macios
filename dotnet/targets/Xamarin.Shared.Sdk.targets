@@ -10,7 +10,7 @@
 		<_AssemblyFileDiriOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDiriOS>
 		<_AssemblyFileDirtvOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDirtvOS>
 		<_AssemblyFileDirwatchOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_AssemblyFileDirwatchOS>
-		<_AssemblyFileDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild</_AssemblyFileDirmacOS>
+		<_AssemblyFileDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild\macOS</_AssemblyFileDirmacOS>
 		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'iOS'">$(_AssemblyFileDiriOS)\</_AssemblyFileDir>
 		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'tvOS'">$(_AssemblyFileDirtvOS)\</_AssemblyFileDir>
 		<_AssemblyFileDir Condition="'$(_PlatformName)' == 'watchOS'">$(_AssemblyFileDirwatchOS)\</_AssemblyFileDir>
