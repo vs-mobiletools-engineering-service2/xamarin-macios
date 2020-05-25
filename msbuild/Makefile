@@ -296,6 +296,7 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/%: Xamarin.Shared/% | $(M
 
 $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Mac.Tasks.dll: Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Mac.Tasks.dll | $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild
 	$(Q) $(CP) $< $@
+	$(Q) $(CP) $(<:.dll=.pdb) $(dir $@)
 
 $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/Xamarin.Localization.MSBuild.dll: Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Localization.MSBuild.dll | $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild
 	$(Q) $(CP) $< $@
@@ -342,6 +343,7 @@ DOTNET_DIRECTORIES = \
 
 $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/%: $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/% | $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS
 	$(Q) $(CP) $< $@
+	if test -f $(<:.dll=.pdb); then $(CP) $(<:.dll=.pdb) $(dir $@); fi
 
 $(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
 	$(Q) $(CP) $< $@
