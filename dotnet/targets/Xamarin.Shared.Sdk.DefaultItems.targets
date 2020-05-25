@@ -19,21 +19,38 @@
 
   <!-- Defaults -->
 
-  <!-- Compute the architecture. This is a variation of https://github.com/dotnet/sdk/blob/873d79d861cbd001488414b9875e53acbeaed890/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.RuntimeIdentifierInference.targets#L68-L96 -->
-  <PropertyGroup Condition=" '$(MtouchArch)' == '' And ('$(_PlatformName)' == 'iOS' Or '$(_PlatformName)' == 'tvOS' Or '$(_PlatformName)' == 'watchOS') ">
-    <MtouchArch Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</MtouchArch>
-    <MtouchArch Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</MtouchArch>
-    <MtouchArch Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</MtouchArch>
-    <MtouchArch Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) And '$(_PlatformName)' == 'iOS' ">ARMv7</MtouchArch> <!-- FIXME: how to enable ARMv7s? Ref: https://github.com/dotnet/runtime/issues/34121 -->
-    <MtouchArch Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) And '$(_PlatformName)' == 'watchOS' ">ARM64_32</MtouchArch> <!-- FIXME: what about ARMv7k? -->
+  <!-- If the old-style variables are set, use those -->
+  <PropertyGroup>
+    <_Architecture Condition=" '$(_PlatformName)' == 'macOS' And '$(XamMacArch)' != '' ">$(XamMacArch)</_Architecture>
+    <_Architecture Condition=" '$(_PlatformName)' != 'macOS' And '$(MtouchArch)' != '' ">$(MtouchArch)</_Architecture>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(XamMacArch)' == '' And '$(_PlatformName)' == 'macOS' ">
-    <XamMacArch Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">x86_64</XamMacArch>
+  <!-- Compute the architecture if it's not set. This is a variation of https://github.com/dotnet/sdk/blob/873d79d861cbd001488414b9875e53acbeaed890/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.RuntimeIdentifierInference.targets#L68-L96 -->
+  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'iOS' ">
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</_Architecture>
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</_Architecture>
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</_Architecture>
+    <_Architecture Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) ">ARMv7</_Architecture> <!-- FIXME: how to enable ARMv7s? Ref: https://github.com/dotnet/runtime/issues/34121 -->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'tvOS' ">
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</_Architecture>
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</_Architecture>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'watchOS' ">
+    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</_Architecture>
+    <_Architecture Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) ">ARM64_32</_Architecture> <!-- FIXME: what about ARMv7k? -->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'macOS' ">
+    <_Architecture Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">x86_64</_Architecture>
+  </PropertyGroup>
+  <!-- Set the old-style variables as well -->
+  <PropertyGroup>
+    <XamMacArch Condition=" '$(_PlatformName)' == 'macOS' And '$(XamMacArch)' == '' ">$(_Architecture)</XamMacArch>
+    <MtouchArch Condition=" '$(_PlatformName)' != 'macOS' And '$(MtouchArch)' == '' ">$(_Architecture)</MtouchArch>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(ComputedPlatform)' == '' ">
-    <ComputedPlatform Condition="'$(MtouchArch)' == 'i386' Or '$(MtouchArch)' == 'x86_64'">iPhoneSimulator</ComputedPlatform>
-    <ComputedPlatform Condition="'$(MtouchArch)' == 'ARMv7' Or '$(MtouchArch)' == 'ARMv7s' Or '$(MtouchArch)' == 'ARM64' Or '$(MtouchArch)' == 'ARMv7k' Or '$(MtouchArch)' == 'ARM64_32'">iPhone</ComputedPlatform>
+    <ComputedPlatform Condition="'$(_Architecture)' == 'i386' Or '$(_Architecture)' == 'x86_64'">iPhoneSimulator</ComputedPlatform>
+    <ComputedPlatform Condition="'$(_Architecture)' == 'ARMv7' Or '$(_Architecture)' == 'ARMv7s' Or '$(_Architecture)' == 'ARM64' Or '$(_Architecture)' == 'ARMv7k' Or '$(_Architecture)' == 'ARM64_32'">iPhone</ComputedPlatform>
   </PropertyGroup>
 
   <!-- Default Asset Catalog file inclusion -->

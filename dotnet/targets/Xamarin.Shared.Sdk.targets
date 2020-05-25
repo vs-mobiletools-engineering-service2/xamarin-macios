@@ -44,7 +44,7 @@
 
 	<!-- Compute a few values -->
 	<PropertyGroup>
-		<_Is32BitBuild Condition=" '(MtouchArch)' == 'x86' Or '$(MtouchArch)' == 'ARMv7' Or '$(MtouchArch)' == 'ARMv7s' Or '$(MtouchArch)' == 'ARMv7k' Or '$(MtouchArch)' == 'ARM64_32'">true</_Is32BitBuild>
+		<_Is32BitBuild Condition=" '(_Architecture)' == 'x86' Or '$(_Architecture)' == 'ARMv7' Or '$(_Architecture)' == 'ARMv7s' Or '$(_Architecture)' == 'ARMv7k' Or '$(_Architecture)' == 'ARM64_32'">true</_Is32BitBuild>
 		<_Is64BitBuild Condition=" '(_Is32BitBuild)' != 'true' ">true</_Is64BitBuild>
 	</PropertyGroup>
 
@@ -244,7 +244,7 @@
 		<CompileExecutable
 			SessionId="$(BuildSessionId)"
 
-			Architecture="$(MtouchArch)"
+			Architecture="$(_Architecture)"
 			AppBundlePath="$(_AppBundlePath)"
 			AssemblyName="$(AssemblyName)"
 			IsAppExtension="$(IsAppExtension)"
