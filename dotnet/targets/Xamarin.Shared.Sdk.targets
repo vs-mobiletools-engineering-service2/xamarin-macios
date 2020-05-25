@@ -217,7 +217,8 @@
 
 	<Target Name="_SetVariables">
 		<PropertyGroup>
-			<_LibMonoName>libmono.a</_LibMonoName>
+			<_LibMonoName Condition="'$(_PlatformName)' != 'macOS'">libmono.a</_LibMonoName>
+			<_LibMonoName Condition="'$(_PlatformName)' == 'macOS'">libcoreclr.dylib</_LibMonoName>
 			<_MonoLibDir Condition="'%(DestinationSubPath)' == '$(_LibMonoName)'">@(RuntimePackAsset -> '%(RootDir)%(Directory)')</_MonoLibDir>
 
 			<_AOTCompiler>$(_MonoLibDir)/cross/mono-aot-cross</_AOTCompiler>
