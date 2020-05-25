@@ -394,7 +394,7 @@
 		<_TargetsDiriOS>$(XamarinSdkRootDirectory)\tools\msbuild\iOS</_TargetsDiriOS>
 		<_TargetsDirtvOS>$(XamarinSdkRootDirectory)\tools\msbuild\TVOS</_TargetsDirtvOS>
 		<_TargetsDirwatchOS>$(XamarinSdkRootDirectory)\tools\msbuild\WatchOS</_TargetsDirwatchOS>
-		<_TargetsDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild</_TargetsDirmacOS>
+		<_TargetsDirmacOS>$(XamarinSdkRootDirectory)\tools\msbuild\macOS</_TargetsDirmacOS>
 		<_TargetsDir Condition="'$(_PlatformName)' == 'iOS'">$(_TargetsDiriOS)\</_TargetsDir>
 		<_TargetsDir Condition="'$(_PlatformName)' == 'tvOS'">$(_TargetsDirtvOS)\</_TargetsDir>
 		<_TargetsDir Condition="'$(_PlatformName)' == 'watchOS'">$(_TargetsDirwatchOS)\</_TargetsDir>
