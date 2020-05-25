@@ -52,6 +52,7 @@
 	<PropertyGroup>
 		<!-- ILLink depends on the output of ComputeFilesToPublish, so we must run that before running ILLink -->
 		<!-- We re-use CopyFilesToPublishDirectory to copy files to the .app -->
+		<_CreateIpa Condition="'$(_PlatformName)' != 'macOS'">CreateIpa</_CreateIpa>
 		<BuildDependsOn>
 			$(BuildDependsOn);
 			_EarlyAppBundleTasks;
@@ -65,7 +66,7 @@
 			CopyFilesToPublishDirectory;
 			_LateAppBundleTasks;
 			Codesign;
-			CreateIpa;
+			$(_CreateIpa);
 			Archive;
 		</BuildDependsOn>
 	</PropertyGroup>
