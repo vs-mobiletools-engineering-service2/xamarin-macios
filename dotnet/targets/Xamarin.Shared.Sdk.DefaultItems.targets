@@ -157,16 +157,16 @@
     <Folder Include="$(MSBuildProjectDirectory)\Resources\" />
   </ItemGroup>
 
-  <!-- HACK: Declare the XI/XM framework bundled with this version of the SDK. See Microsoft.NETCoreSdk.BundledVersions.props -->
+  <!-- Declare the XI/XM framework bundled with this version of the SDK. See Microsoft.NETCoreSdk.BundledVersions.props -->
   <PropertyGroup>
     <!-- Runtime pack identifiers -->
-    <_RuntimePackRuntimeIdentifiers Condition=" '$(_PlatformName)' == 'macOS' ">osx-x64</_RuntimePackRuntimeIdentifiers>
     <_RuntimePackRuntimeIdentifiers Condition=" '$(_PlatformName)' == 'iOS' ">ios-x64;ios-arm64;ios-arm;ios-x86</_RuntimePackRuntimeIdentifiers>
     <_RuntimePackRuntimeIdentifiers Condition=" '$(_PlatformName)' == 'tvOS' ">tvos-x64;tvos-arm64</_RuntimePackRuntimeIdentifiers>
     <_RuntimePackRuntimeIdentifiers Condition=" '$(_PlatformName)' == 'watchOS' ">watchos-x86;watchos-arm</_RuntimePackRuntimeIdentifiers>
+    <_RuntimePackRuntimeIdentifiers Condition=" '$(_PlatformName)' == 'macOS' ">osx-x64</_RuntimePackRuntimeIdentifiers>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(XamarinReplaceBuildTarget)' == 'false'">
+  <ItemGroup>
     <KnownFrameworkReference Include="Microsoft.$(_PlatformName)"
                             TargetFramework="net5.0"
                             RuntimeFrameworkName="Microsoft.$(_PlatformName)"
@@ -180,7 +180,7 @@
                             />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(XamarinReplaceBuildTarget)' == 'false' And '$(DisableImplicitFrameworkReferences)' != 'true'">
+  <ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true'">
     <FrameworkReference Include="Microsoft.$(_PlatformName)" IsImplicitlyDefined="true" Pack="false" PrivateAssets="All" />
   </ItemGroup>
 
