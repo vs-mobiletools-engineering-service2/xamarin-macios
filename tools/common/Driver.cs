@@ -979,13 +979,13 @@ namespace Xamarin.Bundler {
 			}
 		}
 
-		// This is the directory where libxamarin[-debug].[a|dylib] are
+		// This is the directory where the libxamarin*.[a|dylib] and libxammac*.[a|dylib] librares are
 		public static string GetXamarinLibraryDirectory (Application app)
 		{
 			return GetProductSdkLibDirectory (app);
 		}
 
-		// This is the directory where Xamarin[-debug].framework are
+		// This is the directory where the Xamarin[-debug].framework frameworks are
 		public static string GetXamarinFrameworkDirectory (Application app)
 		{
 			return GetProductFrameworksDirectory (app);

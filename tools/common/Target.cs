@@ -140,6 +140,9 @@ namespace Xamarin.Bundler {
 		void ComputePInvokeLinkerFlags ()
 		{
 #if MTOUCH
+			if (!Driver.IsDotNet)
+				return;
+
 			// Check for native libraries from the BCL
 			var symbols = GetAllSymbols ();
 			var native_libraries = new Dictionary<string, List<Tuple<Symbol, Mono.Cecil.MethodDefinition>>> ();
