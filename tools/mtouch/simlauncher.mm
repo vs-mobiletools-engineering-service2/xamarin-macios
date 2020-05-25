@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
 void xamarin_create_classes_Xamarin_iOS ();
+void xammac_setup ();
 
 #ifdef __cplusplus
 }
@@ -45,6 +46,7 @@ void xamarin_setup_impl ()
 #endif
 }
 
+#ifndef MONOMAC
 int
 main (int argc, char** argv)
 {
@@ -58,6 +60,7 @@ main (int argc, char** argv)
 	// A crash (report) is much more useful to them (and us).
 	@autoreleasepool { return xamarin_main (argc, argv, XamarinLaunchModeApp); }
 }
+#endif
 
 void
 xamarin_register_assemblies_impl ()
@@ -71,6 +74,11 @@ xamarin_register_modules_impl ()
 	NSLog (@"xamarin_register_modules ()\n");
 }
 
+void
+xammac_setup ()
+{
+	NSLog (@"Hello World!");
+}
 
 void xamarin_initialize_callbacks () __attribute__ ((constructor));
 void xamarin_initialize_callbacks ()
