@@ -53,6 +53,14 @@
     <ComputedPlatform Condition="'$(_Architecture)' == 'ARMv7' Or '$(_Architecture)' == 'ARMv7s' Or '$(_Architecture)' == 'ARM64' Or '$(_Architecture)' == 'ARMv7k' Or '$(_Architecture)' == 'ARM64_32'">iPhone</ComputedPlatform>
   </PropertyGroup>
 
+  <!-- Use a XM/XI-agnostic variable for debug support -->
+  <PropertyGroup>
+    <_IsDebug Condition="'$(_PlatformName)' != 'macOS'">$(MtouchDebug)</_IsDebug>
+    <_IsDebug Condition="'$(_PlatformName)' == 'macOS' And '$(MmpDebug)' != ''">$(MmpDebug)</_IsDebug> <!-- If MmpDebug is set, use that -->
+    <_IsDebug Condition="'$(_PlatformName)' == 'macOS' And '$(_IsDebug)' == ''">$(DebugSymbols)</_IsDebug> <!-- Otherwise use DebugSymbols -->
+    <_IsDebug Condition="'$(_IsDebug)' == ''">false</_IsDebug> <!-- default to false -->
+  </PropertyGroup>
+
   <!-- Default Asset Catalog file inclusion -->
   <ItemGroup Condition="'$(EnableDefaultXamarinAssetCatalogItems)' == 'true' ">
     <ImageAsset Include="**\*.xcassets\**\*.png;**\*.xcassets\*\*.jpg;**\*.xcassets\**\*.json" Exclude="$(DefaultItemExcludes);$(DefaultXamarinAssetCatalogItemExcludes)">

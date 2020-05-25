@@ -82,7 +82,7 @@
 			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-32bits.xml" Condition=" '$(_Is32BitBuild)' == 'true' " />
 			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/substitute-64bits.xml" Condition=" '$(_Is64BitBuild)' == 'true' " />
 			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/registerentryassembly.xml" Condition=" '$(_SdkIsSimulator)' != 'True' " />
-			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/uibutton.xml" Condition=" '$(MtouchDebug)' != 'true' " />
+			<_LinkerSubstitutions Include="$(_AdditionalTaskAssemblyDirectory)/uibutton.xml" Condition=" '$(_IsDebug)' != 'true' " />
 		</ItemGroup>
 		<PropertyGroup>
 			<_LinkerSubstitutionsCommand>@(_LinkerSubstitutions -> '--substitutions %(FullPath)', '%0a')</_LinkerSubstitutionsCommand>
@@ -248,7 +248,7 @@
 			AppBundlePath="$(_AppBundlePath)"
 			AssemblyName="$(AssemblyName)"
 			IsAppExtension="$(IsAppExtension)"
-			IsDebug="$(MtouchDebug)"
+			IsDebug="$(_IsDebug)"
 			NativeDynamicLibraries="@(_NativeDynamicLibraryFixed)"
 			OutputPath="$(_IntermediateNativeLibraryDir)$(_AppBundleName)"
 			ResolvedFileToPublish="@(ResolvedFileToPublish)"
