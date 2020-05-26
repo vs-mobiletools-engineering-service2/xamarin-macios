@@ -12,6 +12,7 @@ using Xamarin.Tests;
 namespace Xamarin.MMP.Tests {
 	[TestFixture ("Debug")]
 	[TestFixture ("Release")]
+	[Ignore ("Not yet ready")]
 	public partial class DotNetTests {
 		public string Configuration { get; private set; }
 
