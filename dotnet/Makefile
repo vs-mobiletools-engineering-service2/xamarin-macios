@@ -82,7 +82,7 @@ nupkgs/$(WATCHOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(WATCHOS_NUGET_VERSION_FU
 nupkgs/$(MACOS_NUGET).%.nupkg: CURRENT_VERSION_FULL=$(MACOS_NUGET_VERSION_FULL)
 
 # Create the nuget in a temporary directory (nupkgs/)
-nupkgs/%.nupkg: $(TEMPLATED_FILES) $(NUGET_TARGETS)
+nupkgs/%.nupkg: prepare $(TEMPLATED_FILES) $(NUGET_TARGETS)
 	$(Q) rm -f $@
 	$(Q_PACK) $(DOTNET5) pack package/$(shell echo $(notdir $@) | sed 's/[.]$(CURRENT_VERSION_FULL).*//')/package.csproj --output "$(dir $@)" $(DOTNET_PACK_VERBOSITY)
 	@# Nuget pack doesn't add the metadata to the filename, but we want that, so rename nuget to contain the full name
