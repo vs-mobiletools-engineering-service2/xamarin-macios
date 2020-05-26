@@ -36,7 +36,7 @@ namespace Xharness.Jenkins.TestTasks {
 			buildToolTask = new DotNetBuild (
 				msbuildPath: ToolName,
 				processManager: ProcessManager,
-				resourceManager: Jenkins,
+				resourceManager: ResourceManager,
 				eventLogger: this,
 				envManager: this,
 				errorKnowledgeBase: Jenkins.ErrorKnowledgeBase);
