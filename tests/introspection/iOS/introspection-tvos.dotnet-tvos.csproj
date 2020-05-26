@@ -113,4 +113,7 @@
       <Link>simlauncher64-sgen.frameworks</Link>
     </BundleResource>
   </ItemGroup>
+  <Target Name="BuildTouchClient" BeforeTargets="BeforeBuild">
+    <Exec Command="unset MSBuildExtensionsPath; unset MSBuildLoadMicrosoftTargetsReadOnly; unset MSBuildSDKsPath; export MSBuildExtensionsPath; msbuild /r ../../../external/Touch.Unit/Touch.Client/Touch.Client-tvOS.csproj" />
+  </Target>
 </Project>
