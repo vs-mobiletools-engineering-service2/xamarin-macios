@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <UsingXamarinSdk>true</UsingXamarinSdk>
+    <_UsingXamarinSdk>true</_UsingXamarinSdk>
     <UsingXamarinDotnetSdk>true</UsingXamarinDotnetSdk> <!-- need to come up with a better name, this is when using the .net5-style build -->
 
     <!--

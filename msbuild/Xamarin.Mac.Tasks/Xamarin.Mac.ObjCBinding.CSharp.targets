@@ -31,7 +31,7 @@ Copyright (C) 2014 Xamarin Inc. All rights reserved.
 	import Microsoft.CSharp.targets. However, we can't do most of Xamarin.Mac.ObjCBinding.CSharp.props before it. -->
 
 	<Choose>
-		<When Condition="'$(UsingXamarinSdk)' != ''">
+		<When Condition="'$(_UsingXamarinSdk)' != ''">
 			<!-- Do nothing -->
 		</When>
 		<When Condition=" '$(UseXamMacFullFramework)' == '' And ( '$(TargetFrameworkVersion)' == 'v2.0' Or '$(TargetFrameworkVersion)' == '' )">
@@ -54,7 +54,7 @@ Copyright (C) 2014 Xamarin Inc. All rights reserved.
 		<ResolveAssemblyConflicts>true</ResolveAssemblyConflicts>
 	</PropertyGroup>
 
-	<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="'$(UsingXamarinSdk)' == ''" />
+	<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="'$(_UsingXamarinSdk)' == ''" />
 	
 	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Mac.ObjCBinding.CSharp.props"/>
 
