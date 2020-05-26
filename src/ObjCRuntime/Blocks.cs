@@ -40,9 +40,6 @@ namespace ObjCRuntime {
 
 #pragma warning disable 649 //  Field 'XamarinBlockDescriptor.ref_count' is never assigned to, and will always have its default value 0
 	[StructLayout (LayoutKind.Sequential)]
-#if !XAMCORE_2_0
-	public 
-#endif
 	struct BlockDescriptor {
 		public IntPtr reserved;
 		public IntPtr size;
@@ -63,7 +60,6 @@ namespace ObjCRuntime {
 	[StructLayout (LayoutKind.Sequential)]
 	public unsafe struct BlockLiteral {
 #pragma warning disable 169
-#if XAMCORE_2_0
 		IntPtr isa;
 		BlockFlags flags;
 		int reserved;
@@ -71,18 +67,17 @@ namespace ObjCRuntime {
 		IntPtr block_descriptor;
 		IntPtr local_handle;
 		IntPtr global_handle;
-#else
-		public IntPtr isa;
-		public BlockFlags flags;
-		public int reserved;
-		public IntPtr invoke;
-		public IntPtr block_descriptor;
-		public IntPtr local_handle;
-		public IntPtr global_handle;
-#endif
 #pragma warning restore 169
 #if !COREBUILD
-		static IntPtr block_class = Class.GetHandle ("__NSStackBlock");
+		static IntPtr block_class;
+
+		static IntPtr NSConcreteStackBlock {
+			get {
+				if (block_class == IntPtr.Zero)
+					block_class = Dlfcn.dlsym (Libraries.System.Handle, "_NSConcreteStackBlock");
+				return block_class;
+			}
+		}
 
 		[DllImport ("__Internal")]
 		static extern IntPtr xamarin_get_block_descriptor ();
@@ -123,7 +118,7 @@ namespace ObjCRuntime {
 		// the linker will make it public so that it's callable from optimized user code.
 		unsafe void SetupBlockImpl (Delegate trampoline, Delegate userDelegate, bool safe, string signature)
 		{
-			isa = block_class;
+			isa = NSConcreteStackBlock;
 			invoke = Marshal.GetFunctionPointerForDelegate (trampoline);
 			object delegates;
 			if (safe) {
