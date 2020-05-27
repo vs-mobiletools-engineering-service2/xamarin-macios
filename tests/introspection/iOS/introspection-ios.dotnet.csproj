@@ -9,18 +9,13 @@
     <RootNamespace>Introspection</RootNamespace>
     <AssemblyName>introspection</AssemblyName>
     <MtouchLink>None</MtouchLink>
+    <AssetTargetFallback>xamarinios10;$(AssetTargetFallback)</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="NUnitLite" Version="3.12.0" />
-    <!-- <PackageReference Include="MonoTouch.Dialog" Version="2.0.0-pre1" /> -->
-    <!-- The MonoTouch.Dialog nuget isn't compatible with .net5 (yet?) -->
-    <Reference Include="Touch.Client">
-      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\iOS\Debug\Touch.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoTouch.Dialog">
-      <HintPath>..\..\..\external\Touch.Unit\Touch.Client\bin\iOS\Debug\MonoTouch.Dialog.dll</HintPath>
-    </Reference>
+    <PackageReference Include="MonoTouch.Dialog" Version="2.0.0-pre1" />
+    <ProjectReference Include="..\..\..\external\Touch.Unit\Touch.Client\Touch.Client-iOS.dotnet.csproj" />
     <!-- MonoTouch.Dialog references System.Json, which isn't shipped with .NET5, so reference the NuGet instead -->
     <PackageReference Include="System.Json" Version="4.7.1" />
     <!-- The linker resolves some assembly references too eagerly, and fails when it can't find them, so work around this by referencing the missing assemblies-->
@@ -113,13 +108,4 @@
       <Link>simlauncher64-sgen.frameworks</Link>
     </BundleResource>
   </ItemGroup>
-  <Target Name="BuildTouchClient" BeforeTargets="BeforeBuild">
-    <PropertyGroup>
-      <RootDirectory Condition="Exists('..\..\..\Make.config')">../../..</RootDirectory>
-      <RootDirectory Condition="Exists('..\..\..\..\Make.config')">../../../..</RootDirectory>
-      <RootDirectory Condition="Exists('..\..\..\..\..\Make.config')">../../../../..</RootDirectory>
-      <RootDirectory Condition="Exists('..\..\..\..\..\..\Make.config')">../../../../../..</RootDirectory>
-    </PropertyGroup>
-    <Exec Command="unset MSBuildExtensionsPath; unset MSBuildLoadMicrosoftTargetsReadOnly; unset MSBuildSDKsPath; export MSBuildExtensionsPath; msbuild /r $(RootDirectory)/external/Touch.Unit/Touch.Client/Touch.Client-iOS.csproj" />
-  </Target>
 </Project>
