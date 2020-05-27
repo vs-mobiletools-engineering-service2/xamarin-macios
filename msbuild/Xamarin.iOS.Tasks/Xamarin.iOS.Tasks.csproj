@@ -24,13 +24,4 @@
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\ILMerge.targets" />
-
-  <Target Name="ChangeAliasesOfNugetRefs" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-    <ItemGroup>
-      <ReferencePath Condition="'%(FileName)' == 'Microsoft.Build.Tasks.Core'">
-        <Aliases>SystemMSBuild</Aliases>
-      </ReferencePath>
-    </ItemGroup>
-  </Target>
-
 </Project>
