@@ -50,23 +50,30 @@
 
 	<!-- Inject our targets after the Build target -->
 	<PropertyGroup>
-		<!-- ILLink depends on the output of ComputeFilesToPublish, so we must run that before running ILLink -->
-		<!-- We re-use CopyFilesToPublishDirectory to copy files to the .app -->
-		<_CreateIpa Condition="'$(_PlatformName)' != 'macOS'">CreateIpa</_CreateIpa>
-		<BuildDependsOn>
+		<BuildDependsOn Condition="'$(_PlatformName)' != 'macOS'">
 			$(BuildDependsOn);
-			_EarlyAppBundleTasks;
-			_ComputeLinkerArguments;
-			ComputeFilesToPublish;
-			ILLink;
-			_AOTCompile;
-			_CompileLauncher;
-			_StripManagedAssemblies;
-			_ComputeOutputLocation;
-			CopyFilesToPublishDirectory;
-			_LateAppBundleTasks;
+			_CollectBundleResources;
+			_OptimizePngImages;
+			_OptimizePropertyLists;
+			_OptimizeLocalizationFiles;
+			_PackLibraryResources;
+			_UnpackLibraryResources;
+			_GenerateBundleName;
+			_CleanUploaded;
+			_CreateApp;
 			Codesign;
-			$(_CreateIpa);
+			CreateIpa;
+			Archive;
+		</BuildDependsOn>
+		<BuildDependsOn Condition="'$(_PlatformName)' == 'macOS'">
+			$(BuildDependsOn);
+			_CollectBundleResources;
+			_PackLibraryResources;
+			_UnpackLibraryResources;
+			_GenerateBundleName;
+			_CreateApp;
+			Codesign;
+			_CreateInstaller;
 			Archive;
 		</BuildDependsOn>
 	</PropertyGroup>
@@ -137,15 +144,20 @@
 		<WriteLinesToFile File="$(_CustomLinkerOptionsFile)" Lines="$(_CustomLinkerOptions)" Overwrite="true" />
 	</Target>
 
-	<PropertyGroup Condition=" '$(_PlatformName)' != 'macOS' ">
-		<_EarlyAppBundleTasksDependsOn>
-			_CollectBundleResources;
-			_OptimizePngImages;
-			_OptimizePropertyLists;
-			_OptimizeLocalizationFiles;
-			_PackLibraryResources;
-			_UnpackLibraryResources;
-			_GenerateBundleName;
+	<PropertyGroup >
+		<!-- ILLink depends on the output of ComputeFilesToPublish, so we must run that before running ILLink -->
+		<!-- We re-use CopyFilesToPublishDirectory to copy files to the .app -->
+		<_CreateAppDotNet5>
+			_ComputeLinkerArguments;
+			ComputeFilesToPublish;
+			ILLink;
+			_AOTCompile;
+			_CompileLauncher;
+			_StripManagedAssemblies;
+			_ComputeOutputLocation;
+			CopyFilesToPublishDirectory;
+		</_CreateAppDotNet5>
+		<_CreateAppDependsOn Condition=" '$(_PlatformName)' != 'macOS' ">
 			_DetectAppManifest;
 			_DetectSigningIdentity;
 			_CopyResourcesToBundle;
@@ -159,8 +171,9 @@
 			_CompileAppManifest;
 			_GetNativeExecutableName;
 			_ParseExtraMtouchArgs;
-		</_EarlyAppBundleTasksDependsOn>
-		<_LateAppBundleTasksDependsOn>
+
+			$(_CreateAppDotNet5);
+
 			_CompileITunesMetadata;
 			_CollectITunesArtwork;
 			_CopyITunesArtwork;
@@ -175,15 +188,8 @@
 			_PrepareDebugSymbolGeneration;
 			_GenerateDebugSymbols;
 			_ValidateAppBundle;
-		</_LateAppBundleTasksDependsOn>
-	</PropertyGroup>
-
-	<PropertyGroup Condition=" '$(_PlatformName)' == 'macOS' ">
-		<_EarlyAppBundleTasksDependsOn>
-			_CollectBundleResources;
-			_PackLibraryResources;
-			_UnpackLibraryResources;
-			_GenerateBundleName;
+		</_CreateAppDependsOn>
+		<_CreateAppDependsOn Condition=" '$(_PlatformName)' == 'macOS' ">
 			_DetectSigningIdentity;
 			_CopyContentToBundle;
 			_SmeltMetal;
@@ -191,16 +197,19 @@
 			_TemperMetal;
 			_CompileEntitlements;
 			_CompileAppManifest;
-		</_EarlyAppBundleTasksDependsOn>
-		<_LateAppBundleTasksDependsOn>
+
+			$(_CreateAppDotNet5);
+
 			_CreatePkgInfo;
 			_CopyAppExtensionsToBundle;
-		</_LateAppBundleTasksDependsOn>
+		</_CreateAppDependsOn>
 	</PropertyGroup>
 
 	<!-- App bundle creation tasks -->
-	<Target Name="_EarlyAppBundleTasks" DependsOnTargets="$(_EarlyAppBundleTasksDependsOn)" />
-	<Target Name="_LateAppBundleTasks" DependsOnTargets="$(_LateAppBundleTasksDependsOn)" />
+	<Target Name="_EarlyAppBundleTasks" DependsOnTargets="$(_EarlyAppBundleTasksDependsOn)" Condition="'$(_CanOutputAppBundle)' == 'true'" />
+	<Target Name="_LateAppBundleTasks" DependsOnTargets="$(_LateAppBundleTasksDependsOn)" Condition="'$(_CanOutputAppBundle)' == 'true'" />
+
+	<Target Name="_CreateApp" DependsOnTargets="$(_CreateAppDependsOn)" Condition="'$(_CanOutputAppBundle)' == 'true'" />
 
 	<Target Name="_PreAOTCompile" DependsOnTargets="_SetVariables">
 		<Copy SourceFiles="@(_AssembliesToAOT)" DestinationFolder="$(_AOTInputDirectory)" />
