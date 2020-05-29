@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.DotNet.XHarness.iOS.Shared;
+using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
 using Microsoft.DotNet.XHarness.iOS.Shared.Hardware;
 using Microsoft.DotNet.XHarness.iOS.Shared.Listeners;
 using Microsoft.DotNet.XHarness.iOS.Shared.Logging;
@@ -109,6 +112,7 @@ namespace Xharness.TestTasks {
 						new TestReporterFactory (testTask.ProcessManager),
 						testTask.AppRunnerTarget,
 						testTask.Harness,
+						testTask.Harness,
 						projectFilePath: testTask.ProjectFile,
 						mainLog: uninstall_log,
 						logs: new Logs (testTask.LogDirectory ?? defaultLogDirectory),
@@ -187,6 +191,7 @@ namespace Xharness.TestTasks {
 								new DeviceLogCapturerFactory (testTask.ProcessManager),
 								new TestReporterFactory (testTask.ProcessManager),
 								testTask.AppRunnerTarget,
+								testTask.Harness,
 								testTask.Harness,
 								projectFilePath: testTask.ProjectFile,
 								mainLog: testTask.Logs.Create ($"extension-run-{testTask.Device.UDID}-{Helpers.Timestamp}.log", "Extension run log"),

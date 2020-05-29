@@ -245,7 +245,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			return csproj.SelectSingleNode ("/*/*/*[local-name() = 'AssemblyName']").InnerText;
 		}
 
-		public static async Task<string> GetPropertyByMSBuildEvaluationAsync (this XmlDocument csproj, ILog log, IProcessManager processManager, string projectPath, string property, string dependsOnTargets = "", Dictionary<string, string> properties = null)
+		public static async Task<string> GetPropertyByMSBuildEvaluationAsync (this XmlDocument csproj, ILog log, ISystemInformation sysinfo, IProcessManager processManager, string projectPath, string property, string dependsOnTargets = "", Dictionary<string, string> properties = null)
 		{
 			var xml = @"<Project DefaultTargets='WriteProperty' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
 	<!-- Import the project we want to inspect -->
@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				File.WriteAllText (inspector, xml.Replace ("%PROPERTY%", property).Replace ("%DEPENDSONTARGETS%", dependsOnTargets));
 				using (var proc = new Process ()) {
 					var isDotNetProject = csproj.IsDotNetProject ();
-					proc.StartInfo.FileName = isDotNetProject ? "dotnet" : "msbuild";
+					proc.StartInfo.FileName = isDotNetProject ? sysinfo.DotNetExecutable : sysinfo.MSBuildExecutable;
 					var args = new List<string> ();
 					if (isDotNetProject)
 						args.Add ("build");

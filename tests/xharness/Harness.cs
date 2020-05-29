@@ -46,7 +46,7 @@ namespace Xharness {
 		public XmlResultJargon XmlJargon { get; set; } = XmlResultJargon.NUnitV3;
 	}
 
-	public interface IHarness {
+	public interface IHarness : ISystemInformation {
 		HarnessAction Action { get; }
 		Dictionary<string, string> EnvironmentVariables { get; }
 		ILog HarnessLog { get; set; }
@@ -61,7 +61,7 @@ namespace Xharness {
 		void Log (int min_level, string message, params object [] args);
 	}
 
-	public class Harness : IHarness {
+	public class Harness : IHarness, ISystemInformation {
 		readonly TestTarget target;
 		readonly string buildConfiguration = "Debug";
 
@@ -709,6 +709,10 @@ namespace Xharness {
 			}
 		}
 
+		string ISystemInformation.DotNetExecutable => DOTNET5;
+
+		string ISystemInformation.MSBuildExecutable => XIBuildPath;
+
 		private AppRunner CreateAppRunner (TestProject project)
 		{
 			var rv = new AppRunner (processManager,
@@ -721,6 +725,7 @@ namespace Xharness {
 				new DeviceLogCapturerFactory (processManager),
 				new TestReporterFactory (processManager),
 				target,
+				this,
 				this,
 				HarnessLog,
 				new Logs (LogDirectory),

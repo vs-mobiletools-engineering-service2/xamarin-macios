@@ -99,7 +99,7 @@ namespace Xharness.Tests {
 
 			var mock5 = new Mock<IAppBundleInformationParser> ();
 			mock5
-				.Setup (x => x.ParseFromProjectAsync (It.IsAny<ILog> (), It.IsAny<IProcessManager> (), It.IsAny<string> (), It.IsAny<TestTarget> (), It.IsAny<string> ()))
+				.Setup (x => x.ParseFromProjectAsync (It.IsAny<ILog> (), It.IsAny<ISystemInformation> (), It.IsAny<IProcessManager> (), It.IsAny<string> (), It.IsAny<TestTarget> (), It.IsAny<string> ()))
 				.ReturnsAsync (new AppBundleInformation (appName, appName, appPath, appPath, null));
 
 			appBundleInformationParser = mock5.Object;
@@ -129,6 +129,7 @@ namespace Xharness.Tests {
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Simulator_iOS64,
 				Mock.Of<IHarness> (),
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -155,6 +156,7 @@ namespace Xharness.Tests {
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Simulator_iOS64,
 				Mock.Of<IHarness> (),
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -180,6 +182,7 @@ namespace Xharness.Tests {
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Simulator_iOS64,
 				Mock.Of<IHarness> (),
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -204,6 +207,7 @@ namespace Xharness.Tests {
 				Mock.Of<IDeviceLogCapturerFactory> (),
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Device_iOS,
+				Mock.Of<IHarness> (),
 				Mock.Of<IHarness> (),
 				mainLog.Object,
 				logs.Object,
@@ -239,6 +243,7 @@ namespace Xharness.Tests {
 				Mock.Of<IDeviceLogCapturerFactory> (),
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Device_iOS,
+				harness,
 				harness,
 				mainLog.Object,
 				logs.Object,
@@ -283,6 +288,7 @@ namespace Xharness.Tests {
 				Mock.Of<IDeviceLogCapturerFactory> (),
 				Mock.Of<ITestReporterFactory> (),
 				TestTarget.Device_iOS,
+				harness,
 				harness,
 				mainLog.Object,
 				logs.Object,
@@ -366,6 +372,7 @@ namespace Xharness.Tests {
 				testReporterFactory.Object,
 				TestTarget.Simulator_tvOS,
 				GetMockedHarness (),
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -478,6 +485,7 @@ namespace Xharness.Tests {
 				testReporterFactory.Object,
 				TestTarget.Simulator_iOS64,
 				harness,
+				harness,
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -545,6 +553,7 @@ namespace Xharness.Tests {
 				testReporterFactory.Object,
 				TestTarget.Device_tvOS,
 				GetMockedHarness (),
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -640,6 +649,7 @@ namespace Xharness.Tests {
 				testReporterFactory.Object,
 				TestTarget.Device_iOS,
 				harness,
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,
@@ -748,6 +758,7 @@ namespace Xharness.Tests {
 				testReporterFactory.Object,
 				TestTarget.Device_iOS,
 				harness,
+				Mock.Of<ISystemInformation> (),
 				mainLog.Object,
 				logs.Object,
 				projectFilePath: projectFilePath,

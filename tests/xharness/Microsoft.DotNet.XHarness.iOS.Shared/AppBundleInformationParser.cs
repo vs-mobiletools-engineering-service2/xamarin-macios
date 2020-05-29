@@ -7,13 +7,17 @@ using Microsoft.DotNet.XHarness.iOS.Shared.Logging;
 using Microsoft.DotNet.XHarness.iOS.Shared.Utilities;
 
 namespace Microsoft.DotNet.XHarness.iOS.Shared {
+	public interface ISystemInformation {
+		string DotNetExecutable { get; }
+		string MSBuildExecutable { get;  }
+	}
 
 	public interface IAppBundleInformationParser {
-		Task<AppBundleInformation> ParseFromProjectAsync (ILog log, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration);
+		Task<AppBundleInformation> ParseFromProjectAsync (ILog log, ISystemInformation sysinfo, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration);
 	}
 
 	public class AppBundleInformationParser : IAppBundleInformationParser {
-		public async Task<AppBundleInformation> ParseFromProjectAsync (ILog log, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration)
+		public async Task<AppBundleInformation> ParseFromProjectAsync (ILog log, ISystemInformation sysinfo, IProcessManager processManager, string projectFilePath, TestTarget target, string buildConfiguration)
 		{
 			var csproj = new XmlDocument ();
 			csproj.LoadWithoutNetworkAccess (projectFilePath);
@@ -41,7 +45,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 					{ "Configuration", buildConfiguration },
 					{ "Platform", platform },
 				};
-				var appBundlePath = await csproj.GetPropertyByMSBuildEvaluationAsync (log, processManager, projectFilePath, "OutputPath", "_GenerateAppBundleName;_GenerateAppExBundleName", properties);
+				var appBundlePath = await csproj.GetPropertyByMSBuildEvaluationAsync (log, sysinfo, processManager, projectFilePath, "OutputPath", "_GenerateAppBundleName;_GenerateAppExBundleName", properties);
 				appPath = Path.Combine (Path.GetDirectoryName (projectFilePath),
 					appBundlePath,
 					appName + (extension != null ? ".appex" : ".app"));

@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Tests {
 
 			var log = new MemoryLog ();
 			var processManager = new Mock<IProcessManager> ();
-			var info = parser.ParseFromProjectAsync (log, processManager.Object, projectFilePath, TestTarget.Simulator_iOS64, "Debug").Result;
+			var sysinfo = new Mock<ISystemInformation> ();
+			var info = parser.ParseFromProjectAsync (log, sysinfo.Object, processManager.Object, projectFilePath, TestTarget.Simulator_iOS64, "Debug").Result;
 
 			Assert.AreEqual (appName, info.AppName);
 			Assert.AreEqual (appPath, info.AppPath);

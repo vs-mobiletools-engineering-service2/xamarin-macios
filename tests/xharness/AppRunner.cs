@@ -27,6 +27,7 @@ namespace Xharness {
 		readonly IDeviceLogCapturerFactory deviceLogCapturerFactory;
 		readonly ITestReporterFactory testReporterFactory;
 		readonly IAppBundleInformationParser appBundleInformationParser;
+		readonly ISystemInformation sysinfo;
 		
 		readonly RunMode runMode;
 		readonly bool isSimulator;
@@ -72,6 +73,7 @@ namespace Xharness {
 						  ITestReporterFactory reporterFactory,
 						  TestTarget target,
 						  IHarness harness,
+						  ISystemInformation sysinfo,
 						  ILog mainLog,
 						  ILogs logs,
 						  string projectFilePath,
@@ -94,6 +96,7 @@ namespace Xharness {
 			this.testReporterFactory = reporterFactory ?? throw new ArgumentNullException (nameof (testReporterFactory));
 			this.appBundleInformationParser = appBundleInformationParser ?? throw new ArgumentNullException (nameof (appBundleInformationParser));
 			this.harness = harness ?? throw new ArgumentNullException (nameof (harness));
+			this.sysinfo = sysinfo ?? throw new ArgumentNullException (nameof (sysinfo));
 			this.MainLog = mainLog ?? throw new ArgumentNullException (nameof (mainLog));
 			this.Logs = logs ?? throw new ArgumentNullException (nameof (logs));
 			this.timeoutMultiplier = timeoutMultiplier;
@@ -113,7 +116,7 @@ namespace Xharness {
 
 		public async Task InitializeAsync ()
 		{
-			AppInformation = await appBundleInformationParser.ParseFromProjectAsync (MainLog, processManager, projectFilePath, target, buildConfiguration);
+			AppInformation = await appBundleInformationParser.ParseFromProjectAsync (MainLog, sysinfo, processManager, projectFilePath, target, buildConfiguration);
 			AppInformation.Variation = variation;
 		}
 

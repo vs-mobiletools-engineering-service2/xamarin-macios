@@ -96,6 +96,7 @@ namespace Xharness.TestTasks {
 				new TestReporterFactory (testTask.ProcessManager),
 				testTask.AppRunnerTarget,
 				testTask.Harness,
+				testTask.Harness,
 				mainLog: testTask.Logs.Create ($"run-{testTask.Device.UDID}-{Helpers.Timestamp}.log", "Run log"),
 				logs: testTask.Logs,
 				projectFilePath: testTask.ProjectFile,
