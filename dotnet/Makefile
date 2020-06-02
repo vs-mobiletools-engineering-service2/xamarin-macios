@@ -119,26 +119,6 @@ pack-macos: $(RUNTIME_PACKS_MACOS) $(REF_PACK_MACOS) $(SDK_PACK_MACOS)
 
 TARGETS += $(RUNTIME_PACKS) $(REF_PACKS) $(SDK_PACKS)
 
-test/NuGet.config: NuGet.config Makefile
-	$(Q) $(CP) $< $@.tmp
-	$(Q) nuget sources add -Name local-dotnet-feed -Source $(abspath $(DOTNET_FEED_DIR)) -ConfigFile $@.tmp
-	$(Q) mv $@.tmp $@
-
-test/global.json: Makefile $(TEMPLATED_FILES)
-	$(Q_GEN) \
-		printf "{\n" > $@; \
-		printf "\t\"sdk\": { \"version\": \"5.*\" },\n" >> $@; \
-		printf "\t\"msbuild-sdks\": {\n" >> $@; \
-		printf "\t\t\"Microsoft.iOS.Sdk\": \"$(IOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.tvOS.Sdk\": \"$(TVOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.watchOS.Sdk\": \"$(WATCHOS_NUGET_VERSION_NO_METADATA)\",\n" >> $@; \
-		printf "\t\t\"Microsoft.macOS.Sdk\": \"$(MACOS_NUGET_VERSION_NO_METADATA)\"\n" >> $@; \
-		printf "\t}\n}\n" >> $@
-
-TARGETS += \
-	test/NuGet.config \
-	test/global.json \
-
 prepare:
 	$(Q) V=$(V) \
 	TOP=$(TOP) \
