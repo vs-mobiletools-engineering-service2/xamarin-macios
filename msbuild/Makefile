@@ -293,65 +293,6 @@ $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/%: Xamarin.Mac.Tasks/bin/
 
 $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/%: Xamarin.Localization.MSBuild/bin/$(CONFIG)/$(TARGETFRAMEWORK)/% | $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild
 	$(Q) install -m 644 $< $@
-
-##
-## .NET targets ##
-##
-
-
-DOTNET_TARGETS = \
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))               \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))               \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                        \
-	\
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))           \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))           \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                    \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS/FrameworkList.xml                                                         \
-	$(foreach target,$(WATCH_TARGETS)             ,$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS/$(notdir $(target)))       \
-	\
-	$(foreach target,$(IOS_TARGETS)               ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))              \
-	$(foreach target,$(IOS_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(notdir $(target)))              \
-	$(foreach dll,$(IOS_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS/$(dll).dll)                       \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS/FrameworkList.xml                                                               \
-	$(foreach target,$(TVOS_TARGETS)             ,$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS/$(notdir $(target)))              \
-	\
-	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/FrameworkList.xml                                                             \
-	$(foreach target,$(MAC_TARGETS)               ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(notdir $(target)))           \
-	$(foreach target,$(MAC_BINDING_TARGETS)       ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(notdir $(target)))           \
-	$(foreach dll,$(MAC_TASK_ASSEMBLIES)          ,$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/$(dll).dll)                    \
-
-
-DOTNET_DIRECTORIES = \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/iOS \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/TVOS \
-	$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/WatchOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/iOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/TVOS \
-	$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/WatchOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/iOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/TVOS \
-	$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/WatchOS \
-	$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS \
-
-$(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS/%: $(MAC_DESTDIR)$(MAC_FRAMEWORK_CURRENT_DIR)/lib/msbuild/% | $(DOTNET_DESTDIR)/$(MACOS_NUGET).Sdk/tools/msbuild/macOS
-	$(Q) $(CP) $< $@
-	if test -f $(<:.dll=.pdb); then $(CP) $(<:.dll=.pdb) $(dir $@); fi
-
-$(DOTNET_DESTDIR)/$(IOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(DOTNET_DESTDIR)/$(TVOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-$(DOTNET_DESTDIR)/$(WATCHOS_NUGET).Sdk/tools/msbuild/%: $(IOS_DESTDIR)$(MONOTOUCH_PREFIX)/lib/msbuild/% | $(DOTNET_DIRECTORIES)
-	$(Q) $(CP) $< $@
-
-ifdef ENABLE_DOTNET
-MSBUILD_DIRECTORIES += $(DOTNET_DIRECTORIES)
-MSBUILD_PRODUCTS += $(DOTNET_TARGETS)
-endif
-
 ##
 ## net5 targets ##
 ##
@@ -418,11 +359,6 @@ endif
 
 # we must install locally during 'make all', because the F# build depends on the msbuild targets/assemblies.
 all-local:: $(MSBUILD_PRODUCTS) .stamp-test-xml
-
-Xamarin.iOS.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.iOS.Tasks.dll: .build-stamp
-Xamarin.iOS.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Localization.MSBuild.dll: .build-stamp
-Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Mac.Tasks.dll: .build-stamp
-Xamarin.Mac.Tasks/bin/$(CONFIG)/$(TARGETFRAMEWORK)/Xamarin.Localization.MSBuild.dll: .build-stamp
 
 .build-stamp: $(ALL_SOURCES)
 	$(Q) $(SYSTEM_MONO) /Library/Frameworks/Mono.framework/Versions/Current/lib/mono/nuget/NuGet.exe restore
