@@ -10,114 +10,30 @@ using NUnit.Framework;
 
 namespace Xamarin.Tests {
 	public static class DotNet {
-
-		static string default_version = "3.1.101";
-
-		static Dictionary<string, Tuple<string, string>> versions = new Dictionary<string, Tuple<string, string>> {
-			{ "3.1.101", new Tuple<string, string> ("https://download.visualstudio.microsoft.com/download/pr/515b77f4-4678-4b6f-a981-c48cf5607c5a/24b33941ba729ec421aa358fa452fd2f/dotnet-sdk-3.1.101-osx-x64.tar.gz", "b20865ce6c53b7f3321b4d18ccab52307183e4f1210215385870baaaa814d0ec57c8d41aca9a64b7edca4da1dec841f006e07f2af78dd68465a55ea9f25ca057") },
-		};
-
-		static Dictionary<string, string> downloaded = new Dictionary<string, string> ();
-
-		static DotNet ()
-		{
-			var dotnet_version = Configuration.GetVariable ("DOTNET_VERSION", null);
-			var dotnet_url = Configuration.GetVariable ("DOTNET_URL", null);
-			if (dotnet_version != null && dotnet_url != null) {
-				versions [dotnet_version] = new Tuple<string, string> (dotnet_url, null);
-				default_version = dotnet_version;
-			}
-
-			dotnet_version = Configuration.GetVariable ("DOTNET5_VERSION", null);
-			dotnet_url = Configuration.GetVariable ("DOTNET5_TARBALL", null);
-			if (dotnet_version != null && dotnet_url != null) {
-				versions [dotnet_version] = new Tuple<string, string> (dotnet_url, null);
-				default_version = dotnet_version;
-			}
-		}
-
-		static bool VerifyChecksum (string file, string checksum)
-		{
-			using (var provider = new System.Security.Cryptography.SHA512CryptoServiceProvider ()) {
-				using (var fs = new FileStream (file, FileMode.Open, FileAccess.Read)) {
-					var hashed = provider.ComputeHash (fs);
-					var sb = new StringBuilder ();
-					foreach (var b in hashed) {
-						sb.Append ($"{b.ToString ("x2")}");
-					}
-					return sb.ToString () == checksum;
-				}
-			}
-
-		}
-
-		// Downloads the specified dotnet version, extracts it and returns the directory where it was extracted.
-		static string DownloadPackage (string version = null)
-		{
-			return DownloadPackage (version, out var _);
-		}
-
-		static string DownloadPackage (string requested_dotnet_version, out string actual_dotnet_version, bool install_sdks = true)
-		{
-			if (string.IsNullOrEmpty (requested_dotnet_version))
-				requested_dotnet_version = default_version;
-
-			if (!versions.TryGetValue (requested_dotnet_version, out var info))
-				throw new Exception ($"Don't know the download url for dotnet {requested_dotnet_version}");
-
-			actual_dotnet_version = requested_dotnet_version;
-
-			lock (downloaded) {
-				if (downloaded.TryGetValue (requested_dotnet_version, out var local_path))
-					return local_path;
-
-				var url = info.Item1;
-				var checksum = info.Item2; // shasum -a 512
-				var fn = Path.GetFileName (info.Item1);
-				var cache_dir = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "Library", "Caches", "xamarin-macios");
-				var cached_tmp = Path.Combine (cache_dir, fn + ".tmp");
-				var cached = Path.Combine (cache_dir, fn);
-				var download = true;
-
-				Directory.CreateDirectory (cache_dir);
-
-				if (File.Exists (cached) && (checksum == null || VerifyChecksum (cached, checksum)))
-					download = false;
-
-				if (download) {
-					using (var wc = new System.Net.WebClient ()) {
-						File.Delete (cached_tmp);
-						wc.DownloadFile (url, cached_tmp);
-						if (checksum != null && !VerifyChecksum (cached_tmp, checksum))
-							throw new Exception ($"Download of url {url} into {cached_tmp} failed sha512 checksum {checksum}");
-						File.Delete (cached);
-						File.Move (cached_tmp, cached);
-					}
-				}
-
-				local_path = Path.Combine (cache_dir, Path.GetFileNameWithoutExtension (Path.GetFileNameWithoutExtension (cached)));
-				if (Directory.Exists (local_path))
-					Directory.Delete (local_path, true);
-				Directory.CreateDirectory (local_path);
-
-				var rv = ExecutionHelper.Execute ("tar", new string [] { "xvf", cached }, timeout: TimeSpan.FromMinutes (1), workingDirectory: local_path, environmentVariables: null, stdout: null, stderr: null);
-				if (rv != 0)
-					throw new Exception ($"Extraction of {cached} failed, 'tar xvf {cached}' failed with exit code {rv}.");
-
-				downloaded [requested_dotnet_version] = local_path;
-
-				return local_path;
-			}
-		}
-
+		static string dotnet_executable;
 		public static string Executable {
 			get {
-				return Path.Combine (DownloadPackage (), "dotnet");
+				if (dotnet_executable == null) {
+					dotnet_executable = Configuration.EvaluateVariable ("DOTNET5");
+					if (string.IsNullOrEmpty (dotnet_executable))
+						throw new Exception ($"Could not find the dotnet executable.");
+					if (!File.Exists (dotnet_executable))
+						throw new FileNotFoundException ($"The dotnet executable '{dotnet_executable}' does not exist.");
+				}
+				return dotnet_executable;
 			}
+		}
+
+		public static void AssertBuild (string project, Dictionary<string, string> properties = null, string verbosity = "diagnostic")
+		{
+			Execute ("build", project, properties, out var _, verbosity, true);
 		}
 
 		public static int Execute (string verb, string project, Dictionary<string, string> properties, out StringBuilder output, string verbosity = "diagnostic", bool assert_success = true)
 		{
+			if (!File.Exists (project))
+				throw new FileNotFoundException ($"The project file '{project}' does not exist.");
+
 			verb = verb.ToLowerInvariant ();
 
 			switch (verb) {
@@ -126,8 +42,9 @@ namespace Xamarin.Tests {
 				var args = new List<string> ();
 				args.Add (verb);
 				args.Add (project);
-				foreach (var prop in properties) {
-					args.Add ($"/p:{prop.Key}={prop.Value}");
+				if (properties != null) {
+					foreach (var prop in properties)
+						args.Add ($"/p:{prop.Key}={prop.Value}");
 				}
 				if (!string.IsNullOrEmpty (verbosity))
 					args.Add ($"/verbosity:{verbosity}");
@@ -137,12 +54,11 @@ namespace Xamarin.Tests {
 				env ["MSBUILD_EXE_PATH"] = null;
 				output = new StringBuilder ();
 				var rv = ExecutionHelper.Execute (Executable, args, env, output, output, workingDirectory: Path.GetDirectoryName (project), timeout: TimeSpan.FromMinutes (10));
-				if (rv != 0) {
-					Console.WriteLine ($"'dotnet {StringUtils.FormatArguments (args)}' failed with exit code {rv}.");
+				if (assert_success && rv != 0) {
+					Console.WriteLine ($"'{Executable} {StringUtils.FormatArguments (args)}' failed with exit code {rv}.");
 					Console.WriteLine (output);
-				}
-				if (assert_success)
 					Assert.AreEqual (0, rv, $"Exit code: dotnet {StringUtils.FormatArguments (args)}");
+				}
 				return rv;
 			default:
 				throw new NotImplementedException ($"Unknown dotnet action: '{verb}'");

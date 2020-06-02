@@ -340,7 +340,7 @@ Copyright (C) 2013-2016 Xamarin. All rights reserved.
 
 	<Target Name="_OptimizeLocalizationFiles" DependsOnTargets="$(OptimizeLocalizationFilesDependsOn)" />
 
-	<PropertyGroup>
+	<PropertyGroup Condition="'$(_UsingXamarinSdk)' != 'true'">
 		<CreateAppBundleDependsOn>
 			_DetectAppManifest;
 			_DetectSigningIdentity;
@@ -385,24 +385,16 @@ Copyright (C) 2013-2016 Xamarin. All rights reserved.
 			_CalculateCodesignAppBundleInputs;
 		</_CodesignAppBundleDependsOn>
 
-		<_CoreCodesignDependsOn>
+		<CoreCodesignDependsOn>
 			$(_CodesignAppBundleDependsOn);
-			_CodesignAppBundle;
-			_CodesignVerify;
-		</_CoreCodesignDependsOn>
+			$(CoreCodesignDependsOn);
+		</CoreCodesignDependsOn>
 
 		<CodesignDependsOn>
-			BeforeCodeSign;
-			CoreCodeSign;
-			AfterCodeSign;
+			_CreateAppBundle;
+			$(CodesignDependsOn);
 		</CodesignDependsOn>
 	</PropertyGroup>
-
-	<Target Name="BeforeCodesign" />
-	<Target Name="CoreCodesign" DependsOnTargets="$(_CoreCodesignDependsOn)" />
-	<Target Name="AfterCodesign" />
-
-	<Target Name="Codesign" Condition="'$(_CanOutputAppBundle)' == 'true'" DependsOnTargets="_CreateAppBundle;$(CodesignDependsOn)" />
 
 	<PropertyGroup>
 		<!-- Extensibility point for VS Publishing Workflow -->
@@ -726,7 +718,7 @@ Copyright (C) 2013-2016 Xamarin. All rights reserved.
 		</PropertyGroup>
 	</Target>
 
-	<Target Name="_GenerateAppExBundleName" Condition="'$(IsAppExtension)' == 'true'" DependsOnTargets="_ComputeTargetArchitectures;_DetectSigningIdentity">
+	<Target Name="_GenerateAppExBundleName" Condition="'$(IsAppExtension)' == 'true'" DependsOnTargets="_ComputeTargetArchitectures">
 		<PropertyGroup>
 			<AppBundleDir Condition="'$(AppBundleDir)' == ''">$(DeviceSpecificOutputPath)$(_AppBundleName)$(AppBundleExtension)</AppBundleDir>
 			<_AppBundlePath>$(AppBundleDir)\</_AppBundlePath>
