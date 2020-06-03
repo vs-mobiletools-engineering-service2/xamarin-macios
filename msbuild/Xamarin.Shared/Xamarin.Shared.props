@@ -1,0 +1,44 @@
+<!--
+***********************************************************************************************
+Xamarin.Shared.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+  created a backup copy.  Incorrect changes to this file will make it
+  impossible to load or build your projects from the command-line or the IDE.
+
+This file imports the version- and platform-specific targets for the project importing
+this file. This file also defines targets to produce an error if the specified targets
+file does not exist, but the project is built anyway (command-line or IDE build).
+
+Copyright (C) 2020 Microsoft. All rights reserved.
+***********************************************************************************************
+-->
+
+<!-- This is shared between Xamarin.iOS and Xamarin.Mac -->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).Before.targets"
+			Condition="Exists('$(MSBuildThisFileDirectory)$(MSBuildThisFileName).Before.targets')"/>
+
+	<PropertyGroup Condition="'$(_PlatformName)' == ''">
+		<_PlatformName Condition="'$(TargetFrameworkIdentifier)' == 'Xamarin.iOS'">iOS</_PlatformName>
+		<_PlatformName Condition="'$(TargetFrameworkIdentifier)' == 'Xamarin.TVOS'">tvOS</_PlatformName>
+		<_PlatformName Condition="'$(TargetFrameworkIdentifier)' == 'Xamarin.WatchOS'">watchOS</_PlatformName>
+		<_PlatformName Condition="'$(_PlatformName)' == ''">macOS</_PlatformName> <!-- detecting Xamarin.Mac is a bit more complicated, so just fall back to macOS if none of the others match -->
+	</PropertyGroup>
+
+	<!-- Sometimes we've used different variable names for the same thing for Xamarin.iOS and Xamarin.Mac projects. Here we try to unify those variables -->
+	<PropertyGroup>
+		<!-- ResourcePrefix -->
+		<MonoMacResourcePrefix Condition="'$(_PlatformName)' == 'macOS' And '$(MonoMacResourcePrefix)' == ''">Resources</MonoMacResourcePrefix>
+		<XamMacResourcePrefix Condition="'$(_PlatformName)' == 'macOS' And '$(XamMacResourcePrefix)' == ''">$(MonoMacResourcePrefix)</XamMacResourcePrefix>
+		<XamMacResourcePrefix Condition="'$(_PlatformName)' == 'macOS' And '$(XamMacResourcePrefix)' == ''">Resources</XamMacResourcePrefix>
+		<IPhoneResourcePrefix Condition="'$(_PlatformName)' != 'macOS' And '$(IPhoneResourcePrefix)' == ''">Resources</IPhoneResourcePrefix>
+		<_ResourcePrefix Condition="'$(_PlatformName)' == 'macOS'">$(XamMacResourcePrefix)</_ResourcePrefix>
+		<_ResourcePrefix Condition="'$(_PlatformName)' != 'macOS'">$(IPhoneResourcePrefix)</_ResourcePrefix>
+	</PropertyGroup>
+
+	<Import Project="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).After.targets"
+			Condition="Exists('$(MSBuildThisFileDirectory)$(MSBuildThisFileName).After.targets')"/>
+</Project>
+

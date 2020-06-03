@@ -439,7 +439,7 @@ namespace Xamarin.iOS.Tasks
 
 		public void Dotnet (string command, string project, Dictionary<string, string> properties)
 		{
-			DotNet.Execute (command, project, properties, out var _, assert_success: true);
+			DotNet.Execute (command, project, properties, assert_success: true);
 		}
 
 		public void RunTargetOnInstance (ProjectInstance instance, string target, int expectedErrorCount = 0)

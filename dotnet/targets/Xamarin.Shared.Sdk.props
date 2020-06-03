@@ -32,17 +32,14 @@
       * Sdk refers to the XI/XM when installed into /usr/local/share/dotnet/sdk/<version>/Sdks
     -->
 
-    <!-- This is the .net 5 location of the Xamarin.Sdk (/usr/local/share/dotnet/sdk/<version>/Sdks/Xamarin.[iOS/tvOS/watchOS/macOS].Sdk) -->
-    <XamarinSdkRootDirectory>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..'))\</XamarinSdkRootDirectory>
-
     <!-- Opt-in to use the version of XI/XM installed into the system -->
     <XamarinUseSystemInstall Condition=" '$(XamarinUseSystemInstall)' == '' ">false</XamarinUseSystemInstall>
     <!-- Opt-in to use the simplified Build-target-replacement build logic -->
     <XamarinReplaceBuildTarget Condition=" '$(XamarinReplaceBuildTarget)' == '' ">false</XamarinReplaceBuildTarget>
     <!-- Default is to use the .NET5-style build -->
 
-    <MD_MTOUCH_SDK_ROOT      Condition=" '$(XamarinUseSystemInstall)' == 'false' And '$(_PlatformName)' != 'macOS' And '$(MD_MTOUCH_SDK_ROOT)' == ''      ">$(XamarinSdkRootDirectory)</MD_MTOUCH_SDK_ROOT>
-    <XamarinMacFrameworkRoot Condition=" '$(XamarinUseSystemInstall)' == 'false' And '$(_PlatformName)' == 'macOS' And '$(XamarinMacFrameworkRoot)' == '' ">$(XamarinSdkRootDirectory)</XamarinMacFrameworkRoot>
+    <MD_MTOUCH_SDK_ROOT      Condition=" '$(XamarinUseSystemInstall)' == 'false' And '$(_PlatformName)' != 'macOS' And '$(MD_MTOUCH_SDK_ROOT)' == ''      ">$(_XamarinSdkRootDirectory)</MD_MTOUCH_SDK_ROOT>
+    <XamarinMacFrameworkRoot Condition=" '$(XamarinUseSystemInstall)' == 'false' And '$(_PlatformName)' == 'macOS' And '$(XamarinMacFrameworkRoot)' == '' ">$(_XamarinSdkRootDirectory)</XamarinMacFrameworkRoot>
 
     <!-- This is the old location of the legacy Xamarin Sdk -->
     <!-- For iOS, first check MD_MTOUCH_SDK_ROOT and then MonoTouchSdkRoot -->
@@ -56,8 +53,8 @@
     <XamarinFrameworkRoot Condition=" '$(_PlatformName)' != 'macOS' ">$(MonoTouchSdkRoot)</XamarinFrameworkRoot>
 
     <!-- We override the framework path so that we resolves to our own mscorlib.dll when we're not using the .NET 5 build logic -->
-    <TargetFrameworkRootPath Condition=" '$(XamarinReplaceBuildTarget)' == 'true' And '$(TargetFrameworkRootPath)' == '' ">$(XamarinSdkRootDirectory)lib</TargetFrameworkRootPath>
-    <FrameworkPathOverride   Condition=" '$(XamarinReplaceBuildTarget)' == 'true' And '$(FrameworkPathOverride)' == '' ">$(XamarinSdkRootDirectory)lib\$(_TFI)\v1.0</FrameworkPathOverride>
+    <TargetFrameworkRootPath Condition=" '$(XamarinReplaceBuildTarget)' == 'true' And '$(TargetFrameworkRootPath)' == '' ">$(_XamarinSdkRootDirectory)lib</TargetFrameworkRootPath>
+    <FrameworkPathOverride   Condition=" '$(XamarinReplaceBuildTarget)' == 'true' And '$(FrameworkPathOverride)' == '' ">$(_XamarinSdkRootDirectory)lib\$(_TFI)\v1.0</FrameworkPathOverride>
 
     <XamarinFrameworkBinDir Condition=" '$(_PlatformName)' == 'macOS' And '$(XamarinUseSystemInstall)' == 'false' ">$(XamarinFrameworkRoot)/tools/bin</XamarinFrameworkBinDir>
     <XamarinFrameworkBinDir Condition=" '$(_PlatformName)' == 'macOS' And '$(XamarinUseSystemInstall)' != 'false' ">$(XamarinFrameworkRoot)/bin</XamarinFrameworkBinDir>

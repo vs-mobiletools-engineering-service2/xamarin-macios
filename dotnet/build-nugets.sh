@@ -133,9 +133,6 @@ create_sdk_nugets ()
 	$cp "$legacy_destdir/Version" "$destdir/"
 	$cp "$legacy_destdir/buildinfo" "$destdir/tools/"
 
-	# linker assembly
-	$cp -r "$TOP/tools/dotnet-linker/bin/Debug/netcoreapp3.0" "$destdir/tools/dotnet-linker"
-
 	# btouch
 	# FIXME: should this go into a separate package?
 	$cp -r "$legacy_destdir/lib/bgen" "$destdir/tools/lib/"

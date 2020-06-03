@@ -24,12 +24,19 @@ namespace Xamarin.Tests {
 			}
 		}
 
-		public static void AssertBuild (string project, Dictionary<string, string> properties = null, string verbosity = "diagnostic")
+		public static ExecutionResult AssertBuild (string project, Dictionary<string, string> properties = null, string verbosity = "diagnostic")
 		{
-			Execute ("build", project, properties, out var _, verbosity, true);
+			return Execute ("build", project, properties, verbosity, true);
 		}
 
-		public static int Execute (string verb, string project, Dictionary<string, string> properties, out StringBuilder output, string verbosity = "diagnostic", bool assert_success = true)
+		public static ExecutionResult AssertBuildFailure (string project, Dictionary<string, string> properties = null, string verbosity = "diagnostic")
+		{
+			var rv = Execute ("build", project, properties, verbosity, false);
+			Assert.AreNotEqual (0, rv.ExitCode, "Unexpected success");
+			return rv;
+		}
+
+		public static ExecutionResult Execute (string verb, string project, Dictionary<string, string> properties, string verbosity = "diagnostic", bool assert_success = true)
 		{
 			if (!File.Exists (project))
 				throw new FileNotFoundException ($"The project file '{project}' does not exist.");
@@ -52,14 +59,18 @@ namespace Xamarin.Tests {
 				var env = new Dictionary<string, string> ();
 				env ["MSBuildSDKsPath"] = null;
 				env ["MSBUILD_EXE_PATH"] = null;
-				output = new StringBuilder ();
+				var output = new StringBuilder ();
 				var rv = ExecutionHelper.Execute (Executable, args, env, output, output, workingDirectory: Path.GetDirectoryName (project), timeout: TimeSpan.FromMinutes (10));
 				if (assert_success && rv != 0) {
 					Console.WriteLine ($"'{Executable} {StringUtils.FormatArguments (args)}' failed with exit code {rv}.");
 					Console.WriteLine (output);
 					Assert.AreEqual (0, rv, $"Exit code: dotnet {StringUtils.FormatArguments (args)}");
 				}
-				return rv;
+				return new ExecutionResult {
+					StandardOutput = output,
+					StandardError = output,
+					ExitCode = rv,
+				};
 			default:
 				throw new NotImplementedException ($"Unknown dotnet action: '{verb}'");
 			}
@@ -130,5 +141,12 @@ namespace Xamarin.Tests {
 			Console.WriteLine ($"\tSize comparison complete, total size change: {total_diff} bytes = {total_diff / 1024.0:0.0} KB = {total_diff / (1024.0 * 1024.0):0.0} MB");
 
 		}
+	}
+
+	public class ExecutionResult {
+		public StringBuilder StandardOutput;
+		public StringBuilder StandardError;
+		public int ExitCode;
+		public bool TimedOut;
 	}
 }
