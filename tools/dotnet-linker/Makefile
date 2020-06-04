@@ -31,6 +31,8 @@ dotnet-linker.csproj.inc: export BUILD_EXECUTABLE=$(DOTNET5) build
 $(BUILD_OUTPUT): Makefile $(dotnet_linker_dependencies)
 	$(Q_DOTNET_BUILD) $(DOTNET5) build $(XBUILD_VERBOSITY)
 
+../mtouch/Errors.Designer.cs: # the build breaks without this...
+
 $(DOTNET_DESTDIR)/Microsoft.iOS.Sdk/tools/dotnet-linker/%: $(BUILD_DIR)/% | $(DOTNET_DESTDIR)/Microsoft.iOS.Sdk/tools/dotnet-linker
 	$(Q) $(CP) $< $@
 
