@@ -10,11 +10,20 @@ DOTNET_TARGETS += \
 	$(BUILD_DIR)/dotnet-linker.dll \
 	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.dll) \
 	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.pdb) \
+	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/registerentryassembly.xml) \
+	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/uibutton.xml) \
 
 DOTNET_DIRECTORIES += \
 	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker) \
 
-$(BUILD_DIR)/dotnet-linker%dll $(BUILD_DIR)/dotnet-linker%pdb: Makefile $(dotnet_linker_dependencies)
+# This is a list of all the build output, with a percentage sign for the last dot in the filename (because that's how you can tell make that a single target has multiple output).
+BUILD_OUTPUT = \
+	$(BUILD_DIR)/dotnet-linker%dll \
+	$(BUILD_DIR)/dotnet-linker%pdb \
+	$(BUILD_DIR)/registerentryassembly%xml \
+	$(BUILD_DIR)/uibutton%xml \
+
+$(BUILD_OUTPUT): Makefile $(dotnet_linker_dependencies)
 	$(Q_DOTNET_BUILD) $(DOTNET5) build $(XBUILD_VERBOSITY)
 
 $(DOTNET_DESTDIR)/Microsoft.iOS.Sdk/tools/dotnet-linker/%: $(BUILD_DIR)/% | $(DOTNET_DESTDIR)/Microsoft.iOS.Sdk/tools/dotnet-linker
