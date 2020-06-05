@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+
+using Mono.Linker;
 
 using Xamarin.Bundler;
 using Xamarin.Utils;
@@ -19,63 +22,92 @@ namespace Xamarin.Linker {
 
 		public List<string> WarnOnTypeRef { get; } = new List<string> ();
 
-		static LinkerConfiguration linker_configuration;
+		LinkerConfiguration ()
+		{
+			// not the historical tooling (mtouch) default, but that's what the simulator templates offered
+			LinkMode = LinkMode.None;
+		}
+
+		static ConditionalWeakTable<LinkContext, LinkerConfiguration> configurations = new ConditionalWeakTable<LinkContext, LinkerConfiguration> ();
+		static LinkerConfiguration single_instance;
 		public static LinkerConfiguration Instance {
 			get {
-				if (linker_configuration == null)
-					linker_configuration = new LinkerConfiguration ();
-				return linker_configuration;
+				return single_instance;
 			}
 		}
 
-		LinkerConfiguration ()
+		public static LinkerConfiguration GetInstance (LinkContext context)
 		{
-			var linker_file = Environment.GetEnvironmentVariable ("CUSTOM_LINKER_OPTIONS_FILE");
-			if (string.IsNullOrEmpty (linker_file))
-				throw new Exception ($"No custom linker options file is specified (using the CUSTOM_LINKER_OPTIONS_FILE environment variable).");
-			if (!File.Exists (linker_file))
-				throw new FileNotFoundException ($"The custom linker file {linker_file} (specified using the CUSTOM_LINKER_OPTIONS_FILE environment variable) does not exist.");
+			if (!configurations.TryGetValue (context, out var instance)) {
+				if (!context.TryGetCustomData ("LinkerOptionsFile", out var linker_options_file))
+					throw new Exception ($"No custom linker options file was passed to the linker (using --custom-data LinkerOptionsFile=...");
+				instance = new LinkerConfiguration (linker_options_file);
+				single_instance = instance;
+				configurations.Add (context, instance);
+			}
 
-			// not the historical tooling (mtouch) default, but that's what the simulator templates offered
-			LinkMode = LinkMode.None;
+			return instance;
+		}
+
+		LinkerConfiguration (string linker_file)
+		{
+			if (!File.Exists (linker_file))
+				throw new FileNotFoundException ($"The custom linker file {linker_file} does not exist.");
+
 			var lines = File.ReadAllLines (linker_file);
 			for (var i = 0; i < lines.Length; i++) {
 				var line = lines [i].TrimStart ();
 				if (line.Length == 0 || line [0] == '#')
 					continue; // Allow comments
-				switch (line.ToLowerInvariant ()) {
-				case "platform=ios":
-					Platform = ApplePlatform.iOS;
+
+				var eq = line.IndexOf ('=');
+				if (eq == -1)
+					throw new InvalidOperationException ($"Invalid syntax for line {i + 1} in {linker_file}: No equals sign.");
+
+				var key = line [..eq];
+				var value = line [(eq + 1)..];
+				switch (key) {
+				case "LinkMode":
+					switch (value.ToLowerInvariant ()) {
+					case "full":
+						LinkMode = LinkMode.All;
+						break;
+					case "sdkonly":
+						LinkMode = LinkMode.SDKOnly;
+						break;
+					case "platform":
+						LinkMode = LinkMode.Platform;
+						break;
+					case "none":
+						LinkMode = LinkMode.None;
+						break;
+					default:
+						throw new InvalidOperationException ($"Unknown link mode: {value} for the entry {line} in {linker_file}");
+					}
 					break;
-				case "platform=tvos":
-					Platform = ApplePlatform.TVOS;
+				case "Platform":
+					switch (value) {
+					case "iOS":
+						Platform = ApplePlatform.iOS;
+						break;
+					case "tvOS":
+						Platform = ApplePlatform.TVOS;
+						break;
+					case "watchOS":
+						Platform = ApplePlatform.WatchOS;
+						break;
+					case "macOS":
+						Platform = ApplePlatform.MacOSX;
+						break;
+					default:
+						throw new InvalidOperationException ($"Unknown platform: {value} for the entry {line} in {linker_file}");
+					}
 					break;
-				case "Platform=watchos":
-					Platform = ApplePlatform.WatchOS;
-					break;
-				case "platform=macos":
-					Platform = ApplePlatform.MacOSX;
-					break;
-				case "linkmode=full":
-					LinkMode = LinkMode.All;
-					break;
-				case "linkmode=sdkonly":
-					LinkMode = LinkMode.SDKOnly;
-					break;
-				case "linkmode=platform":
-					LinkMode = LinkMode.Platform;
-					break;
-				case "linkmode=none":
-					LinkMode = LinkMode.None;
-					break;
-				case string _ when line.StartsWith ("PlatformAssembly=", StringComparison.Ordinal):
-					PlatformAssembly = Path.GetFileNameWithoutExtension (line ["PlatformAssembly=".Length..]);
+				case "PlatformAssembly":
+					PlatformAssembly = Path.GetFileNameWithoutExtension (value);
 					break;
 				default:
-					var eq = line.IndexOf ('=');
-					if (eq == -1)
-						throw new InvalidOperationException ($"Invalid syntax for line {i + 1} in {linker_file}: No equals sign.");
-					throw new InvalidOperationException ($"Unknown key '{line[..eq]}' in {linker_file}");
+					throw new InvalidOperationException ($"Unknown key '{key}' in {linker_file}");
 				}
 			}
 		}
@@ -83,8 +115,8 @@ namespace Xamarin.Linker {
 		public void Write ()
 		{
 			Console.WriteLine ($"LinkerConfiguration:");
-			Console.WriteLine ($"    Platform: {Platform}");
 			Console.WriteLine ($"    LinkMode: {LinkMode}");
+			Console.WriteLine ($"    Platform: {Platform}");
 			Console.WriteLine ($"    PlatformAssembly: {PlatformAssembly}.dll");
 		}
 	}

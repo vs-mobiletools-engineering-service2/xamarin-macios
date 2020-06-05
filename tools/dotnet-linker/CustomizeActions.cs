@@ -4,6 +4,7 @@ using Mono.Cecil;
 using Mono.Linker;
 
 using Xamarin.Bundler;
+using Xamarin.Linker;
 
 namespace Xamarin {
 

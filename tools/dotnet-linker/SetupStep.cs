@@ -13,14 +13,10 @@ using Xamarin.Linker;
 using Xamarin.Linker.Steps;
 using Xamarin.Tuner;
 
+using Xamarin.Linker;
+
 namespace Xamarin {
 
-	public class ConfigurationAwareStep : BaseStep {
-		public LinkerConfiguration Configuration {
-			get { return LinkerConfiguration.Instance; }
-		}
-	}
-	
 	public class SetupStep : ConfigurationAwareStep {
 
 		List<IStep> _steps;
@@ -58,6 +54,10 @@ namespace Xamarin {
 
 		protected override void Process ()
 		{
+			// This will be replaced with something more useful later.
+			Console.WriteLine ("Hello SetupStep");
+			Configuration.Write ();
+
 			DerivedLinkContext.Instance.Context = Context;
 
 			// partially implemented upstream - but we need a subset of it to support
