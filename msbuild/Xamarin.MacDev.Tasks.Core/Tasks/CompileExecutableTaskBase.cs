@@ -138,7 +138,7 @@ namespace Xamarin.MacDev.Tasks {
 			arguments.Add ("-Wl,@executable_path/");
 
 			// _LibMono
-			var lib_mono_name = "libmono.a";
+			var lib_mono_name = "libmonosgen-2.0.a";
 			var lib_mono = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_mono_name);
 			if (lib_mono != null) {
 				arguments.Add (lib_mono.ItemSpec);
