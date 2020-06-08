@@ -149,7 +149,11 @@ namespace Xamarin.MacDev.Tasks {
 			// _LibXamarin
 			var lib_xamarin_name = IsDebug ? "libxamarin-debug.a" : "libxamarin.a";
 			var lib_xamarin = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_xamarin_name);
-			arguments.Add (lib_xamarin.ItemSpec);
+			if (lib_xamarin != null) {
+				arguments.Add (lib_xamarin.ItemSpec);
+			} else {
+				Log.LogError ($"Could not find {lib_xamarin_name}");
+			}
 
 			// _LibRegistrar
 			//string lib_registrar_name;
