@@ -140,8 +140,11 @@ namespace Xamarin.MacDev.Tasks {
 			// _LibMono
 			var lib_mono_name = "libmono.a";
 			var lib_mono = RuntimePackAsset.FirstOrDefault ((v) => v.GetMetadata ("DestinationSubPath") == lib_mono_name);
-			if (lib_mono != null)
+			if (lib_mono != null) {
 				arguments.Add (lib_mono.ItemSpec);
+			} else {
+				Log.LogError ("Could not find libmono.a");
+			}
 
 			// _LibXamarin
 			var lib_xamarin_name = IsDebug ? "libxamarin-debug.a" : "libxamarin.a";
