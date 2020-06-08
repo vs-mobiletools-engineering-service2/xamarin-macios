@@ -143,8 +143,13 @@ namespace Xamarin.MacDev.Tasks {
 			if (lib_mono != null) {
 				arguments.Add (lib_mono.ItemSpec);
 			} else {
-				Log.LogError ("Could not find libmono.a");
+				Log.LogError ($"Could not find {lib_mono_name}");
 			}
+
+			// mono needs iconv
+			arguments.Add ("-liconv");
+			// and zlib
+			arguments.Add ("-lz");
 
 			// _LibXamarin
 			var lib_xamarin_name = IsDebug ? "libxamarin-debug.a" : "libxamarin.a";
