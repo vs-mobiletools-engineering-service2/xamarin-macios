@@ -146,6 +146,7 @@
 			$(BuildDependsOn);
 			$(_AlwaysPostBuildTargets);
 			_CreateAppBundle;
+			$(_BundleApp);
 		</BuildDependsOn>
 
 		<_PreBundle Condition="'$(_PlatformName)' != 'macOS'">
@@ -206,7 +207,6 @@
 			_ComputePublishLocation;
 			CopyFilesToPublishDirectory;
 			$(_PostBundle);
-			$(_BundleApp);
 		</CreateAppBundleDependsOn>
 	</PropertyGroup>
 
