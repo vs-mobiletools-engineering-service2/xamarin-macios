@@ -928,16 +928,14 @@ public class B : A {}
 		[Test]
 		public void MT0051 ()
 		{
-			if (Directory.Exists ("/Applications/Xcode44.app/Contents/Developer")) {
-				Asserts.ThrowsPattern<TestExecutionException> (() => {
-					ExecutionHelper.Execute (TestTarget.ToolPath, new [] { "-sdkroot", "/Applications/Xcode44.app/Contents/Developer", "-sim", "/tmp/foo" });
-				}, "error MT0051: Xamarin.iOS .* requires Xcode 6.0 or later. The current Xcode version [(]found in /Applications/Xcode44.app/Contents/Developer[)] is 4.*");
-			}
-
-			if (Directory.Exists ("/Applications/Xcode511.app/Contents/Developer")) {
-				Asserts.ThrowsPattern<TestExecutionException> (() => {
-					ExecutionHelper.Execute (TestTarget.ToolPath, new [] { "-sdkroot", "/Applications/Xcode511.app/Contents/Developer", "-sim", "/tmp/foo" });
-				}, "error MT0051: Xamarin.iOS .* requires Xcode 6.0 or later. The current Xcode version [(]found in /Applications/Xcode511.app/Contents/Developer[)] is 6.0");
+			var xcode_path = "/Applications/Xcode511.app/Contents/Developer";
+			if (Directory.Exists (xcode_path)) {
+				using (var mtouch = new MTouchTool ()) {
+					mtouch.CreateTemporaryApp ();
+					mtouch.SdkRoot = xcode_path;
+					mtouch.AssertExecuteFailure (xcode_path);
+					mtouch.AssertErrorPattern (51, $"Xamarin.iOS .* requires Xcode 6.0 or later. The current Xcode version [(]found in {xcode_path}[)] is 5.1.1");
+				}
 			}
 		}
 
@@ -2988,14 +2986,6 @@ public class TestApp {
 				Assert.AreEqual (1, mtouch.Execute (MTouchAction.LaunchSim), "launch");
 				mtouch.HasError ("MT", 1210, "Invalid simulator specification: 'a=1', unknown key 'a'");
 			}
-		}
-
-		[Test]
-		public void MT1211 ()
-		{
-			Assert.Ignore ("There are no device types in the iOS 9 simulator that the 8.1 simulator (earliest simulator Xcode 7 can run) doesn't support, so there's no way to produce the MT1211 error");
-			Asserts.Throws<TestExecutionException> (() => ExecutionHelper.Execute (TestTarget.ToolPath, new [] { "--sdkroot", Configuration.xcode_root, "--launchsim", "/path/to/somewhere", "--device=:v2;runtime=com.apple.CoreSimulator.SimRuntime.iOS-7-1,devicetype=com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm" }),
-				"error MT1211: The simulator version '7.1' does not support the simulator type 'Resizable iPhone'\n");
 		}
 
 		// MT1213: unused
