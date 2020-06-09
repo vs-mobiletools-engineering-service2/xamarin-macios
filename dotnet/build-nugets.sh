@@ -21,54 +21,16 @@ make -C "$TOP/msbuild" dotnet -j
 copy_ios_native_libs_to_runtime_pack ()
 {
 	local platform=$1
-	local sdk=$2
-	local fat=$3
 	local rid_family=$4
-	local architectures=$5
 	#shellcheck disable=SC2155
 	local platform_lower=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 	local rid=$platform_lower-$rid_family
 	local packageid=Microsoft.$platform.Runtime.$rid
 	local destdir=$DOTNET_DESTDIR/$packageid/runtimes/$rid/native
-	local sdk_dir="$TOP/_ios-build/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/SDKs/$sdk.sdk"
-	local lib_dir="$sdk_dir/lib/"
-	local include_dir="$sdk_dir/include/"
 
 	mkdir -p "$destdir"
 
-	local thin=()
-	for arch in $architectures; do
-		thin+=(-extract_family "$arch")
-	done
-
-	local inputs=("$lib_dir"/libapp.a)
-	inputs+=("$lib_dir"/libextension.a)
-	inputs+=("$lib_dir"/libtvextension.a)
-	inputs+=("$lib_dir"/libwatchextension.a)
-	inputs+=("$lib_dir"/libxamarin*)
-	for element in "${inputs[@]}"; do
-		if [[ x$fat == x1 ]]; then
-			lipo "$element" "${thin[@]}" -output "$destdir/$(basename "$element")"
-		else
-			$cp "$element" "$destdir"
-		fi
-	done
-
-	mkdir -p "$destdir/Frameworks"
-	local frameworks=()
-	frameworks+=("$sdk_dir"/Frameworks/Xamarin.framework "$sdk_dir"/Frameworks/Xamarin-debug.framework)
-	for element in "${frameworks[@]}"; do
-		local fw_name
-		fw_name=$(basename "$element" .framework)
-		$cp -r "$element" "$destdir/Frameworks/"
-		if [[ x$fat == x1 ]]; then
-			lipo "$element/$fw_name" "${thin[@]}" -output "$destdir/Frameworks/$fw_name.framework/$fw_name"
-		fi
-	done
-
 	$cp "$TOP"/tools/mtouch/simlauncher.mm "$destdir"
-
-	$cp -r "$include_dir/xamarin" "$destdir/"
 }
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm64" "arm64"
 copy_ios_native_libs_to_runtime_pack "iOS"     "MonoTouch.iphoneos"        1 "arm"   "armv7 armv7s"
@@ -82,38 +44,15 @@ copy_ios_native_libs_to_runtime_pack "watchOS" "Xamarin.WatchSimulator"    0 "x8
 copy_macos_native_libs_to_runtime_pack ()
 {
 	local platform=$1
-	local sdk=$2
-	local fat=$3
-	local rid_family=$4
-	local architectures=$5
-	local rid_family=osx
-	local architectures=x86_64
 	#shellcheck disable=SC2155
 	local platform_lower=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
 	local rid=osx-x64
 	local packageid=Microsoft.$platform.Runtime.$rid
 	local destdir=$DOTNET_DESTDIR/$packageid/runtimes/$rid/native
-	local sdk_dir="$TOP/_mac-build/Library/Frameworks/Xamarin.Mac.framework/Versions/Current/SDKs/$sdk.sdk"
-	local lib_dir="$sdk_dir/lib/"
-	local include_dir="$sdk_dir/include/"
 
 	mkdir -p "$destdir"
 
-	local inputs=()
-	inputs+=("$lib_dir"/libxammac.a)
-	inputs+=("$lib_dir"/libxammac.dylib)
-	inputs+=("$lib_dir"/libxammac-debug.a)
-	inputs+=("$lib_dir"/libxammac-debug.dylib)
-
-	for element in "${inputs[@]}"; do
-		#shellcheck disable=SC2155
-		local filename=$(basename "$element")
-		$cp "$element" "$destdir/${filename/xammac/xamarin}"
-	done
-
 	$cp "$TOP"/tools/mtouch/simlauncher.mm "$destdir"
-
-	$cp -r "$include_dir/xamarin" "$destdir/"
 }
 copy_macos_native_libs_to_runtime_pack "macOS"     "Xamarin.macOS"        0 "osx" "x86_64"
 
