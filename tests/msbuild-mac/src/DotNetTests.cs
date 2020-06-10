@@ -44,7 +44,7 @@ namespace Xamarin.MMP.Tests {
 
 			Console.WriteLine ("Building dotnet");
 			var new_proj = Path.Combine (dotnet, project, project + ".csproj");
-			Assert.AreEqual (0, DotNet.Execute ("build", new_proj, properties, out var _), "dotnet build return value");
+			Assert.AreEqual (0, DotNet.Execute ("build", new_proj, properties).ExitCode, "dotnet build return value");
 			Console.WriteLine ("Done building dotnet");
 			var dotnet_bundle = Path.Combine (Path.GetDirectoryName (new_proj), "bin", "AnyCPU", Configuration, "xamarinmac10", project + ".app");
 
