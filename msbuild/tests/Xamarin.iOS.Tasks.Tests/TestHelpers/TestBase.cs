@@ -49,16 +49,14 @@ namespace Xamarin.iOS.Tasks
 			var rv = Configuration.CloneTestDirectory (testSourceDirectory, mode);
 
 			if (mode == "dotnet") {
-				var dir = Path.Combine (Configuration.SourceRoot, "dotnet");
+				var dir = Path.Combine (Configuration.SourceRoot, "tests", "dotnet");
 				var args = new [] {
 					"-C",
 					dir,
-					"test/global.json",
-					"test/NuGet.config",
 				};
 				ExecutionHelper.Execute ("make", args);
-				File.Copy (Path.Combine (dir, "test", "global.json"), Path.Combine (rv, "global.json"), true);
-				File.Copy (Path.Combine (dir, "test", "NuGet.config"), Path.Combine (rv, "NuGet.config"), true);
+				File.Copy (Path.Combine (dir, "global.json"), Path.Combine (rv, "global.json"), true);
+				File.Copy (Path.Combine (dir, "NuGet.config"), Path.Combine (rv, "NuGet.config"), true);
 			}
 
 			return rv;
