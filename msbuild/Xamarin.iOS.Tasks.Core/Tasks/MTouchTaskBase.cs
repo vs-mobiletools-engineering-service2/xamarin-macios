@@ -261,9 +261,6 @@ namespace Xamarin.iOS.Tasks
 			
 			args.AddQuotedLine ((SdkIsSimulator ? "--sim=" : "--dev=") + Path.GetFullPath (AppBundleDir));
 
-			if (AppleSdkSettings.XcodeVersion.Major >= 5 && IPhoneSdks.MonoTouch.Version.CompareTo (new IPhoneSdkVersion (6, 3, 7)) < 0)
-				args.AddLine ("--compiler=clang");
-
 			args.AddQuotedLine ($"--executable={ExecutableName}");
 
 			if (IsAppExtension)
@@ -547,7 +544,7 @@ namespace Xamarin.iOS.Tasks
 		{
 			// It may have been resolved to an existing local full path
 			// already, such as when building from XS on the Mac.
-			if (File.Exists (fullName))
+			if (Path.IsPathRooted (fullName) && File.Exists (fullName))
 				return fullName;
 
 			var frameworkDir = TargetFramework.Identifier;
