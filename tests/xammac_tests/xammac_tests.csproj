@@ -104,6 +104,12 @@
     <Compile Include="..\mtouch\Cache.cs">
       <Link>Cache.cs</Link>
     </Compile>
+    <Compile Include="..\..\tools\common\Driver.execution.cs">
+      <Link>Driver.execution.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tools\common\Execution.cs">
+      <Link>Execution.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

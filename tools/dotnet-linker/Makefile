@@ -3,19 +3,17 @@ TOP=../..
 include $(TOP)/Make.config
 include $(TOP)/mk/rules.mk
 
-PLATFORMS=iOS tvOS watchOS macOS
-
 BUILD_DIR=bin/Debug/net5.0
 
 DOTNET_TARGETS += \
 	$(BUILD_DIR)/dotnet-linker.dll \
-	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.dll) \
-	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.pdb) \
-	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/registerentryassembly.xml) \
-	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/uibutton.xml) \
+	$(foreach platform,$(DOTNET_PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.dll) \
+	$(foreach platform,$(DOTNET_PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/dotnet-linker.pdb) \
+	$(foreach platform,$(DOTNET_PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/registerentryassembly.xml) \
+	$(foreach platform,$(DOTNET_PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker/uibutton.xml) \
 
 DOTNET_DIRECTORIES += \
-	$(foreach platform,$(PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker) \
+	$(foreach platform,$(DOTNET_PLATFORMS),$(DOTNET_DESTDIR)/Microsoft.$(platform).Sdk/tools/dotnet-linker) \
 
 # This is a list of all the build output, with a percentage sign for the last dot in the filename (because that's how you can tell make that a single target has multiple output).
 BUILD_OUTPUT = \

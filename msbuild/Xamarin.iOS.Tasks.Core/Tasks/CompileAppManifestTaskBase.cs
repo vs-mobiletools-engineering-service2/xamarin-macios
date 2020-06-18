@@ -48,7 +48,6 @@ namespace Xamarin.iOS.Tasks
 
 		TargetArchitecture architectures;
 		IPhoneDeviceType supportedDevices;
-		IPhoneSdkVersion minimumOSVersion;
 		IPhoneSdkVersion sdkVersion;
 
 		bool IsIOS;
@@ -65,13 +64,6 @@ namespace Xamarin.iOS.Tasks
 			}
 
 			sdkVersion = IPhoneSdkVersion.Parse (DefaultSdkVersion);
-			var text = plist.GetMinimumOSVersion ();
-			if (string.IsNullOrEmpty (text)) {
-				minimumOSVersion = sdkVersion;
-			} else if (!IPhoneSdkVersion.TryParse (text, out minimumOSVersion)) {
-				LogAppManifestError (MSBStrings.E0011, text);
-				return false;
-			}
 
 			switch (Platform) {
 			case ApplePlatform.iOS:
@@ -194,8 +186,7 @@ namespace Xamarin.iOS.Tasks
 
 			SetDeviceFamily (plist);
 
-			plist.SetIfNotPresent (ManifestKeys.MinimumOSVersion, minimumOSVersion.ToString ());
-			DeploymentTarget = plist.Get<PString> (ManifestKeys.MinimumOSVersion).Value;
+			plist.SetIfNotPresent (ManifestKeys.MinimumOSVersion, MinimumOSVersion);
 
 			if (IsWatchExtension) {
 				// Note: Only watchOS1 Extensions target Xamarin.iOS

@@ -517,80 +517,126 @@ install-local:: $(RUNTIME_MAC_TARGETS)
 # .NET
 #
 
-PLATFORMS=iOS tvOS watchOS macOS
-
 iOS_LIBRARIES = libapp.a libextension.a
 tvOS_LIBRARIES = libtvextension.a
 watchOS_LIBRARIES = libextension.a libwatchextension.a
 macOS_LIBRARIES = libextension.a
 macOS_SHIPPED_HEADERS = $(MAC_SHIPPED_HEADERS)
 
-define DotNetRidTemplate
+define DotNetLibTemplate
 DOTNET_TARGETS += \
 	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/libxamarin.dylib \
 	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/libxamarin-debug.dylib \
 	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/libxamarin.a \
 	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/libxamarin-debug.a \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework/Xamarin \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework/Info.plist \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework/Xamarin-debug \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework/Info.plist \
 	$$(foreach lib,$$($(2)_LIBRARIES),$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/$$(lib)) \
 	$$(foreach header,$$(SHIPPED_HEADERS),$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/$$(header)) \
 	$$(foreach header,$$($(2)_SHIPPED_HEADERS),$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/$(header)) \
 
 DOTNET_TARGET_DIRS += \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/xamarin \
 	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework \
-	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/xamarin \
 
 $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/xamarin/%.h: xamarin/%.h | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/xamarin
 	$$(Q) $$(CP) $$< $$@
-
 endef
 
 define DotNetLipoLibTemplate
 $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/%: .libs/$(3)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native
 	$$(call Q_2,LIPO,  [$1]) $(DEVICE_BIN_PATH)/lipo $$< $$(foreach arch,$(4),-extract_family $$(arch)) -output $$@
-
-$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/%: $(5)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
-	$$(Q) $$(CP) $$< $$@
 endef
 
 define DotNetCopyLibTemplate
 $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/%: .libs/$(3)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native
 	$$(Q) $$(CP) $$< $$@
+endef
+
+# Copy libxammac* to libxamarin* for macOS for now. Eventually we might rename libxammac to libxamarin, which would make it possible to remove this hack.
+.libs/mac/libxamarin%: .libs/mac/libxammac%
+	$(Q)$(CP) $< $@
+
+
+$(foreach platform,$(DOTNET_PLATFORMS),$(foreach rid,$(DOTNET_$(platform)_RUNTIME_IDENTIFIERS),$(eval $(call DotNetLibTemplate,$(platform),$(rid)))))
+
+# If the RID represents fewer architectures than the library in .libs, then use the LipoTemplate, otherwise the CopyTemplate
+ifdef INCLUDE_IOS
+$(eval $(call DotNetLipoLibTemplate,iOS,ios-x64,iphonesimulator,x86_64))
+$(eval $(call DotNetLipoLibTemplate,iOS,ios-x86,iphonesimulator,i386))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetLipoLibTemplate,iOS,ios-arm64,iphoneos,arm64))
+$(eval $(call DotNetLipoLibTemplate,iOS,ios-arm,iphoneos,armv7 armv7s))
+endif
+endif
+ifdef INCLUDE_TVOS
+$(eval $(call DotNetCopyLibTemplate,tvOS,tvos-x64,tvsimulator,x86_64))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetCopyLibTemplate,tvOS,tvos-arm64,tvos,arm64))
+endif
+endif
+ifdef INCLUDE_WATCH
+$(eval $(call DotNetCopyLibTemplate,watchOS,watchos-x86,watchsimulator,i386))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetLipoLibTemplate,watchOS,watchos-arm,watchos,armv7k arm64_32))
+endif
+endif
+$(eval $(call DotNetCopyLibTemplate,macOS,osx-x64,mac,x86_64))
+
+define DotNetFrameworkTemplate
+DOTNET_TARGETS += \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework/Xamarin \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework/Info.plist \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework/Xamarin-debug \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework/Info.plist \
+
+DOTNET_TARGET_DIRS += \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework \
+	$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
 
 $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/%: $(5)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
 	$$(Q) $$(CP) $$< $$@
 endef
 
-.libs/mac/libxamarin%: .libs/mac/libxammac%
-	$(Q)$(CP) $< $@
+# Frameworks have two files: Info.plist and the executable. Here we copy the Info.plist and lipo the executable.
+define DotNetLipoFrameworkTemplate
+$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/%.plist: $(5)/%.plist | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
+	$$(Q) $$(CP) $$< $$@
 
-$(DOTNET_DESTDIR)/Microsoft.macOS.Runtime.osx-x64/runtimes/osx-x64/native/Frameworks/Xamarin%: | $(DOTNET_DESTDIR)/Microsoft.macOS.Runtime.osx-x64/runtimes/osx-x64/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.macOS.Runtime.osx-x64/runtimes/osx-x64/native/Frameworks/Xamarin-debug.framework
-	$(Q) echo TODO > $@
+$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/%: $(5)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
+	$$(call Q_2,LIPO,  [$1]) $(DEVICE_BIN_PATH)/lipo $$< $$(foreach arch,$(4),-extract_family $$(arch)) -output $$@
+endef
 
+# Just copy both the Info.plist and the executable.
+define DotNetCopyFrameworkTemplate
+$(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/%: $(5)/% | $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin.framework $(DOTNET_DESTDIR)/Microsoft.$(1).Runtime.$(2)/runtimes/$(2)/native/Frameworks/Xamarin-debug.framework
+	$$(Q) $$(CP) $$< $$@
+endef
 
-# Create variables prefixed with the correctly cased platform name from the upper-cased platform name. This makes the next section somewhat simpler.
-$(foreach platform,$(PLATFORMS),$(eval DOTNET_$(platform)_RUNTIME_IDENTIFIERS:=$(DOTNET_$(shell echo $(platform) | tr a-z A-Z)_RUNTIME_IDENTIFIERS)))
+# macOS does not have the Xamarin[-debug].framework frameworks
+$(foreach platform,$(filter-out macOS,$(DOTNET_PLATFORMS)),$(foreach rid,$(DOTNET_$(platform)_RUNTIME_IDENTIFIERS),$(eval $(call DotNetFrameworkTemplate,$(platform),$(rid)))))
 
-$(foreach platform,$(PLATFORMS),$(foreach rid,$(DOTNET_$(platform)_RUNTIME_IDENTIFIERS),$(eval $(call DotNetRidTemplate,$(platform),$(rid)))))
-
-$(eval $(call DotNetLipoLibTemplate,iOS,ios-x64,iphonesimulator,x86_64,$(IOS_DESTDIR)$(XAMARIN_IOSSIMULATOR_SDK)/Frameworks))
-$(eval $(call DotNetLipoLibTemplate,iOS,ios-x86,iphonesimulator,i386,$(IOS_DESTDIR)$(XAMARIN_IOSSIMULATOR_SDK)/Frameworks))
-$(eval $(call DotNetLipoLibTemplate,iOS,ios-arm64,iphoneos,arm64,$(IOS_DESTDIR)$(XAMARIN_IPHONEOS_SDK)/Frameworks))
-$(eval $(call DotNetLipoLibTemplate,iOS,ios-arm,iphoneos,armv7 armv7s,$(IOS_DESTDIR)$(XAMARIN_IPHONEOS_SDK)/Frameworks))
-$(eval $(call DotNetCopyLibTemplate,tvOS,tvos-x64,tvsimulator,x86_64,$(IOS_DESTDIR)$(XAMARIN_TVSIMULATOR_SDK)/Frameworks))
-$(eval $(call DotNetCopyLibTemplate,tvOS,tvos-arm64,tvos,arm64,$(IOS_DESTDIR)$(XAMARIN_TVOS_SDK)/Frameworks))
-$(eval $(call DotNetCopyLibTemplate,watchOS,watchos-x86,watchsimulator,i386,$(IOS_DESTDIR)$(XAMARIN_WATCHSIMULATOR_SDK)/Frameworks))
-$(eval $(call DotNetLipoLibTemplate,watchOS,watchos-arm,watchos,armv7k arm64_32,$(IOS_DESTDIR)$(XAMARIN_WATCHOS_SDK)/Frameworks))
-$(eval $(call DotNetCopyLibTemplate,macOS,osx-x64,mac,x86_64))
-
+# If the RID represents fewer architectures than the library in .libs, then use the LipoTemplate, otherwise the CopyTemplate
+ifdef INCLUDE_IOS
+$(eval $(call DotNetLipoFrameworkTemplate,iOS,ios-x64,iphonesimulator,x86_64,$(IOS_DESTDIR)$(XAMARIN_IOSSIMULATOR_SDK)/Frameworks))
+$(eval $(call DotNetLipoFrameworkTemplate,iOS,ios-x86,iphonesimulator,i386,$(IOS_DESTDIR)$(XAMARIN_IOSSIMULATOR_SDK)/Frameworks))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetLipoFrameworkTemplate,iOS,ios-arm64,iphoneos,arm64,$(IOS_DESTDIR)$(XAMARIN_IPHONEOS_SDK)/Frameworks))
+$(eval $(call DotNetLipoFrameworkTemplate,iOS,ios-arm,iphoneos,armv7 armv7s,$(IOS_DESTDIR)$(XAMARIN_IPHONEOS_SDK)/Frameworks))
+endif
+endif
+ifdef INCLUDE_TVOS
+$(eval $(call DotNetCopyFrameworkTemplate,tvOS,tvos-x64,tvsimulator,x86_64,$(IOS_DESTDIR)$(XAMARIN_TVSIMULATOR_SDK)/Frameworks))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetCopyFrameworkTemplate,tvOS,tvos-arm64,tvos,arm64,$(IOS_DESTDIR)$(XAMARIN_TVOS_SDK)/Frameworks))
+endif
+endif
+ifdef INCLUDE_WATCH
+$(eval $(call DotNetCopyFrameworkTemplate,watchOS,watchos-x86,watchsimulator,i386,$(IOS_DESTDIR)$(XAMARIN_WATCHSIMULATOR_SDK)/Frameworks))
+ifdef INCLUDE_DEVICE
+$(eval $(call DotNetLipoFrameworkTemplate,watchOS,watchos-arm,watchos,armv7k arm64_32,$(IOS_DESTDIR)$(XAMARIN_WATCHOS_SDK)/Frameworks))
+endif
+endif
 
 dotnet: $(DOTNET_TARGETS)
-	@#$(MAKE) $(DOTNET_TARGETS)
 
 $(DOTNET_TARGET_DIRS):
 	$(Q) mkdir -p $@
