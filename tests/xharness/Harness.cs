@@ -74,7 +74,7 @@ namespace Xharness {
 		}
 	}
 
-	public class Harness : IHarness {
+	public class Harness : IHarness, ISystemInformation {
 		readonly TestTarget target;
 		readonly string buildConfiguration = "Debug";
 
