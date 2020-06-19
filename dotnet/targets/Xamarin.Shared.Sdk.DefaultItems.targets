@@ -25,40 +25,6 @@
     </None>
   </ItemGroup>
 
-  <!-- If the old-style variables are set, use those -->
-  <PropertyGroup>
-    <_Architecture Condition=" '$(_PlatformName)' == 'macOS' And '$(XamMacArch)' != '' ">$(XamMacArch)</_Architecture>
-    <_Architecture Condition=" '$(_PlatformName)' != 'macOS' And '$(MtouchArch)' != '' ">$(MtouchArch)</_Architecture>
-  </PropertyGroup>
-  <!-- Compute the architecture if it's not set. This is a variation of https://github.com/dotnet/sdk/blob/873d79d861cbd001488414b9875e53acbeaed890/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.RuntimeIdentifierInference.targets#L68-L96 -->
-  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'iOS' ">
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</_Architecture>
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</_Architecture>
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</_Architecture>
-    <_Architecture Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) ">ARMv7</_Architecture> <!-- FIXME: how to enable ARMv7s? Ref: https://github.com/dotnet/runtime/issues/34121 -->
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'tvOS' ">
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</_Architecture>
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</_Architecture>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'watchOS' ">
-    <_Architecture Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</_Architecture>
-    <_Architecture Condition=" ($(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-'))) ">ARM64_32</_Architecture> <!-- FIXME: what about ARMv7k? -->
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(_Architecture)' == '' And '$(_PlatformName)' == 'macOS' ">
-    <_Architecture Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">x86_64</_Architecture>
-  </PropertyGroup>
-  <!-- Set the old-style variables as well -->
-  <PropertyGroup>
-    <XamMacArch Condition=" '$(_PlatformName)' == 'macOS' And '$(XamMacArch)' == '' ">$(_Architecture)</XamMacArch>
-    <MtouchArch Condition=" '$(_PlatformName)' != 'macOS' And '$(MtouchArch)' == '' ">$(_Architecture)</MtouchArch>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(ComputedPlatform)' == '' ">
-    <ComputedPlatform Condition="'$(_Architecture)' == 'i386' Or '$(_Architecture)' == 'x86_64'">iPhoneSimulator</ComputedPlatform>
-    <ComputedPlatform Condition="'$(_Architecture)' == 'ARMv7' Or '$(_Architecture)' == 'ARMv7s' Or '$(_Architecture)' == 'ARM64' Or '$(_Architecture)' == 'ARMv7k' Or '$(_Architecture)' == 'ARM64_32'">iPhone</ComputedPlatform>
-  </PropertyGroup>
-
   <!-- Use a XM/XI-agnostic variable for debug support -->
   <PropertyGroup>
     <_IsDebug Condition="'$(_PlatformName)' != 'macOS'">$(MtouchDebug)</_IsDebug>
@@ -90,14 +56,6 @@
       <Link>$([MSBuild]::MakeRelative ('$(MSBuildProjectDirectory)', '%(Identity)'))</Link>
       <IsDefaultItem>true</IsDefaultItem>
     </AtlasTexture>
-  </ItemGroup>
-
-  <!-- Default plist file inclusion -->
-  <ItemGroup Condition="'$(_EnableDefaultXamarinItems)' == 'true' ">
-    <None Include="*.plist">
-      <Link>$([MSBuild]::MakeRelative ('$(MSBuildProjectDirectory)', '%(Identity)'))</Link>
-      <IsDefaultItem>true</IsDefaultItem>
-    </None>
   </ItemGroup>
 
   <!-- Default iTunesArtwork inclusion -->
@@ -162,6 +120,38 @@
   <ItemGroup>
     <Folder Include="$(MSBuildProjectDirectory)\Resources\" />
   </ItemGroup>
+
+  <!-- Architecture -->
+  <!-- If the old-style variables are set, use those -->
+  <PropertyGroup Condition=" '$(TargetArchitectures)' == '' ">
+    <TargetArchitectures Condition=" '$(_PlatformName)' == 'macOS' And '$(XamMacArch)' != '' ">$(XamMacArch)</TargetArchitectures>
+    <TargetArchitectures Condition=" '$(_PlatformName)' != 'macOS' And '$(MtouchArch)' != '' ">$(MtouchArch)</TargetArchitectures>
+  </PropertyGroup>
+  <!-- If the old-style variables aren't set, figure it out using RuntimeIdentifier. -->
+  <!-- This is a variation of https://github.com/dotnet/sdk/blob/873d79d861cbd001488414b9875e53acbeaed890/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.RuntimeIdentifierInference.targets#L68-L96 -->
+  <!-- This doesn't cover every single possibility (in particular it does not handle ARMv7s, either as a thin or fat option, and the same for ARMv7k), but that can be done by passing /p:TargetArchitectures=ARMv7s to msbuild -->
+  <PropertyGroup Condition=" '$(TargetArchitectures)' == '' And '$(_PlatformName)' == 'iOS' ">
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</TargetArchitectures>
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</TargetArchitectures>
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</TargetArchitectures>
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-')) ">ARMv7</TargetArchitectures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetArchitectures)' == '' And '$(_PlatformName)' == 'tvOS' ">
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-arm64')) Or $(RuntimeIdentifier.Contains('-arm64-')) ">ARM64</TargetArchitectures>
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-x64')) Or $(RuntimeIdentifier.Contains('-x64-')) ">x86_64</TargetArchitectures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetArchitectures)' == '' And '$(_PlatformName)' == 'watchOS' ">
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-x84')) Or $(RuntimeIdentifier.Contains('-x86-')) ">i386</TargetArchitectures>
+    <TargetArchitectures Condition=" $(RuntimeIdentifier.EndsWith('-arm')) Or $(RuntimeIdentifier.Contains('-arm-')) ">ARM64_32</TargetArchitectures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetArchitectures)' == '' And '$(_PlatformName)' == 'macOS' ">
+    <TargetArchitectures Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">x86_64</TargetArchitectures>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ComputedPlatform)' == ''">
+    <ComputedPlatform Condition="'$(_PlatformName)' != 'macOS' And ($(TargetArchitectures.Contains('i386')) Or $(TargetArchitectures.Contains('x86_64')))">iPhoneSimulator</ComputedPlatform>
+    <ComputedPlatform Condition="'$(_PlatformName)' != 'macOS' And '$(ComputedPlatform)' == ''">iPhone</ComputedPlatform>
+  </PropertyGroup>
 
   <!-- Declare the XI/XM framework bundled with this version of the SDK. See Microsoft.NETCoreSdk.BundledVersions.props -->
   <PropertyGroup>

@@ -2,12 +2,10 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>dotnet_linker</RootNamespace>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;NET;IOS;DEBUG;NETCOREAPP;NETCOREAPP3_0;MTOUCH</DefineConstants>
+    <DefineConstants>$(DefineConstants);BUNDLER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="XliffTasks" Version="1.0.0-beta.20154.1" />
     <PackageReference Include="Microsoft.NET.ILLink" Version="5.0.0-preview.3.20302.1" />
   </ItemGroup>
   <ItemGroup>
@@ -35,7 +33,7 @@
       <Link>ProcessExportedFields.cs</Link>
     </Compile>
     <Compile Include="..\common\ApplePlatform.cs">
-      <Link>ApplePlatform.cs</Link>
+      <Link>external\ApplePlatform.cs</Link>
     </Compile>
     <Compile Include="..\common\LinkMode.cs">
       <Link>LinkMode.cs</Link>
@@ -81,14 +79,30 @@
     </Compile>
     <Compile Include="..\mtouch\Errors.Designer.cs">
       <Link>Errors.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\common\MachO.cs">
+      <Link>external\MachO.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\ObjCRuntime\ErrorHelper.cs">
+      <Link>external\ErrorHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\common\error.cs">
+      <Link>external\error.cs</Link>
+    </Compile>
+    <Compile Include="..\common\ErrorHelper.tools.cs">
+      <Link>external\ErrorHelper.tools.cs</Link>
+    </Compile>
+    <Compile Include="..\mtouch\Errors.designer.cs">
+      <Link>external\Errors.designer.cs</Link>
       <DependentUpon>Errors.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\mtouch\Errors.resx">
-      <Link>Errors.resx</Link>
+      <Link>external\Errors.resx</Link>
       <XlfSourceFormat>Resx</XlfSourceFormat>
       <XlfOutputItem>EmbeddedResource</XlfOutputItem>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Errors.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Xamarin.Bundler</CustomToolNamespace>
       <LogicalName>Errors.mtouch.resources</LogicalName>

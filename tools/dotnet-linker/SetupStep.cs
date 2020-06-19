@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -13,6 +14,7 @@ using Xamarin.Linker;
 using Xamarin.Linker.Steps;
 using Xamarin.Tuner;
 
+using Xamarin.Bundler;
 using Xamarin.Linker;
 
 namespace Xamarin {
@@ -173,6 +175,10 @@ namespace Xamarin {
 					Console.WriteLine ($"    {step}");
 				}
 			}
+
+			ErrorHelper.Platform = Configuration.Platform;
+			Directory.CreateDirectory (Configuration.ItemsDirectory);
+			Directory.CreateDirectory (Configuration.CacheDirectory);
 		}
 	}
 

@@ -1,4 +1,4 @@
-// Compat.cs: might not be ideal but ease code sharing with existing implementation
+// Compat.cs: might not be ideal but it eases code sharing with existing code during the initial implementation.
 
 using System;
 using Mono.Cecil;
@@ -6,25 +6,6 @@ using Mono.Tuner;
 using Xamarin.Bundler;
 
 namespace Xamarin.Linker {
-
-	public static class ErrorHelper {
-		public static Exception CreateError (int code, Exception innerException, string message)
-		{
-			// fix type
-			return new NotFiniteNumberException (message, innerException);
-		}
-
-		public static Exception CreateError (int code, string message)
-		{
-			// fix type
-			return new NotFiniteNumberException (message);
-		}
-
-		public static void Show (Exception exception)
-		{
-			Console.WriteLine (exception.ToString ());
-		}
-	}
 
 	public static class Profile {
 		public static bool IsProductAssembly (AssemblyDefinition assembly)
@@ -120,6 +101,15 @@ namespace Xamarin.Linker {
 			}
 
 			return rv;
+		}
+	}
+}
+
+namespace Xamarin.Bundler {
+	public class Application {
+		// This method is needed for ErrorHelper.tools.cs to compile.
+		public void LoadSymbols ()
+		{
 		}
 	}
 }

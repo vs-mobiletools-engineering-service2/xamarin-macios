@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
@@ -40,6 +41,9 @@
     </Compile>
     <Compile Include="..\..\tools\mtouch\UnresolvedSymbols.cs">
       <Link>UnresolvedSymbols.cs</Link>
+    </Compile>
+    <Compile Include="..\..\tools\common\Execution.cs">
+      <Link>Execution.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
