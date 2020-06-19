@@ -214,7 +214,6 @@ $(IOS_DOTNET_BUILD_DIR)/$(1)/Xamarin.iOS%dll $(IOS_DOTNET_BUILD_DIR)/$(1)/Xamari
 	$$(call Q_PROF_CSC,dotnet/$(1)-bit) $(SYSTEM_CSC) $(DOTNET_FLAGS) -out:$(IOS_DOTNET_BUILD_DIR)/$(1)/Xamarin.iOS.dll -unsafe -optimize \
 		$$(ARGS_$(1)) \
 		-publicsign -keyfile:$(PRODUCT_KEY_PATH) \
-		-res:$(BUILD_DIR)/mtouch.Errors.resources,Errors.mtouch.resources \
 		$(3) \
 		$$(IOS_DEFINES) \
 		$$(IOS_native_DEFINES) \
