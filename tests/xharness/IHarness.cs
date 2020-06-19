@@ -58,6 +58,7 @@ namespace Xharness {
 		bool InCI { get; }
 		bool UseTcpTunnel { get; }
 		bool UseGroupedApps { get; }
+		string VSDropsUri { get; }
 		bool DisableWatchOSOnWrench { get; }
 
 		#endregion

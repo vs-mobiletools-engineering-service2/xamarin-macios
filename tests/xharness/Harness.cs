@@ -639,6 +639,13 @@ namespace Xharness {
 			}
 		}
 
+		public string VSDropsUri {
+			get {
+				var uri = Environment.GetEnvironmentVariable ("VSDROPS_URI");
+				return string.IsNullOrEmpty (uri) ? null : uri;
+			}
+		}
+
 		public int Execute ()
 		{
 			switch (Action) {
