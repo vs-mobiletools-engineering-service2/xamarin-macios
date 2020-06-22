@@ -98,6 +98,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Tasks {
 				args.Add (project_file);
 				args.Add ("/t:Clean");
 				xbuild.StartInfo.Arguments = StringUtils.FormatArguments (args);
+				xbuild.StartInfo.WorkingDirectory = Path.GetDirectoryName (project_file);
 				EnviromentManager.SetEnvironmentVariables (xbuild);
 				EventLogger.LogEvent (log, "Cleaning {0} ({1}) - {2}", TestName, Mode, project_file);
 				var timeout = TimeSpan.FromMinutes (1);
