@@ -175,15 +175,16 @@ function New-GitHubComment {
 
     $targetUrl = Get-TargetUrl
     # build the message, which will be sent to github, users can use markdown
-    $fullDescription ="$Emoji $Description on [Azure DevOps]($targetUrl) ($Env:BUILD_DEFINITIONNAME) $Emoji"
     $msg = [System.Text.StringBuilder]::new()
-    $msg.AppendLine("### $Header")
+    $msg.AppendLine("### $Emoji $Header $Emoji")
     $msg.AppendLine()
-    $msg.AppendLine($fullDescription)
+    $msg.AppendLine($Description)
     if ($Message) { # only if message is not null or empty
         $msg.AppendLine()
         $msg.AppendLine($Message)
     }
+    $msg.AppendLine()
+    $msg.AppendLine("[Pipeline]($targetUrl) on Agent $Env:AGENT_NAME") # Env:AGENT_NAME is added by the pipeline
 
     $url = "https://api.github.com/repos/xamarin/xamarin-macios/commits/$Env:BUILD_REVISION/comments"
     $payload = @{
@@ -254,7 +255,7 @@ function New-GitHubCommentFromFile {
     {
         $msg.AppendLine($line)
     }
-    New-GithubComment -Header $Header -Description $Description -Message $msg.ToString() -Emoji $Emoji
+    return New-GithubComment -Header $Header -Description $Description -Message $msg.ToString() -Emoji $Emoji
 }
 
 <#
@@ -307,11 +308,10 @@ function New-GitHubSummaryComment {
 
         [Parameter(Mandatory)]
         [String]
-        $XamarinStoragePath,
+        $TestSummaryPath,
 
-        [Parameter(Mandatory)]
         [String]
-        $TestSummaryPath
+        $XamarinStoragePath
     )
 
     $envVars = @{
@@ -335,26 +335,30 @@ function New-GitHubSummaryComment {
     # 2. We did reach the xamarin-storage, stored in the env var XAMARIN_STORAGE_REACHED
     $headerSb = [System.Text.StringBuilder]::new()
     $headerSb.AppendLine(); # new line to start the list
-    $headerSb.AppendLine("* [Azure DevOps]($vstsTargetUrl")
+    $headerSb.AppendLine("* [Azure DevOps]($vstsTargetUrl)")
     if ($XamarinStoragePath -and $Env:XAMARIN_STORAGE_FAILED) { # if we do have the storage path but we failed. first part of the -and check string is not null or empty, second check presence of the env var
         $headerSb.AppendLine("* :warning: xamarin-storage could not be reached :warning:")
     } else {
         $xamarinStorageUrl = Get-XamarinStorageIndexUrl -Path $XamarinStoragePath
         $headerSb.AppendLine("* [Html Report]($xamarinStorageUrl)")
     }
+    if ($Env:VSDROPS_INDEX) {
+        # we did generate an index with the files in vsdrops
+        $headerSb.AppendLine("* [Html Report (VSDrops)]($Env:VSDROPS_INDEX)")
+    }
     $headerLinks = $headerSb.ToString()
     $request = $null
 
     if (-not (Test-Path $TestSummaryPath -PathType Leaf)) {
-        Set-GitHubStatus -Status "failure" -Description "Tests failed catastrophically on $CONTEXT (no summary found)." -Context "$CONTEXT"
-        $request = New-GitHubComment -Header "Tests failed catastrophically on $CONTEXT (no summary found)." -Emoji ":fire:" -Description "Result file $TestSummaryPath not found. $headerLinks"
+        Set-GitHubStatus -Status "failure" -Description "Tests failed catastrophically on $Context (no summary found)." -Context "$Context"
+        $request = New-GitHubComment -Header "Tests failed catastrophically on $Context (no summary found)." -Emoji ":fire:" -Description "Result file $TestSummaryPath not found. $headerLinks"
     } else {
-        if (Test-JobSuccess -Status $Env:AGENT_JOBSTATUS) {
-            Set-GitHubStatus -Status "success" -Description "Device tests passed on $CONTEXT." -Context "$CONTEXT"
-            $request = New-GitHubCommentFromFile -Header "Device tests passed on $CONTEXT." -Description "Device tests passed on $CONTEXT. $headerLinks"  -Emoji ":white_check_mark:" -Path $TestSummaryPath
+        if (Test-JobSuccess -Status $Env:TESTS_JOBSTATUS) {
+            Set-GitHubStatus -Status "success" -Description "Device tests passed on $Context." -Context "$Context"
+            $request = New-GitHubCommentFromFile -Header "Device tests passed on $Context." -Description "Device tests passed on $Context. $headerLinks"  -Emoji ":white_check_mark:" -Path $TestSummaryPath
         } else {
-            Set-GitHubStatus -Status "failure" -Description "Device tests failed on $CONTEXT." -Context "$CONTEXT"
-            $request = New-GitHubCommentFromFile -Header "Device tests failed on $CONTEXT" -Description "Device tests failed on $CONTEXT. $headerLinks" -Emoji ":x:" -Path $TestSummaryPath
+            Set-GitHubStatus -Status "failure" -Description "Device tests failed on $Context." -Context "$Context"
+            $request = New-GitHubCommentFromFile -Header "Device tests failed on $Context" -Description "Device tests failed on $Context. $headerLinks" -Emoji ":x:" -Path $TestSummaryPath
         }
     }
     return $request

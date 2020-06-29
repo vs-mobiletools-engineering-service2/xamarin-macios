@@ -14,9 +14,7 @@ namespace Xharness.Jenkins.TestTasks {
 		public DotNetBuildTask (Jenkins jenkins, TestProject testProject, IProcessManager processManager) 
 			: base (jenkins, testProject, processManager) { }
 
-		public bool IsDotNet5 {  get { return true; } }
-
-		protected override string ToolName => IsDotNet5 ? Jenkins.Harness.DOTNET5 : Jenkins.Harness.DOTNET;
+		protected override string ToolName => Jenkins.Harness.GetDotNetExecutable (Path.GetDirectoryName (ProjectFile));
 
 		public override bool RestoreNugets => false; // 'dotnet build' will restore
 
@@ -34,7 +32,7 @@ namespace Xharness.Jenkins.TestTasks {
 
 		protected override void InitializeTool () =>
 			buildToolTask = new DotNetBuild (
-				msbuildPath: ToolName,
+				msbuildPath: () => ToolName,
 				processManager: ProcessManager,
 				resourceManager: ResourceManager,
 				eventLogger: this,

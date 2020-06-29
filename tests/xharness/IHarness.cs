@@ -70,6 +70,7 @@ namespace Xharness {
 		void Log (int minLevel, string message, params object [] args);
 		void Log (string message);
 		void Log (string message, params object [] args);
+		string GetDotNetExecutable (string directory);
 
 		#endregion
 	}

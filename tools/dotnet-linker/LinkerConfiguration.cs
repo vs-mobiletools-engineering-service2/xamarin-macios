@@ -13,6 +13,8 @@ using Xamarin.Utils;
 namespace Xamarin.Linker {
 	public class LinkerConfiguration {
 		public List<Abi> Abis;
+		// This is the AssemblyName MSBuild property for the main project (which is also the root/entry assembly)
+		public string AssemblyName { get; private set; }
 		public string CacheDirectory { get; private set; }
 		public string ItemsDirectory { get; private set; }
 		public ApplePlatform Platform { get; private set; }
@@ -72,6 +74,15 @@ namespace Xamarin.Linker {
 				var key = line [..eq];
 				var value = line [(eq + 1)..];
 				switch (key) {
+				case "AssemblyName":
+					AssemblyName = value;
+					break;
+				case "CacheDirectory":
+					CacheDirectory = value;
+					break;
+				case "ItemsDirectory":
+					ItemsDirectory = value;
+					break;
 				case "LinkMode":
 					switch (value.ToLowerInvariant ()) {
 					case "full":
@@ -89,12 +100,6 @@ namespace Xamarin.Linker {
 					default:
 						throw new InvalidOperationException ($"Unknown link mode: {value} for the entry {line} in {linker_file}");
 					}
-					break;
-				case "CacheDirectory":
-					CacheDirectory = value;
-					break;
-				case "ItemsDirectory":
-					ItemsDirectory = value;
 					break;
 				case "Platform":
 					switch (value) {
@@ -140,6 +145,7 @@ namespace Xamarin.Linker {
 		{
 			Console.WriteLine ($"LinkerConfiguration:");
 			Console.WriteLine ($"    ABIs: {string.Join (", ", Abis.Select (v => v.AsArchString ()))}");
+			Console.WriteLine ($"    AssemblyName: {AssemblyName}");
 			Console.WriteLine ($"    CacheDirectory: {CacheDirectory}");
 			Console.WriteLine ($"    ItemsDirectory: {ItemsDirectory}");
 			Console.WriteLine ($"    LinkMode: {LinkMode}");
