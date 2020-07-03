@@ -24,9 +24,10 @@ BUILD_OUTPUT = \
 
 # dotnet-linker.csproj.inc contains the dotnet_linker_dependencies variable used to determine if mtouch needs to be rebuilt or not.
 dotnet-linker.csproj.inc: export BUILD_EXECUTABLE=$(DOTNET5) build
+dotnet-linker.csproj.inc: global.json
 -include dotnet-linker.csproj.inc
 
-$(BUILD_OUTPUT): Makefile $(dotnet_linker_dependencies)
+$(BUILD_OUTPUT): Makefile global.json $(dotnet_linker_dependencies)
 	$(Q_DOTNET_BUILD) $(DOTNET5) build $(XBUILD_VERBOSITY)
 
 ../mtouch/Errors.Designer.cs: # the build breaks without this...
@@ -45,6 +46,13 @@ $(DOTNET_DESTDIR)/Microsoft.macOS.Sdk/tools/dotnet-linker/%: $(BUILD_DIR)/% | $(
 
 $(DOTNET_DIRECTORIES):
 	$(Q) mkdir -p $@
+
+# This tells NuGet to use the exact same dotnet version we've configured in Make.config
+global.json: $(TOP)/Make.config.inc Makefile $(TOP)/.git/HEAD $(TOP)/.git/index
+	$(Q_GEN) \
+		printf "{\n" > $@; \
+		printf "\t\"sdk\": { \"version\": \"$(DOTNET5_VERSION)\" }\n" >> $@; \
+		printf "}\n" >> $@
 
 all-local:: $(DOTNET_TARGETS)
 install-local:: $(DOTNET_TARGETS)
