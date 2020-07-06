@@ -96,6 +96,9 @@
       <Link>external\Errors.designer.cs</Link>
       <DependentUpon>Errors.resx</DependentUpon>
     </Compile>
+    <Compile Include="..\common\Frameworks.cs">
+      <Link>external\Frameworks.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\mtouch\Errors.resx">

@@ -209,10 +209,16 @@ namespace Introspection
 					case "__Internal":
 						// load from executable
 						path = null;
+#if NET
+						// Globalization hasn't been implemented yet: https://github.com/xamarin/xamarin-macios/issues/8906
+						if (name.StartsWith ("GlobalizationNative_", StringComparison.Ordinal))
+							continue;
+#endif
 						break;
 #if NET
-					case "libhostpolicy": // not shipped with .NET 5 (yet?)
-					case "libSystem.Globalization.Native": // not shipped with .NET 5 (yet?)
+					case "libhostpolicy":
+						// There's no libhostpolicy library.
+						// https://github.com/dotnet/runtime/issues/38543
 						continue;
 					case "libSystem.Native":
 						path += ".dylib";

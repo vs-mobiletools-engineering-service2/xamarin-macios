@@ -16,12 +16,14 @@ namespace Xamarin.Linker {
 		// This is the AssemblyName MSBuild property for the main project (which is also the root/entry assembly)
 		public string AssemblyName { get; private set; }
 		public string CacheDirectory { get; private set; }
+		public bool DebugBuild { get; private set; }
+		public Version DeploymentTarget { get; private set; }
 		public string ItemsDirectory { get; private set; }
+		public bool IsSimulatorBuild { get; private set; }
+		public LinkMode LinkMode { get; private set; }
 		public ApplePlatform Platform { get; private set; }
 		public string PlatformAssembly { get; private set; }
-		public LinkMode LinkMode { get; private set; }
-
-		public bool DebugBuild { get; private set; }
+		public Version SdkVersion { get; private set; }
 
 		public bool InsertTimestamps { get; private set; } = true;
 
@@ -42,6 +44,8 @@ namespace Xamarin.Linker {
 				return single_instance;
 			}
 		}
+
+		public Application Application { get; private set; }
 
 		public static LinkerConfiguration GetInstance (LinkContext context)
 		{
@@ -80,8 +84,16 @@ namespace Xamarin.Linker {
 				case "CacheDirectory":
 					CacheDirectory = value;
 					break;
+				case "DeploymentTarget":
+					if (!Version.TryParse (value, out var deployment_target))
+						throw new InvalidOperationException ($"Unable to parse the {key} value: {value} in {linker_file}");
+					DeploymentTarget = deployment_target;
+					break;
 				case "ItemsDirectory":
 					ItemsDirectory = value;
+					break;
+				case "IsSimulatorBuild":
+					IsSimulatorBuild = string.Equals ("true", value, StringComparison.OrdinalIgnoreCase);
 					break;
 				case "LinkMode":
 					switch (value.ToLowerInvariant ()) {
@@ -122,6 +134,11 @@ namespace Xamarin.Linker {
 				case "PlatformAssembly":
 					PlatformAssembly = Path.GetFileNameWithoutExtension (value);
 					break;
+				case "SdkVersion":
+					if (!Version.TryParse (value, out var sdk_version))
+						throw new InvalidOperationException ($"Unable to parse the {key} value: {value} in {linker_file}");
+					SdkVersion = sdk_version;
+					break;
 				case "TargetArchitectures":
 					if (!Enum.TryParse<Abi> (value, out var arch))
 						throw new InvalidOperationException ($"Unknown target architectures: {value} in {linker_file}");
@@ -139,6 +156,8 @@ namespace Xamarin.Linker {
 			}
 
 			ErrorHelper.Platform = Platform;
+
+			Application = new Application (this);
 		}
 
 		public void Write ()
@@ -147,10 +166,13 @@ namespace Xamarin.Linker {
 			Console.WriteLine ($"    ABIs: {string.Join (", ", Abis.Select (v => v.AsArchString ()))}");
 			Console.WriteLine ($"    AssemblyName: {AssemblyName}");
 			Console.WriteLine ($"    CacheDirectory: {CacheDirectory}");
+			Console.WriteLine ($"    DeploymentTarget: {DeploymentTarget}");
 			Console.WriteLine ($"    ItemsDirectory: {ItemsDirectory}");
 			Console.WriteLine ($"    LinkMode: {LinkMode}");
+			Console.WriteLine ($"    IsSimulatorBuild: {IsSimulatorBuild}");
 			Console.WriteLine ($"    Platform: {Platform}");
 			Console.WriteLine ($"    PlatformAssembly: {PlatformAssembly}.dll");
+			Console.WriteLine ($"    SdkVersion: {SdkVersion}");
 		}
 
 		public void WriteOutputForMSBuild (string itemName, List<MSBuildItem> items)

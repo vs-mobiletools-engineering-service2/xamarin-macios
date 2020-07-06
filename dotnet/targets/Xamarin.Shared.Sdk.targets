@@ -123,7 +123,6 @@
 	<PropertyGroup>
 		<!-- This is somewhat complicated due to how the XI and XM targets differ. This will be improved as things go into master -->
 		<_AlwaysPostBuildTargets Condition="'$(_PlatformName)' != 'macOS'">
-			_CollectBundleResources;
 			_OptimizePngImages;
 			_OptimizePropertyLists;
 			_OptimizeLocalizationFiles;
@@ -133,7 +132,6 @@
 			_CleanUploaded;
 		</_AlwaysPostBuildTargets>
 		<_AlwaysPostBuildTargets Condition="'$(_PlatformName)' == 'macOS'">
-			_CollectBundleResources;
 			_PackLibraryResources;
 			_UnpackLibraryResources;
 			_GenerateBundleName;
@@ -159,7 +157,6 @@
 
 		<_PreBundle Condition="'$(_PlatformName)' != 'macOS'">
 			_DetectSigningIdentity;
-			_CopyResourcesToBundle;
 			_CreateAssetPackManifest;
 			_SmeltMetal;
 			_ForgeMetal;
@@ -172,7 +169,6 @@
 		</_PreBundle>
 		<_PreBundle Condition="'$(_PlatformName)' == 'macOS'">
 			_DetectSigningIdentity;
-			_CopyContentToBundle;
 			_SmeltMetal;
 			_ForgeMetal;
 			_TemperMetal;
@@ -203,8 +199,10 @@
 		<!-- We re-use ComputeFilesToPublish & CopyFilesToPublishDirectory to copy files to the .app -->
 		<!-- ComputeFilesToPublish will run ILLink -->
 		<CreateAppBundleDependsOn>
+			_CollectBundleResources;
 			$(_PreBundle);
 			_DetectAppManifest;
+			_CopyResourcesToBundle;
 			_CompileAppManifest;
 			_ComputeLinkerArguments;
 			ComputeFilesToPublish;
@@ -267,13 +265,20 @@
 			<_CustomLinkerOptions>
 				AssemblyName=$(AssemblyName).dll
 				CacheDirectory=$(_LinkerCacheDirectory)
+				DeploymentTarget=$(_MinimumOSVersion)
 				ItemsDirectory=$(_LinkerItemsDirectory)
+				IsSimulatorBuild=$(_SdkIsSimulator)
 				LinkMode=$(_LinkMode)
 				Platform=$(_PlatformName)
 				PlatformAssembly=$(_PlatformAssemblyName).dll
+				SdkVersion=$(_SdkVersion)
 				TargetArchitectures=$(TargetArchitectures)
 			</_CustomLinkerOptions>
 			<_ExtraTrimmerArgs>$(_ExtraTrimmerArgs) --custom-data "LinkerOptionsFile=$(_CustomLinkerOptionsFile)"</_ExtraTrimmerArgs>
+
+			<!-- Work around a linker issue: https://github.com/mono/linker/issues/1304 -->
+			<!-- System.Runtime.dll isn't always copied to the .app -->
+			<_ExtraTrimmerArgs>$(_ExtraTrimmerArgs) -p copy "System.Runtime"</_ExtraTrimmerArgs>
 
 			<!-- make the output verbose to see what the linker is doing. FIXME: make dependent upon verbosity level -->
 			<_ExtraTrimmerArgs>$(_ExtraTrimmerArgs) --verbose</_ExtraTrimmerArgs>
@@ -288,6 +293,10 @@
 				<!-- At the end of the pipeline -->
 				<Type>Xamarin.GenerateMainStep</Type>
 			</_TrimmerCustomSteps>
+			<_TrimmerCustomSteps Include="$(_AdditionalTaskAssembly)">
+				<!-- At the end of the pipeline -->
+				<Type>Xamarin.GatherFrameworksStep</Type>
+			</_TrimmerCustomSteps>
 		</ItemGroup>
 
 		<!-- Create the file with our custom linker options -->
@@ -298,6 +307,10 @@
 		<!-- Load _MainFile -->
 		<ReadItemsFromFile File="$(_LinkerItemsDirectory)/_MainFile.items" Condition="Exists('$(_LinkerItemsDirectory)/_MainFile.items')">
 			<Output TaskParameter="Items" ItemName="_MainFile" />
+		</ReadItemsFromFile>
+		<!-- Load _LinkerFrameworks -->
+		<ReadItemsFromFile File="$(_LinkerItemsDirectory)/_LinkerFrameworks.items" Condition="Exists('$(_LinkerItemsDirectory)/_LinkerFrameworks.items')">
+			<Output TaskParameter="Items" ItemName="_LinkerFrameworks" />
 		</ReadItemsFromFile>
 	</Target>
 
@@ -404,9 +417,8 @@
 			<_XamarinMainLibraries Include="$(_XamarinNativeLibraryDirectory)/$(_LibXamarinName)" />
 			<!-- Link with the libraries shipped with the mono runtime pack -->
 			<_XamarinMainLibraries Include="@(_MonoLibrary)" />
-			<!-- Hardcode a few frameworks for now -->
-			<_NativeExecutableFrameworks Include="Foundation" />
-			<_NativeExecutableFrameworks Include="CoreFoundation" />
+			<!-- The frameworks we need to link with (both weakly and normally) -->
+			<_NativeExecutableFrameworks Include="@(_LinkerFrameworks)" />
 		</ItemGroup>
 
 		<LinkNativeCode
@@ -420,7 +432,6 @@
 			SdkIsSimulator="$(_SdkIsSimulator)"
 			SdkRoot="$(_SdkRoot)"
 			TargetFrameworkMoniker="$(_ComputedTargetFrameworkMoniker)"
-			WeakFrameworks="@(_NativeExecutableWeakFrameworks)"
 		/>
 
 		<ItemGroup>

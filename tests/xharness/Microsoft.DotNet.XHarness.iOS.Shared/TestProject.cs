@@ -59,6 +59,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			TestProject rv = (TestProject) Activator.CreateInstance (GetType ());
 			rv.Path = Path;
 			rv.IsExecutableProject = IsExecutableProject;
+			rv.IsDotNetProject = IsDotNetProject;
 			rv.RestoreNugetsInProject = RestoreNugetsInProject;
 			rv.Name = Name;
 			rv.MTouchExtraArgs = MTouchExtraArgs;
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			return rv;
 		}
 
-		public async Task CreateCopyAsync (ILog log, IProcessManager processManager, ITestTask test = null)
+		public async Task CreateCopyAsync (ILog log, IProcessManager processManager, ITestTask test)
 		{
 			var directory = DirectoryUtilities.CreateTemporaryDirectory (test?.TestName ?? System.IO.Path.GetFileNameWithoutExtension (Path));
 			Directory.CreateDirectory (directory);
@@ -95,11 +96,12 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 				doc.SetNode ("DocumentationFile", "bin\\$(Configuration)\\nunitlite.xml");
 			}
 			doc.ResolveAllPaths (original_path);
+
 			if (doc.IsDotNetProject ()) {
 				// Many types of files below the csproj directory are included by default,
 				// which means that we have to include them manually in the cloned csproj,
-				// because it's in a very different directory.
-				var test_dir = P.GetDirectoryName (original_path);
+				// because the cloned project is stored in a very different directory.
+				var test_dir = System.IO.Path.GetDirectoryName (original_path);
 
 				// Get all the files in the project directory from git
 				using var process = new Process ();
@@ -113,8 +115,8 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 
 				var files = stdout.ToString ().Split ('\n');
 				foreach (var file in files) {
-					var ext = P.GetExtension (file);
-					var full_path = P.Combine (test_dir, file);
+					var ext = System.IO.Path.GetExtension (file);
+					var full_path = System.IO.Path.Combine (test_dir, file);
 					var windows_file = full_path.Replace ('/', '\\');
 
 					if (file.Contains (".xcasset")) {
@@ -134,6 +136,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 						break;
 					case ".gitignore":
 					case ".csproj":
+					case ".props": // Directory.Build.props
 					case "": // Makefile
 						break; // ignore these files
 					default:
@@ -141,8 +144,18 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 						break;
 					}
 				}
+
+				// The global.json and NuGet.config files make sure we use the locally built packages.
+				var dotnet_test_dir = System.IO.Path.Combine (test.RootDirectory, "dotnet");
+				var global_json = System.IO.Path.Combine (dotnet_test_dir, "global.json");
+				var nuget_config = System.IO.Path.Combine (dotnet_test_dir, "NuGet.config");
+				var target_directory = directory;
+				File.Copy (global_json, System.IO.Path.Combine (target_directory, System.IO.Path.GetFileName (global_json)), true);
+				log.WriteLine ($"Copied {global_json} to {target_directory}");
+				File.Copy (nuget_config, System.IO.Path.Combine (target_directory, System.IO.Path.GetFileName (nuget_config)), true);
+				log.WriteLine ($"Copied {nuget_config} to {target_directory}");
 			}
-			
+
 			var projectReferences = new List<TestProject> ();
 			foreach (var pr in doc.GetProjectReferences ()) {
 				var tp = new TestProject (pr.Replace ('\\', '/'));

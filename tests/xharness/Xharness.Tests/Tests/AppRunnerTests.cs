@@ -99,7 +99,7 @@ namespace Xharness.Tests {
 
 			var mock5 = new Mock<IAppBundleInformationParser> ();
 			mock5
-				.Setup (x => x.ParseFromProjectAsync (It.IsAny<ILog> (), It.IsAny<ISystemInformation> (), It.IsAny<IProcessManager> (), It.IsAny<string> (), It.IsAny<TestTarget> (), It.IsAny<string> ()))
+				.Setup (x => x.ParseFromProjectAsync (It.IsAny<ILog> (), It.IsAny<IProcessManager> (), It.IsAny<string> (), It.IsAny<TestTarget> (), It.IsAny<string> ()))
 				.ReturnsAsync (new AppBundleInformation (appName, appName, appPath, appPath, null));
 
 			appBundleInformationParser = mock5.Object;
