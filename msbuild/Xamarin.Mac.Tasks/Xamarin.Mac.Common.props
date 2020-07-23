@@ -72,7 +72,6 @@ Copyright (C) 2013-2014 Xamarin. All rights reserved.
 		<PackagingExtraArgs Condition="'$(PackagingExtraArgs)' == ''"></PackagingExtraArgs>
 		<I18n Condition="'$(I18n)' == ''"></I18n>
 		<IncludeMonoRuntime Condition="'$(IncludeMonoRuntime)' == ''">true</IncludeMonoRuntime>
-		<MonoBundlingExtraArgs Condition="'$(MonoBundlingExtraArgs)' == ''"></MonoBundlingExtraArgs>
 		<IsAppExtension Condition="'$(IsAppExtension)' == ''">False</IsAppExtension>
 		<EnableSGenConc Condition="'$(EnableSGenConc)' == ''">false</EnableSGenConc>
 		<AotScope Condition="'$(AotScope)' == ''">None</AotScope>
@@ -84,17 +83,13 @@ Copyright (C) 2013-2014 Xamarin. All rights reserved.
 		<IsMacEnabled>true</IsMacEnabled>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(XamarinMacFrameworkRoot)' == ''">
-		<XamarinMacFrameworkRoot>/Library/Frameworks/Xamarin.Mac.framework/Versions/Current</XamarinMacFrameworkRoot>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(TargetFrameworkName)' == 'Full'">
-		<AssemblySearchPaths>$(XamarinMacFrameworkRoot)/lib/reference/full;$(XamarinMacFrameworkRoot)/lib/mono;$(AssemblySearchPaths)</AssemblySearchPaths>
+		<AssemblySearchPaths>$(_XamarinSdkRoot)/lib/reference/full;$(_XamarinSdkRoot)/lib/mono;$(AssemblySearchPaths)</AssemblySearchPaths>
 		<ImplicitlyExpandNETStandardFacades>False</ImplicitlyExpandNETStandardFacades>
 	</PropertyGroup>
 
 	<!-- Do not resolve from the GAC in Modern or Full unless allow-unsafe-gac-resolution is passed in -->
-	<PropertyGroup Condition="'$(TargetFrameworkName)' != 'System' And !$(MonoBundlingExtraArgs.Contains('--allow-unsafe-gac-resolution')) And '$(_UsingXamarinSdk)' == ''" >
+	<PropertyGroup Condition="'$(TargetFrameworkName)' != 'System' And !$(_BundlerArguments.Contains('--allow-unsafe-gac-resolution')) And '$(_UsingXamarinSdk)' == ''" >
 		<AssemblySearchPaths>$([System.String]::Copy('$(AssemblySearchPaths)').Replace('{GAC}',''))</AssemblySearchPaths>
 		<AssemblySearchPaths Condition="'$(MSBuildRuntimeVersion)' != ''">$(AssemblySearchPaths.Split(';'))</AssemblySearchPaths>
 	</PropertyGroup>

@@ -1093,6 +1093,8 @@ METALPERFORMANCESHADERS_SOURCES = \
 	MetalPerformanceShaders/MPSCnnNeuron.cs \
 	MetalPerformanceShaders/MPSCnnKernel.cs \
 	MetalPerformanceShaders/MPSMatrixDescriptor.cs \
+	MetalPerformanceShaders/MPSNDArray.cs \
+	MetalPerformanceShaders/MPSNNGraph.cs \
 	MetalPerformanceShaders/MPSImageHistogram.cs \
 	MetalPerformanceShaders/MPSStateBatch.cs \
 	MetalPerformanceShaders/MPSStateResourceList.cs \
@@ -1703,6 +1705,7 @@ SHARED_CORE_SOURCES = \
 	ObjCRuntime/BindAsAttribute.cs \
 	ObjCRuntime/Blocks.cs \
 	ObjCRuntime/Class.cs \
+	ObjCRuntime/Constants.cs \
 	ObjCRuntime/INativeObject.cs \
 	ObjCRuntime/LinkWithAttribute.cs \
 	ObjCRuntime/NativeAttribute.cs \

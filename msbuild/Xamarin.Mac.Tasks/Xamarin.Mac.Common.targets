@@ -18,50 +18,6 @@ Copyright (C) 2014 Xamarin. All rights reserved.
      so be careful not to add fixes here that should go into Xamarin.Mac.Common.props which is shared -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.SetEnvironmentVariable" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.ArTool" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.Codesign" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.CollectBundleResources" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.CreateInstallerPackage" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.CreatePkgInfo" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.Ditto" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.FindItemWithLogicalName" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.PackLibraryResources" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.PropertyListEditor" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.ReadItemsFromFile" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.SmartCopy" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.UnpackLibraryResources" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.WriteItemsToFile" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.Archive" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.ACTool" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.CodesignVerify" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.CompileAppManifest" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.CompileEntitlements" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.CompileSceneKitAssets" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.DetectSdkLocations" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.DetectSigningIdentity" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.EmbedProvisionProfile" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.IBTool" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.MetalLib" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.Metal" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.Mmp" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.ScnTool" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.Mac.Tasks.TextureAtlas" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.GenerateBundleName" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.GetNativeExecutableName" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.GetPropertyListValue" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.SymbolStrip" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Xamarin.MacDev.Tasks.Zip" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-
-	<UsingTask TaskName="Microsoft.Build.Tasks.Copy" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-	<UsingTask TaskName="Microsoft.Build.Tasks.Delete" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-	<UsingTask TaskName="Microsoft.Build.Tasks.Exec" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-	<UsingTask TaskName="Microsoft.Build.Tasks.MakeDir" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-	<UsingTask TaskName="Microsoft.Build.Tasks.Move" AssemblyFile="Xamarin.Mac.Tasks.dll" />
-	<UsingTask TaskName="Microsoft.Build.Tasks.RemoveDir" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-	<UsingTask TaskName="Microsoft.Build.Tasks.Touch" AssemblyFile="Xamarin.Mac.Tasks.dll"/>
-
 	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Mac.Common.props"
 			Condition="'$(_XamarinCommonPropsHasBeenImported)' != 'true'" />
 	
@@ -131,6 +87,7 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 			_TemperMetal;
 			_CompileEntitlements;
 			_CompileAppManifest;
+			_ParseBundlerArguments;
 			_CompileToNative;
 			_CreatePkgInfo;
 			_CopyAppExtensionsToBundle;
@@ -374,6 +331,19 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 		<_AppBundleManifestRelativePath>Contents/</_AppBundleManifestRelativePath>
 	</PropertyGroup>
 
+	<Target Name="_GetCompileToNativeInputs"
+		DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+			<!-- Skip the reference assemblies. 'mmp' will fail to AOT them if passed 'aot:all'. Similar to: https://github.com/xamarin/xamarin-macios/issues/3199 -->
+			<!-- Remove exact references, such as if a package had a framework reference to 'System' that we already have -->
+			<!-- This is exactly what "Microsoft.NuGet.Build.Tasks"'s 'ResolveNuGetPackageAssets' target is doing -->
+			<!-- Effectively 'ResolveNuGetPackageAssets' computes the NuGet packages using their json asset file, adds the full assemblies to 'ReferenceCopyLocalPaths' and outputs the resolved references via '_ReferencesFromNuGetPackages' -->
+			<ReferencePath Remove="@(_ReferencesFromNuGetPackages)" />
+			<MmpReferencePath Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll'" />
+			<_CompileToNativeInput Include="$(TargetDir)$(TargetFileName);@(MmpReferencePath)" />
+		</ItemGroup>
+	</Target>
+
 	<PropertyGroup>
 		<CompileToNativeDependsOn>
 			_ComputeTargetFrameworkMoniker;
@@ -383,22 +353,15 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 			ResolveReferences;
 			_CompileEntitlements;
 			_CompileAppManifest;
+			_GetCompileToNativeInputs;
 			_ExpandNativeReferences;
 			_ComputeTargetArchitectures;
 		</CompileToNativeDependsOn>
 	</PropertyGroup>
 
 	<Target Name="_CompileToNative" DependsOnTargets="$(CompileToNativeDependsOn)"
-		Inputs="$(TargetDir)$(TargetFileName);@(_FrameworkNativeReference);@(_FileNativeReference);@(BundleDependentFiles)"
+		Inputs="@(_CompileToNativeInput);@(_FrameworkNativeReference);@(_FileNativeReference);@(BundleDependentFiles)"
 		Outputs="$(_AppBundlePath)Contents\MacOS\$(_AppBundleName)">
-		<ItemGroup>
-			<!-- Skip the reference assemblies. 'mmp' will fail to AOT them if passed 'aot:all'. Similar to: https://github.com/xamarin/xamarin-macios/issues/3199 -->
-			<!-- Remove exact references, such as if a package had a framework reference to 'System' that we already have -->
-			<!-- This is exactly what "Microsoft.NuGet.Build.Tasks"'s 'ResolveNuGetPackageAssets' target is doing -->
-			<!-- Effectively 'ResolveNuGetPackageAssets' computes the NuGet packages using their json asset file, adds the full assemblies to 'ReferenceCopyLocalPaths' and outputs the resolved references via '_ReferencesFromNuGetPackages' -->
-			<ReferencePath Remove="@(_ReferencesFromNuGetPackages)" />
-			<ReferenceCopyLocalAssemblyPaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll'" />
-		</ItemGroup>
 		<Mmp
 			Condition="'$(IsMacEnabled)' == 'true'"
 			SessionId="$(BuildSessionId)"
@@ -415,9 +378,9 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 			HttpClientHandler="$(HttpClientHandler)"
 			I18n="$(I18n)"
 			Profiling="$(Profiling)"
-			ExtraArgs="$(MonoBundlingExtraArgs)"
+			ExtraArgs="$(_BundlerArguments)"
 			NativeReferences="@(NativeReference)"
-			References="@(ReferencePath);@(ReferenceCopyLocalAssemblyPaths)"
+			References="@(ReferencePath);@(MmpReferencePath)"
 			ResponseFilePath="$(IntermediateOutputPath)response-file.rsp"
 			SdkRoot="$(_SdkDevPath)"
 			IntermediateOutputPath="$(IntermediateOutputPath)mmp-cache"
@@ -601,7 +564,7 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 		/>
 	</Target>
 
-	<Target Name="_CopyAppExtensionsToBundle"  Condition="'$(IsAppExtension)' != 'true'" DependsOnTargets="_ResolveAppExtensionReferences">
+	<Target Name="_CopyAppExtensionsToBundle"  Condition="'$(IsAppExtension)' != 'true'" DependsOnTargets="_ExtendAppExtensionReferences">
 		<MakeDir Directories="$(_AppBundlePath)Contents\PlugIns" Condition="'%(_ResolvedAppExtensionReferences.Extension)' == '.appex'" />
 		<MakeDir Directories="$(_AppBundlePath)Contents\XPCServices" Condition="'%(_ResolvedAppExtensionReferences.Extension)' == '.xpc'" />
 
