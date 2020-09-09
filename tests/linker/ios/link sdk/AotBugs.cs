@@ -35,6 +35,9 @@ namespace LinkSdk.Aot {
 	
 	interface IAotTest {
 	}
+
+	interface IExpectException {
+	}
 	
 	[TestFixture]
 	// already done in Bug2096Test.cs -> [Preserve (AllMembers = true)]
@@ -466,6 +469,9 @@ namespace LinkSdk.Aot {
 		}
 
 		[Test]
+#if NET
+		[Ignore ("MulticastDelegate.BeginInvoke isn't supported in .NET (https://github.com/dotnet/runtime/issues/16312)")]
+#endif
 		public void Bug5354 ()
 		{
 			Action<string> testAction = (string s) => { s.ToString (); };

@@ -15,7 +15,9 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 	public class TestProject
 	{
 		XmlDocument xml;
+		bool generate_variations = true;
 
+		public TestPlatform TestPlatform;
 		public string Path;
 		public string SolutionPath;
 		public string Name;
@@ -25,9 +27,10 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 		public string [] Configurations;
 		public Func<Task> Dependency;
 		public string FailureMessage;
-		public bool RestoreNugetsInProject;
+		public bool RestoreNugetsInProject = true;
 		public string MTouchExtraArgs;
 		public double TimeoutMultiplier = 1;
+		public bool? Ignore;
 
 		public IEnumerable<TestProject> ProjectReferences;
 
@@ -43,6 +46,8 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			Path = path;
 			IsExecutableProject = isExecutableProject;
 		}
+
+		public virtual bool GenerateVariations { get => generate_variations; set => generate_variations = value; }
 
 		public XmlDocument Xml {
 			get {
@@ -65,17 +70,24 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			rv.MTouchExtraArgs = MTouchExtraArgs;
 			rv.TimeoutMultiplier = TimeoutMultiplier;
 			rv.IsDotNetProject = IsDotNetProject;
+			rv.Ignore = Ignore;
 			return rv;
 		}
 
-		internal async Task<TestProject> CreateCloneAsync (ILog log, IProcessManager processManager, ITestTask test)
+		internal async Task<TestProject> CreateCloneAsync (ILog log, IProcessManager processManager, ITestTask test, string rootDirectory)
 		{
 			var rv = Clone ();
-			await rv.CreateCopyAsync (log, processManager, test);
+			await rv.CreateCopyAsync (log, processManager, test, rootDirectory);
 			return rv;
 		}
 
-		public async Task CreateCopyAsync (ILog log, IProcessManager processManager, ITestTask test)
+		public Task CreateCopyAsync (ILog log, IProcessManager processManager, ITestTask test, string rootDirectory)
+		{
+			var pr = new Dictionary<string, TestProject> ();
+			return CreateCopyAsync (log, processManager, test, rootDirectory, pr);
+		}
+
+		async Task CreateCopyAsync (ILog log, IProcessManager processManager, ITestTask test, string rootDirectory, Dictionary<string, TestProject> allProjectReferences)
 		{
 			var directory = DirectoryUtilities.CreateTemporaryDirectory (test?.TestName ?? System.IO.Path.GetFileNameWithoutExtension (Path));
 			Directory.CreateDirectory (directory);
@@ -88,14 +100,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 			doc = new XmlDocument ();
 			doc.LoadWithoutNetworkAccess (original_path);
 			var original_name = System.IO.Path.GetFileName (original_path);
-			if (original_name.Contains ("GuiUnit_NET") || original_name.Contains ("GuiUnit_xammac_mobile")) {
-				// The GuiUnit project files writes stuff outside their project directory using relative paths,
-				// but override that so that we don't end up with multiple cloned projects writing stuff to
-				// the same location.
-				doc.SetOutputPath ("bin\\$(Configuration)");
-				doc.SetNode ("DocumentationFile", "bin\\$(Configuration)\\nunitlite.xml");
-			}
-			doc.ResolveAllPaths (original_path);
+			doc.ResolveAllPaths (original_path, rootDirectory);
 
 			if (doc.IsDotNetProject ()) {
 				if (doc.GetEnableDefaultItems () != false) {
@@ -160,8 +165,12 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared {
 
 			var projectReferences = new List<TestProject> ();
 			foreach (var pr in doc.GetProjectReferences ()) {
-				var tp = new TestProject (pr.Replace ('\\', '/'));
-				await tp.CreateCopyAsync (log, processManager, test);
+				var prPath = pr.Replace ('\\', '/');
+				if (!allProjectReferences.TryGetValue (prPath, out var tp)) {
+					tp = new TestProject (pr.Replace ('\\', '/'));
+					await tp.CreateCopyAsync (log, processManager, test, rootDirectory, allProjectReferences);
+					allProjectReferences.Add (prPath, tp);
+				}
 				doc.SetProjectReferenceInclude (pr, tp.Path.Replace ('/', '\\'));
 				projectReferences.Add (tp);
 			}

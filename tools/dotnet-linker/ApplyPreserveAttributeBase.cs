@@ -1,3 +1,5 @@
+// This is copied from https://github.com/mono/linker/blob/fa9ccbdaf6907c69ef1bb117906f8f012218d57f/src/tuner/Mono.Tuner/ApplyPreserveAttributeBase.cs
+// and modified to work without a Profile class.
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,11 +29,7 @@ namespace Mono.Tuner {
 
 		public override bool IsActiveFor (AssemblyDefinition assembly)
 		{
-#if !NET
-			return !Profile.IsSdkAssembly (assembly) && Annotations.GetAction (assembly) == AssemblyAction.Link;
-#else
 			return Annotations.GetAction (assembly) == AssemblyAction.Link;
-#endif
 		}
 
 		public override void ProcessType (TypeDefinition type)

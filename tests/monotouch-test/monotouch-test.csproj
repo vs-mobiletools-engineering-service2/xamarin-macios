@@ -16,6 +16,8 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)-unified</IntermediateOutputPath>
     <DefineConstants></DefineConstants>
     <LangVersion>latest</LangVersion>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <RootTestsDirectory>..</RootTestsDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>True</DebugSymbols>
@@ -154,10 +156,14 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
-    <Reference Include="MonoTouch.NUnitLite" />
     <Reference Include="System.Net.Http" />
     <Reference Include="OpenTK-1.0" />
     <Reference Include="System.Net" />
+    <PackageReference Include="MonoTouch.Dialog" Version="2.0.0-pre1" />
+    <ProjectReference Include="..\..\external\Touch.Unit\Touch.Client\iOS\Touch.Client-iOS.csproj">
+      <Project>{F611ED96-54B5-4975-99BB-12F50AF95936}</Project>
+      <Name>Touch.Client-iOS</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist">
@@ -207,6 +213,7 @@
       <Link>Extensions.cs</Link>
     </Compile>
   </ItemGroup>
+  <Import Project="$(RootTestsDirectory)\nunit.framework.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
     <Folder Include="MapKit\" />
@@ -306,7 +313,7 @@
       <Project>{676F527D-3352-42EA-9DE2-181C45003568}</Project>
       <Name>EmbeddedResources</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\tests\bindings-test\bindings-test.csproj">
+    <ProjectReference Include="..\..\tests\bindings-test\iOS\bindings-test.csproj">
       <Project>{D6667423-EDD8-4B50-9D98-1AC5D8A8A4EA}</Project>
       <Name>bindings-test</Name>
     </ProjectReference>

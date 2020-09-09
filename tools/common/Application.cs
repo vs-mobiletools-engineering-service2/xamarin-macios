@@ -9,17 +9,28 @@ using Mono.Cecil.Cil;
 using Mono.Linker;
 
 using Xamarin.Linker;
+using Xamarin.MacDev;
 using Xamarin.Utils;
 
 using ObjCRuntime;
 
 #if MONOTOUCH
 using PlatformResolver = MonoTouch.Tuner.MonoTouchResolver;
-#else
+#elif MMP
 using PlatformResolver = Xamarin.Bundler.MonoMacResolver;
+#elif NET
+using PlatformResolver = Xamarin.Linker.DotNetResolver;
+#else
+#error Invalid defines
 #endif
 
 namespace Xamarin.Bundler {
+
+	public enum BuildTarget {
+		None,
+		Simulator,
+		Device,
+	}
 
 	public enum MonoNativeMode {
 		None,
@@ -48,6 +59,7 @@ namespace Xamarin.Bundler {
 		public bool EnableDebug;
 		// The list of assemblies that we do generate debugging info for.
 		public bool DebugAll;
+		public bool UseInterpreter;
 		public List<string> DebugAssemblies = new List<string> ();
 		internal RuntimeOptions RuntimeOptions;
 		public Optimizations Optimizations = new Optimizations ();
@@ -59,10 +71,11 @@ namespace Xamarin.Bundler {
 		public HashSet<string> Frameworks = new HashSet<string> ();
 		public HashSet<string> WeakFrameworks = new HashSet<string> ();
 
+		public bool IsExtension;
 		public ApplePlatform Platform { get { return Driver.TargetFramework.Platform; } }
 
 		// Linker config
-		public LinkMode LinkMode = LinkMode.All;
+		public LinkMode LinkMode = LinkMode.Full;
 		public List<string> LinkSkipped = new List<string> ();
 		public List<string> Definitions = new List<string> ();
 		public I18nAssemblies I18n;
@@ -87,6 +100,83 @@ namespace Xamarin.Bundler {
 		public List<string> References = new List<string> ();
 		public List<Application> SharedCodeApps = new List<Application> (); // List of appexes we're sharing code with.
 		public string RegistrarOutputLibrary;
+
+		public BuildTarget BuildTarget;
+
+		bool RequiresXcodeHeaders {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					return LinkMode == LinkMode.None;
+				case ApplePlatform.MacOSX:
+					return Registrar == RegistrarMode.Static && LinkMode == LinkMode.None;
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
+
+		public string LocalBuildDir {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					return "_ios-build";
+				case ApplePlatform.MacOSX:
+					return "_mac-build";
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
+
+		public string FrameworkLocationVariable {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					return "MD_MTOUCH_SDK_ROOT";
+				case ApplePlatform.MacOSX:
+					return "XAMMAC_FRAMEWORK_PATH";
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
+
+		public bool IsDeviceBuild {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					return BuildTarget == BuildTarget.Device;
+				case ApplePlatform.MacOSX:
+					return false;
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
+
+		public bool IsSimulatorBuild {
+			get {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					return BuildTarget == BuildTarget.Simulator;
+				case ApplePlatform.MacOSX:
+					return false;
+				default:
+					throw ErrorHelper.CreateError (71, Errors.MX0071, Platform, ProductName);
+				}
+			}
+		}
 
 		public static int Concurrency => Driver.Concurrency;
 		public Version DeploymentTarget;
@@ -135,7 +225,16 @@ namespace Xamarin.Bundler {
 
 		public bool IsDualBuild { get { return Is32Build && Is64Build; } } // if we're building both a 32 and a 64 bit version.
 
-		public Application (string[] arguments)
+		public Application ()
+		{
+		}
+
+		public Application (string [] arguments)
+		{
+			CreateCache (arguments);
+		}
+
+		public void CreateCache (string [] arguments)
 		{
 			Cache = new Cache (arguments);
 		}
@@ -163,6 +262,38 @@ namespace Xamarin.Bundler {
 			}
 
 			I18n = assemblies;
+		}
+
+		public bool IsTodayExtension {
+			get {
+				return ExtensionIdentifier == "com.apple.widget-extension";
+			}
+		}
+
+		public bool IsWatchExtension {
+			get {
+				return ExtensionIdentifier == "com.apple.watchkit";
+			}
+		}
+
+		public bool IsTVExtension {
+			get {
+				return ExtensionIdentifier == "com.apple.tv-services";
+			}
+		}
+
+		public string ExtensionIdentifier {
+			get {
+				if (!IsExtension)
+					return null;
+
+				var info_plist = Path.Combine (AppDirectory, "Info.plist");
+				var plist = Driver.FromPList (info_plist);
+				var dict = plist.Get<PDictionary> ("NSExtension");
+				if (dict == null)
+					return null;
+				return dict.GetString ("NSExtensionPointIdentifier");
+			}
 		}
 
 		// This is just a name for this app to show in log/error messages, etc.
@@ -388,15 +519,25 @@ namespace Xamarin.Bundler {
 
 			RuntimeOptions = RuntimeOptions.Create (this, HttpMessageHandler, TlsProvider);
 
-			if (RequiresXcodeHeaders && SdkVersion < SdkVersions.GetVersion (Platform)) {
-				throw ErrorHelper.CreateError (91, Errors.MX0091, ProductName, PlatformName, SdkVersions.GetVersion (Platform), SdkVersions.Xcode, Error91LinkerSuggestion);
+			if (RequiresXcodeHeaders && SdkVersion < SdkVersions.GetVersion (this)) {
+				switch (Platform) {
+				case ApplePlatform.iOS:
+				case ApplePlatform.TVOS:
+				case ApplePlatform.WatchOS:
+					throw ErrorHelper.CreateError (180, Errors.MX0180, ProductName, PlatformName, SdkVersions.GetVersion (this), SdkVersions.Xcode);
+				case ApplePlatform.MacOSX:
+					throw ErrorHelper.CreateError (179, Errors.MX0179, ProductName, PlatformName, SdkVersions.GetVersion (this), SdkVersions.Xcode);
+				default:
+					// Default to the iOS error message, it's better than showing MX0071 (unknown platform), which would be completely unrelated
+					goto case ApplePlatform.iOS;
+				}
 			}
 
 			if (DeploymentTarget != null) {
-				if (DeploymentTarget < Xamarin.SdkVersions.GetMinVersion (Platform))
-					throw new ProductException (73, true, Errors.MT0073, Constants.Version, DeploymentTarget, Xamarin.SdkVersions.GetMinVersion (Platform), PlatformName, ProductName);
-				if (DeploymentTarget > Xamarin.SdkVersions.GetVersion (Platform))
-					throw new ProductException (74, true, Errors.MX0074, Constants.Version, DeploymentTarget, Xamarin.SdkVersions.GetVersion (Platform), PlatformName, ProductName);
+				if (DeploymentTarget < Xamarin.SdkVersions.GetMinVersion (this))
+					throw new ProductException (73, true, Errors.MT0073, Constants.Version, DeploymentTarget, Xamarin.SdkVersions.GetMinVersion (this), PlatformName, ProductName);
+				if (DeploymentTarget > Xamarin.SdkVersions.GetVersion (this))
+					throw new ProductException (74, true, Errors.MX0074, Constants.Version, DeploymentTarget, Xamarin.SdkVersions.GetVersion (this), PlatformName, ProductName);
 			}
 
 			if (Platform == ApplePlatform.WatchOS && EnableCoopGC.HasValue && !EnableCoopGC.Value)
@@ -405,41 +546,8 @@ namespace Xamarin.Bundler {
 			if (!EnableCoopGC.HasValue)
 				EnableCoopGC = Platform == ApplePlatform.WatchOS;
 
-			if (EnableCoopGC.Value) {
-				switch (MarshalObjectiveCExceptions) {
-				case MarshalObjectiveCExceptionMode.UnwindManagedCode:
-				case MarshalObjectiveCExceptionMode.Disable:
-					throw ErrorHelper.CreateError (89, Errors.MT0089, "--marshal-objectivec-exceptions", MarshalObjectiveCExceptions.ToString ().ToLowerInvariant ());
-				}
-				switch (MarshalManagedExceptions) {
-				case MarshalManagedExceptionMode.UnwindNativeCode:
-				case MarshalManagedExceptionMode.Disable:
-					throw ErrorHelper.CreateError (89, Errors.MT0089, "--marshal-managed-exceptions", MarshalManagedExceptions.ToString ().ToLowerInvariant ());
-				}
-			}
-
-
-			bool isSimulatorOrDesktopDebug = EnableDebug;
-#if MTOUCH
-			isSimulatorOrDesktopDebug &= IsSimulatorBuild;
-#endif
-
-			if (MarshalObjectiveCExceptions == MarshalObjectiveCExceptionMode.Default) {
-				if (EnableCoopGC.Value || (Platform == ApplePlatform.MacOSX && EnableDebug)) {
-					MarshalObjectiveCExceptions = MarshalObjectiveCExceptionMode.ThrowManagedException;
-				} else {
-					MarshalObjectiveCExceptions = isSimulatorOrDesktopDebug ? MarshalObjectiveCExceptionMode.UnwindManagedCode : MarshalObjectiveCExceptionMode.Disable;
-				}
-			}
-
-			if (MarshalManagedExceptions == MarshalManagedExceptionMode.Default) {
-				if (EnableCoopGC.Value) {
-					MarshalManagedExceptions = MarshalManagedExceptionMode.ThrowObjectiveCException;
-				} else {
-					MarshalManagedExceptions = isSimulatorOrDesktopDebug ? MarshalManagedExceptionMode.UnwindNativeCode : MarshalManagedExceptionMode.Disable;
-				}
-				IsDefaultMarshalManagedExceptionMode = true;
-			}
+			SetObjectiveCExceptionMode ();
+			SetManagedExceptionMode ();
 
 			if (SymbolMode == SymbolMode.Default) {
 #if MONOTOUCH
@@ -471,7 +579,10 @@ namespace Xamarin.Bundler {
 				ErrorHelper.Warning (3007, Errors.MX3007);
 			}
 
-			Optimizations.Initialize (this);
+			Optimizations.Initialize (this, out var messages);
+			ErrorHelper.Show (messages);
+			if (Driver.Verbosity > 3)
+				Driver.Log (4, $"Enabled optimizations: {Optimizations}");
 		}
 
 		void SelectMonoNative ()
@@ -530,7 +641,7 @@ namespace Xamarin.Bundler {
 #endif
 			};
 
-			if (Platform == ApplePlatform.iOS) {
+			if (Platform == ApplePlatform.iOS && !Driver.IsDotNet) {
 				if (Is32Build) {
 					resolver.ArchDirectory = Driver.GetArch32Directory (this);
 				} else {
@@ -825,6 +936,129 @@ namespace Xamarin.Bundler {
 		{
 			foreach (var t in Targets)
 				t.LoadSymbols ();
+		}
+
+		public bool IsFrameworkAvailableInSimulator (string framework)
+		{
+			if (!Driver.GetFrameworks (this).TryGetValue (framework, out var fw))
+				return true; // Unknown framework, assume it's valid for the simulator
+
+			return fw.IsFrameworkAvailableInSimulator (this);
+		}
+
+		public static bool TryParseManagedExceptionMode (string value, out MarshalManagedExceptionMode mode)
+		{
+			mode = MarshalManagedExceptionMode.Default;
+
+			switch (value) {
+			case "default":
+				mode = MarshalManagedExceptionMode.Default;
+				break;
+			case "unwindnative":
+			case "unwindnativecode":
+				mode = MarshalManagedExceptionMode.UnwindNativeCode;
+				break;
+			case "throwobjectivec":
+			case "throwobjectivecexception":
+				mode = MarshalManagedExceptionMode.ThrowObjectiveCException;
+				break;
+			case "abort":
+				mode = MarshalManagedExceptionMode.Abort;
+				break;
+			case "disable":
+				mode = MarshalManagedExceptionMode.Disable;
+				break;
+			default:
+				return false;
+			}
+
+			return true;
+		}
+
+		public static bool TryParseObjectiveCExceptionMode (string value, out MarshalObjectiveCExceptionMode mode)
+		{
+			mode = MarshalObjectiveCExceptionMode.Default;
+			switch (value) {
+			case "default":
+				mode = MarshalObjectiveCExceptionMode.Default;
+				break;
+			case "unwindmanaged":
+			case "unwindmanagedcode":
+				mode = MarshalObjectiveCExceptionMode.UnwindManagedCode;
+				break;
+			case "throwmanaged":
+			case "throwmanagedexception":
+				mode = MarshalObjectiveCExceptionMode.ThrowManagedException;
+				break;
+			case "abort":
+				mode = MarshalObjectiveCExceptionMode.Abort;
+				break;
+			case "disable":
+				mode = MarshalObjectiveCExceptionMode.Disable;
+				break;
+			default:
+				return false;
+			}
+			return true;
+		}
+
+		public void SetManagedExceptionMode ()
+		{
+			switch (MarshalManagedExceptions) {
+			case MarshalManagedExceptionMode.Default:
+				if (EnableCoopGC.Value) {
+					MarshalManagedExceptions = MarshalManagedExceptionMode.ThrowObjectiveCException;
+				} else {
+					switch (Platform) {
+					case ApplePlatform.iOS:
+					case ApplePlatform.TVOS:
+					case ApplePlatform.WatchOS:
+						MarshalManagedExceptions = EnableDebug && IsSimulatorBuild ? MarshalManagedExceptionMode.UnwindNativeCode : MarshalManagedExceptionMode.Disable;
+						break;
+					case ApplePlatform.MacOSX:
+						MarshalManagedExceptions = EnableDebug ? MarshalManagedExceptionMode.UnwindNativeCode : MarshalManagedExceptionMode.Disable;
+						break;
+					default:
+						throw ErrorHelper.CreateError (71, Errors.MX0071 /* Unknown platform: {0}. This usually indicates a bug in {1}; please file a bug report at https://github.com/xamarin/xamarin-macios/issues/new with a test case. */, Platform, ProductName);
+					}
+				}
+				IsDefaultMarshalManagedExceptionMode = true;
+				break;
+			case MarshalManagedExceptionMode.UnwindNativeCode:
+			case MarshalManagedExceptionMode.Disable:
+				if (EnableCoopGC.Value)
+					throw ErrorHelper.CreateError (89, Errors.MT0089, "--marshal-managed-exceptions", MarshalManagedExceptions.ToString ().ToLowerInvariant ());
+				break;
+			}
+		}
+
+		public void SetObjectiveCExceptionMode ()
+		{
+			switch (MarshalObjectiveCExceptions) {
+			case MarshalObjectiveCExceptionMode.Default:
+				if (EnableCoopGC.Value) {
+					MarshalObjectiveCExceptions = MarshalObjectiveCExceptionMode.ThrowManagedException;
+				} else {
+					switch (Platform) {
+					case ApplePlatform.iOS:
+					case ApplePlatform.TVOS:
+					case ApplePlatform.WatchOS:
+						MarshalObjectiveCExceptions = EnableDebug && IsSimulatorBuild ? MarshalObjectiveCExceptionMode.UnwindManagedCode : MarshalObjectiveCExceptionMode.Disable;
+						break;
+					case ApplePlatform.MacOSX:
+						MarshalObjectiveCExceptions = EnableDebug ? MarshalObjectiveCExceptionMode.ThrowManagedException : MarshalObjectiveCExceptionMode.Disable;
+						break;
+					default:
+						throw ErrorHelper.CreateError (71, Errors.MX0071 /* Unknown platform: {0}. This usually indicates a bug in {1}; please file a bug report at https://github.com/xamarin/xamarin-macios/issues/new with a test case. */, Platform, ProductName);
+					}
+				}
+				break;
+			case MarshalObjectiveCExceptionMode.UnwindManagedCode:
+			case MarshalObjectiveCExceptionMode.Disable:
+				if (EnableCoopGC.Value)
+					throw ErrorHelper.CreateError (89, Errors.MT0089, "--marshal-objectivec-exceptions", MarshalObjectiveCExceptions.ToString ().ToLowerInvariant ());
+				break;
+			}
 		}
 	}
 }

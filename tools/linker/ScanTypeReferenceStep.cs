@@ -24,11 +24,13 @@ namespace Xamarin.Linker.Steps {
 		{
 			foreach (var module in assembly.Modules) {
 				foreach (var name in lookfor) {
-					if (module.HasTypeReference (name))
+					if (IsReferenced (module, name))
 						Report (name, assembly);
 				}
 			}
 		}
+
+		protected abstract bool IsReferenced (ModuleDefinition module, string name);
 
 		protected abstract void Report (string typeName, AssemblyDefinition assembly);
 	}
@@ -44,6 +46,11 @@ namespace Xamarin.Linker.Steps {
 		{
 		}
 #endif
+
+		protected override bool IsReferenced (ModuleDefinition module, string name)
+		{
+			return module.HasTypeReference (name);
+		}
 
 		protected override void Report (string typeName, AssemblyDefinition assembly)
 		{
@@ -67,6 +74,19 @@ namespace Xamarin.Linker.Steps {
 		{
 		}
 #endif
+
+		protected override bool IsReferenced (ModuleDefinition module, string name)
+		{
+			if (!module.TryGetTypeReference (name, out var tr))
+				return false;
+			// it might be there (and not cleaned) until it's saved back to disk
+			// but it can't resolve anymore (since it's removed from the actual assembly)
+			var td = tr.Resolve ();
+			if (td == null)
+				return false;
+			// and, if it was (cache) then we can ask if it was marked (since we're post mark)
+			return Annotations.IsMarked (td);
+		}
 
 		protected override void Report (string typeName, AssemblyDefinition assembly)
 		{

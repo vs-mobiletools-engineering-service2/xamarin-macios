@@ -246,7 +246,10 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 
 		public static string GetAssemblyName (this XmlDocument csproj)
 		{
-			return csproj.SelectSingleNode ("/*/*/*[local-name() = 'AssemblyName']").InnerText;
+			var assemblyNameNode = csproj.SelectSingleNode ("/*/*/*[local-name() = 'AssemblyName']");
+			if (assemblyNameNode != null)
+				return assemblyNameNode.InnerText;
+			return Path.GetFileNameWithoutExtension (csproj.GetFilename ());
 		}
 
 		public static async Task<string> GetPropertyByMSBuildEvaluationAsync (this XmlDocument csproj, ILog log, ISystemInformation sysinfo, IProcessManager processManager, string projectPath, string property, string dependsOnTargets = "", Dictionary<string, string> properties = null)
@@ -315,6 +318,13 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				reference.ParentNode.RemoveChild (reference);
 		}
 
+		public static void RemovePackageReference (this XmlDocument csproj, string projectName)
+		{
+			var reference = csproj.SelectSingleNode ("/*/*/*[local-name() = 'PackageReference' and @Include = '" + projectName + "']");
+			if (reference != null)
+				reference.ParentNode.RemoveChild (reference);
+		}
+
 		public static void AddCompileInclude (this XmlDocument csproj, string link, string include, bool prepend = false)
 		{
 			AddInclude (csproj, "Compile", link, include, prepend);
@@ -355,9 +365,12 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 
 		public static void SetImport (this XmlDocument csproj, string value)
 		{
-			var imports = csproj.SelectNodes ("/*/*[local-name() = 'Import'][not(@Condition)]");			
+			var import = GetImport (csproj);
+			if (string.IsNullOrEmpty (import))
+				throw new Exception ($"Could not find the xamarin import");
+			var imports = csproj.SelectNodes ($"/*/*[local-name() = 'Import'][@Project = '{import}']");			
 			if (imports.Count != 1)
-				throw new Exception ("More than one import");
+				throw new Exception ($"Found {imports.Count} xamarin imports?");
 			imports [0].Attributes ["Project"].Value = value;
 		}
 
@@ -474,45 +487,44 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			return null;
 		}
 
-		public static string GetImport (this XmlDocument csproj)
+		public static List<string> GetImports (this XmlDocument csproj)
 		{
 			var imports = csproj.SelectNodes ("/*/*[local-name() = 'Import'][not(@Condition)]");
-			if (imports.Count != 1)
-				throw new Exception ("More than one import");
-			return imports [0].Attributes ["Project"].Value;
+			var rv = new List<string> ();
+			foreach (XmlNode import in imports)
+				rv.Add (import.Attributes ["Project"].Value);
+			return rv;
 		}
 
-		public delegate bool FixReferenceDelegate (string reference, out string fixed_reference);
-		public static void FixProjectReferences (this XmlDocument csproj, string suffix, FixReferenceDelegate fixCallback = null, FixReferenceDelegate fixIncludeCallback = null)
+		public static string GetImport (this XmlDocument csproj)
+		{
+			return GetImports (csproj).FirstOrDefault ((v) => v.Replace ('/', '\\').Contains ("$(MSBuildExtensionsPath)\\Xamarin"));
+		}
+
+		public delegate bool FixReferenceDelegate (string include, string subdir, string suffix, out string fixed_include);
+
+		public static void FixProjectReferences (this XmlDocument csproj, string suffix, FixReferenceDelegate fixCallback)
+		{
+			FixProjectReferences (csproj, null, suffix, fixCallback);
+		}
+
+		public static void FixProjectReferences (this XmlDocument csproj, string subdir, string suffix, FixReferenceDelegate fixCallback)
 		{
 			var nodes = csproj.SelectNodes ("/*/*/*[local-name() = 'ProjectReference']");
-			if (nodes.Count == 0)
-				return;
 			foreach (XmlNode n in nodes) {
-				var name = n ["Name"]?.InnerText;
-				string fixed_name = null;
-				if (name != null && fixCallback != null && !fixCallback (name, out fixed_name))
+				var nameNode = n ["Name"];
+				var includeAttribute = n.Attributes ["Include"];
+				var include = includeAttribute.Value;
+
+				include = include.Replace ('\\', '/');
+				if (!fixCallback (include, subdir, suffix, out var fixed_include))
 					continue;
-				var include = n.Attributes ["Include"];
-				string fixed_include;
-				if (fixIncludeCallback != null && fixIncludeCallback (include.Value, out fixed_include)) {
-					// we're done here
-				} else if (fixed_name == null) {
-					fixed_include = include.Value;
-					fixed_include = fixed_include.Replace (".csproj", suffix + ".csproj");
-					fixed_include = fixed_include.Replace (".fsproj", suffix + ".fsproj");
-				} else {
-					var unix_path = include.Value.Replace ('\\', '/');
-					var unix_dir = System.IO.Path.GetDirectoryName (unix_path);
-					fixed_include = System.IO.Path.Combine (unix_dir, fixed_name + System.IO.Path.GetExtension (unix_path));
-					fixed_include = fixed_include.Replace ('/', '\\');
-				}
-				n.Attributes ["Include"].Value = fixed_include;
-				if (name != null) {
-					var nameElement = n ["Name"];
-					name = System.IO.Path.GetFileNameWithoutExtension (fixed_include.Replace ('\\', '/'));
-					nameElement.InnerText = name;
-				}
+				var name = Path.GetFileNameWithoutExtension (fixed_include);
+				fixed_include = fixed_include.Replace ('/', '\\');
+
+				includeAttribute.Value = fixed_include;
+				if (nameNode != null)
+					nameNode.InnerText = name;
 			}
 		}
 
@@ -602,17 +614,25 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 		{
 			var import = GetInfoPListNode (csproj, false);
 			if (import != null) {
-				var value = import.Attributes ["Include"].Value;
+				var attrib = import.Attributes ["Include"];
+				var value = attrib.Value;
 				var unixValue = value.Replace ('\\', '/');
-				var fname = Path.GetFileName (unixValue);
-				if (newName == null) {
-					if (string.IsNullOrEmpty (fullPath))
-						newName = value.Replace (fname, $"Info{suffix}.plist");
-					else
-						newName = value.Replace (fname, $"{fullPath}\\Info{suffix}.plist");
-				}
-				import.Attributes ["Include"].Value = (!Path.IsPathRooted (unixValue)) ? value.Replace (fname, newName) : newName;
 
+				// If newName is specified, use that as-is
+				// If not:
+				//     If the existing value has a directory, use that as the directory
+				//     Otherwise, if fullPath is passed, use that as the directory
+				//     Finally, combine the expected Info.plist name with the directory (if there is a directory; there might not be one)
+				if (newName == null) {
+					var directory = Path.GetDirectoryName (unixValue);
+					if (string.IsNullOrEmpty (directory))
+						directory = fullPath;
+
+					newName = $"Info{suffix}.plist";
+					if (!string.IsNullOrEmpty (directory))
+						newName = Path.Combine (directory, newName);
+				}
+				attrib.Value = newName.Replace ('/', '\\');
 				var logicalName = import.SelectSingleNode ("./*[local-name() = 'LogicalName']");
 				if (logicalName == null) {
 					logicalName = csproj.CreateElement ("LogicalName", csproj.GetNamespace ());
@@ -629,8 +649,8 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 
 		public static bool IsDotNetProject (this XmlDocument csproj)
 		{
-			var project = csproj.SelectSingleNode ("./*[local-name() = 'Project']");
-			var attrib = project.Attributes ["Sdk"];
+			var project = csproj?.SelectSingleNode ("./*[local-name() = 'Project']");
+			var attrib = project?.Attributes ["Sdk"];
 			return attrib != null;
 		}
 
@@ -642,22 +662,16 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			return string.Equals (node.InnerText, "true", StringComparison.OrdinalIgnoreCase);
 		}
 
-		static XmlNode GetInfoPListNode (this XmlDocument csproj, bool throw_if_not_found = false)
+		public static XmlNode GetInfoPListNode (this XmlDocument csproj, bool throw_if_not_found = false)
 		{
-			var logicalNames = csproj.SelectNodes ("//*[local-name() = 'LogicalName']");
-			foreach (XmlNode ln in logicalNames) {
-				if (!ln.InnerText.Contains("Info.plist"))
-					continue;
-				return ln.ParentNode;
-			}
-			var nodes = csproj.SelectNodes ("//*[local-name() = 'None' and contains(@Include ,'Info.plist')]");
-			if (nodes.Count > 0) {
-				return nodes [0]; // return the value, which could be Info.plist or a full path (linked).
-			}
-			nodes = csproj.SelectNodes ("//*[local-name() = 'None' and contains(@Include ,'Info-tv.plist')]");
-			if (nodes.Count > 0) {
-				return nodes [0]; // return the value, which could be Info.plist or a full path (linked).
-			}
+			var noLogicalName = csproj.SelectSingleNode ("//*[(local-name() = 'None' or local-name() = 'BundleResource' or local-name() = 'Content') and @Include = 'Info.plist']");
+			if (noLogicalName != null)
+				return noLogicalName;
+
+			var logicalName = csproj.SelectSingleNode ("//*[(local-name() = 'None' or local-name() = 'Content' or local-name() = 'BundleResource')]/*[local-name()='LogicalName' and text() = 'Info.plist']");
+			if (logicalName != null)
+				return logicalName.ParentNode;
+
 			if (throw_if_not_found)
 				throw new Exception ($"Could not find Info.plist include.");
 			return null;
@@ -665,7 +679,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 
 		public static string GetInfoPListInclude (this XmlDocument csproj)
 		{
-			return GetInfoPListNode (csproj).Attributes ["Include"].Value;
+			return GetInfoPListNode (csproj)?.Attributes ["Include"]?.Value;
 		}
 
 		public static IEnumerable<string> GetProjectReferences (this XmlDocument csproj)
@@ -859,7 +873,34 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				return;
 			}
 
-			throw new Exception ("Could not find where to add a new DefineConstants node");
+			// Create a new PropertyGroup with the desired condition, and add it just after the last PropertyGroup in the csproj.
+			var projectNode = csproj.SelectSingleNode ("//*[local-name() = 'Project']");
+			var lastPropertyGroup = csproj.SelectNodes ("//*[local-name() = 'PropertyGroup']").Cast<XmlNode> ().Last ();
+			var newPropertyGroup = csproj.CreateElement ("PropertyGroup", csproj.GetNamespace ());
+			var conditionAttribute = csproj.CreateAttribute ("Condition");
+			var condition = "";
+			if (!string.IsNullOrEmpty (platform))
+				condition = $"'$(Platform)' == '{platform}'";
+			if (!string.IsNullOrEmpty (configuration)) {
+				if (!string.IsNullOrEmpty (condition))
+					condition += " And ";
+				condition += $"'$(Configuration)' == '{configuration}'";
+			}
+			conditionAttribute.Value = condition;
+			newPropertyGroup.Attributes.Append (conditionAttribute);
+			var defineConstantsElement = csproj.CreateElement ("DefineConstants", csproj.GetNamespace ());
+			defineConstantsElement.InnerText = "$(DefineConstants);" + value;
+			newPropertyGroup.AppendChild (defineConstantsElement);
+			projectNode.InsertAfter (newPropertyGroup, lastPropertyGroup);
+		}
+
+		public static void AddTopLevelProperty (this XmlDocument csproj, string property, string value)
+		{
+			var propertyGroup = csproj.SelectNodes ("//*[local-name() = 'PropertyGroup' and not(@Condition)]") [0];
+
+			var propertyNode = csproj.CreateElement (property, csproj.GetNamespace ());
+			propertyNode.InnerText = value;
+			propertyGroup.AppendChild (propertyNode);
 		}
 
 		public static void SetNode (this XmlDocument csproj, string node, string value)
@@ -917,7 +958,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			}
 		}
 
-		public static void ResolveAllPaths (this XmlDocument csproj, string project_path)
+		public static void ResolveAllPaths (this XmlDocument csproj, string project_path, string rootDirectory = null)
 		{
 			var dir = System.IO.Path.GetDirectoryName (project_path);
 			var nodes_with_paths = new string []
@@ -926,6 +967,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				"CodesignEntitlements",
 				"TestLibrariesDirectory",
 				"HintPath",
+				"RootTestsDirectory",
 			};
 			var attributes_with_paths = new string [] []
 			{
@@ -947,7 +989,7 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 				new string [] { "ObjcBindingCoreSource", "Include" },
 				new string [] { "ObjcBindingNativeLibrary", "Include" },
 				new string [] { "ObjcBindingNativeFramework", "Include" },
-				new string [] { "Import", "Project", "CustomBuildActions.targets" },
+				new string [] { "Import", "Project", "CustomBuildActions.targets", "..\\shared.targets" },
 				new string [] { "FilesToCopy", "Include" },
 				new string [] { "FilesToCopyFoo", "Include" },
 				new string [] { "FilesToCopyFooBar", "Include" },
@@ -963,15 +1005,28 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 			{
 				"MtouchExtraArgs",
 			};
-			Func<string, string> convert = (input) =>
+			Func<string, string> convert = null;
+			convert = (input) =>
 			{
+				if (input.IndexOf (';') >= 0) {
+					var split = input.Split (new char [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+					for (var i = 0; i < split.Length; i++)
+						split [i] = convert (split [i]);
+					return string.Join (";", split);
+				}
+
 				if (input [0] == '/')
 					return input; // This is already a full path.
-				if (input.StartsWith ("$(MSBuildExtensionsPath)", StringComparison.Ordinal))
-					return input; // This is already a full path.
-				if (input.StartsWith ("$(MSBuildBinPath)", StringComparison.Ordinal))
-					return input; // This is already a full path.
+
 				input = input.Replace ('\\', '/'); // make unix-style
+
+				if (rootDirectory != null)
+					input = input.Replace ("$(RootTestsDirectory)", rootDirectory);
+
+				// Don't process anything that starts with a variable, it's either a full path already, or the variable will be updated according to the new location
+				if (input.StartsWith ("$(", StringComparison.Ordinal))
+					return input;
+
 				input = System.IO.Path.GetFullPath (System.IO.Path.Combine (dir, input));
 				input = input.Replace ('/', '\\'); // make windows-style again
 				return input;
@@ -1072,9 +1127,12 @@ namespace Microsoft.DotNet.XHarness.iOS.Shared.Utilities {
 					foreach (var prop in properties)
 						args.Add ($"/p:{prop.Key}={prop.Value}");
 					args.Add (inspector);
+					var env = new Dictionary<string, string> {
+						{ "MSBUILD_EXE_PATH", null },
+					};
 					proc.StartInfo.Arguments = StringUtils.FormatArguments (args);
 					proc.StartInfo.WorkingDirectory = dir;
-					var rv = await processManager.RunAsync (proc, log, timeout: TimeSpan.FromSeconds (15));
+					var rv = await processManager.RunAsync (proc, log, environment_variables: env, timeout: TimeSpan.FromSeconds (15));
 					if (!rv.Succeeded)
 						throw new Exception ($"Unable to evaluate the property {evaluateProperty}.");
 					return File.ReadAllText (output).Trim ();

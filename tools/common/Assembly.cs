@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Mono.Cecil;
+using Mono.Tuner;
 using MonoTouch.Tuner;
 using ObjCRuntime;
 using Xamarin;
@@ -55,25 +56,31 @@ namespace Xamarin.Bundler {
 
 		public AssemblyDefinition AssemblyDefinition;
 		public Target Target;
-		public bool IsFrameworkAssembly { get { return is_framework_assembly.Value; } }
+		public bool? IsFrameworkAssembly { get { return is_framework_assembly; } }
 		public string FullPath {
 			get {
 				return full_path;
 			}
 			set {
 				full_path = value;
-				if (!is_framework_assembly.HasValue) {
+				if (!is_framework_assembly.HasValue && !string.IsNullOrEmpty (full_path)) {
+#if NET
+					is_framework_assembly = Target.App.Configuration.FrameworkAssemblies.Contains (GetIdentity (full_path));
+#else
 					var real_full_path = Target.GetRealPath (full_path);
 					is_framework_assembly = real_full_path.StartsWith (Path.GetDirectoryName (Path.GetDirectoryName (Target.Resolver.FrameworkDirectory)), StringComparison.Ordinal);
+#endif
 				}
 			}
 		}
 		public string FileName { get { return Path.GetFileName (FullPath); } }
-		public string Identity { get { return GetIdentity (FullPath); } }
+		public string Identity { get { return GetIdentity (AssemblyDefinition); } }
 
 		public static string GetIdentity (AssemblyDefinition ad)
 		{
-			return Path.GetFileNameWithoutExtension (ad.MainModule.FileName);
+			if (!string.IsNullOrEmpty (ad.MainModule.FileName))
+				return Path.GetFileNameWithoutExtension (ad.MainModule.FileName);
+			return ad.Name.Name;
 		}
 
 		public static string GetIdentity (string path)
@@ -108,6 +115,12 @@ namespace Xamarin.Bundler {
 			this.FullPath = definition.MainModule.FileName;
 		}
 
+		public bool HasValidSymbols {
+			get {
+				return AssemblyDefinition.MainModule.HasSymbols;
+			}
+		}
+
 		public void LoadSymbols ()
 		{	
 			if (symbols_loaded.HasValue)
@@ -137,7 +150,7 @@ namespace Xamarin.Bundler {
 		public void ExtractNativeLinkInfo ()
 		{
 			// ignore framework assemblies, they won't have any LinkWith attributes
-			if (IsFrameworkAssembly)
+			if (IsFrameworkAssembly == true)
 				return;
 
 			var assembly = AssemblyDefinition;
@@ -231,7 +244,7 @@ namespace Xamarin.Bundler {
 					continue;
 
 				TypeReference type = attr.Constructor.DeclaringType;
-				if (!type.IsPlatformType ("ObjCRuntime", "LinkWithAttribute"))
+				if (!type.Is ("ObjCRuntime", "LinkWithAttribute"))
 					continue;
 
 				// Let the linker remove it the attribute from the assembly
@@ -487,7 +500,7 @@ namespace Xamarin.Bundler {
 					string file = Path.GetFileNameWithoutExtension (name);
 
 #if !MONOMAC
-					if (App.IsSimulatorBuild && !Driver.IsFrameworkAvailableInSimulator (App, file)) {
+					if (App.IsSimulatorBuild && !App.IsFrameworkAvailableInSimulator (file)) {
 						Driver.Log (3, "Not linking with {0} (referenced by a module reference in {1}) because it's not available in the simulator.", file, FileName);
 						continue;
 					}
@@ -665,6 +678,56 @@ namespace Xamarin.Bundler {
 					Directory.CreateDirectory (target_dir);
 
 				CopyAssembly (a, target_s);
+			}
+		}
+
+		public delegate bool StripAssembly (string path);
+
+		// returns false if the assembly was not copied (because it was already up-to-date).
+		public bool CopyAssembly (string source, string target, bool copy_debug_symbols = true, StripAssembly strip = null)
+		{
+			var copied = false;
+
+			try {
+				var strip_assembly = strip != null && strip (source);
+				if (!Application.IsUptodate (source, target) && (strip_assembly || !Cache.CompareAssemblies (source, target))) {
+					copied = true;
+					if (strip_assembly) {
+						Driver.FileDelete (target);
+						Directory.CreateDirectory (Path.GetDirectoryName (target));
+						MonoTouch.Tuner.Stripper.Process (source, target);
+					} else {
+						Application.CopyFile (source, target);
+					}
+				} else {
+					Driver.Log (3, "Target '{0}' is up-to-date.", target);
+				}
+
+				// Update the debug symbols file even if the assembly didn't change.
+				if (copy_debug_symbols && HasValidSymbols) {
+					// Unfortunately Cecil won't tell us the path of the symbol file, so we have to try all we support (.pdb+.mdb)
+					if (File.Exists (source + ".mdb"))
+						Application.UpdateFile (source + ".mdb", target + ".mdb", true);
+
+					var spdb = Path.ChangeExtension (source, "pdb");
+					if (File.Exists (spdb))
+						Application.UpdateFile (spdb, Path.ChangeExtension (target, "pdb"), true);
+				}
+
+				CopyConfigToDirectory (Path.GetDirectoryName (target));
+			} catch (Exception e) {
+				throw new ProductException (1009, true, e, Errors.MX1009, source, target, e.Message);
+			}
+
+			return copied;
+		}
+
+		public void CopyConfigToDirectory (string directory)
+		{
+			string config_src = FullPath + ".config";
+			if (File.Exists (config_src)) {
+				string config_target = Path.Combine (directory, FileName + ".config");
+				Application.UpdateFile (config_src, config_target, true);
 			}
 		}
 	}

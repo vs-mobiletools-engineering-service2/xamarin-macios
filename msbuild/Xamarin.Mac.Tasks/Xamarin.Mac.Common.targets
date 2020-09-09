@@ -18,8 +18,7 @@ Copyright (C) 2014 Xamarin. All rights reserved.
      so be careful not to add fixes here that should go into Xamarin.Mac.Common.props which is shared -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Mac.Common.props"
-			Condition="'$(_XamarinCommonPropsHasBeenImported)' != 'true'" />
+	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Mac.Common.props" />
 	
 	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Shared.targets"/>
 
@@ -151,26 +150,6 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 		</EmbedProvisionProfile>
 	</Target>
 
-	<Target Name="_CompileEntitlements" Condition="'$(_RequireCodeSigning)'" DependsOnTargets="_GenerateBundleName"
-		Outputs="$(IntermediateOutputPath)Entitlements.xcent">
-		<CompileEntitlements
-			Condition="'$(IsMacEnabled)' == 'true'"
-			SessionId="$(BuildSessionId)"
-			AppBundleDir="$(AppBundleDir)"
-			AppIdentifier="$(_AppIdentifier)"
-			BundleIdentifier="$(_BundleIdentifier)"
-			Entitlements="$(CodesignEntitlements)"
-			CompiledEntitlements="$(IntermediateOutputPath)Entitlements.xcent"
-			IsAppExtension="$(IsAppExtension)"
-			ProvisioningProfile="$(_ProvisioningProfile)"
-			SdkVersion="$(_SdkVersion)"
-			SdkPlatform="MacOSX"
-			SdkDevPath="$(_SdkDevPath)"
-			Debug="$(_BundlerDebug)"
-			>
-		</CompileEntitlements>
-	</Target>
-
 	<Target Name="_CodesignAppBundle" Condition="'$(_RequireCodeSigning)'" DependsOnTargets="$(_CodesignAppBundleDependsOn)">
 		<Codesign
 			Condition="'$(IsMacEnabled)' == 'true'"
@@ -295,30 +274,6 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 		</CreateInstallerPackage>
 	</Target>
 
-	<Target Name="_PackLibraryResources" Condition="'$(_CanOutputAppBundle)' == 'false'" DependsOnTargets="_CollectBundleResources">
-		<PackLibraryResources
-			Condition="'$(IsMacEnabled)' == 'true'"
-			SessionId="$(BuildSessionId)"
-			Prefix="xammac"
-			BundleResourcesWithLogicalNames="@(_BundleResourceWithLogicalName)">
-			<Output TaskParameter="EmbeddedResources" ItemName="EmbeddedResource" />
-		</PackLibraryResources>
-	</Target>
-
-	<Target Name="_UnpackLibraryResources" Condition="'$(_CanOutputAppBundle)' == 'true'" DependsOnTargets="ResolveReferences;_CollectBundleResources">
-		<UnpackLibraryResources
-			Condition="'$(IsMacEnabled)' == 'true'"
-			SessionId="$(BuildSessionId)"
-			Prefix="xammac"
-			NoOverwrite="@(_BundleResourceWithLogicalName)"
-			IntermediateOutputPath="$(IntermediateOutputPath)"
-			TargetFrameworkDirectory="$(TargetFrameworkDirectory)"
-			ReferencedLibraries="@(ReferencePath)">
-			<Output TaskParameter="BundleResourcesWithLogicalNames" ItemName="_BundleResourceWithLogicalName" />
-			<Output TaskParameter="BundleResourcesWithLogicalNames" ItemName="FileWrites" />
-		</UnpackLibraryResources>
-	</Target>
-
 	<Target Name="_GenerateBundleName">
 		<PropertyGroup>
 			<AppBundleDir>$(OutputPath)$(_AppBundleName)$(AppBundleExtension)</AppBundleDir>
@@ -346,6 +301,7 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 
 	<PropertyGroup>
 		<CompileToNativeDependsOn>
+			_ComputeLinkMode;
 			_ComputeTargetFrameworkMoniker;
 			_DetectAppManifest;
 			_DetectSdkLocations;
@@ -360,6 +316,7 @@ Copyright (C) 2014 Xamarin. All rights reserved.
 	</PropertyGroup>
 
 	<Target Name="_CompileToNative" DependsOnTargets="$(CompileToNativeDependsOn)"
+		Condition = "'$(_UsingXamarinSdk)' != 'true'"
 		Inputs="@(_CompileToNativeInput);@(_FrameworkNativeReference);@(_FileNativeReference);@(BundleDependentFiles)"
 		Outputs="$(_AppBundlePath)Contents\MacOS\$(_AppBundleName)">
 		<Mmp

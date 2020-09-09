@@ -8,7 +8,12 @@ namespace Xamarin.MacDev.Tasks {
 	public abstract class LinkNativeCodeTaskBase : XamarinTask {
 
 #region Inputs
+		public ITaskItem[] LinkerFlags { get; set; }
+
 		public ITaskItem[] LinkWithLibraries { get; set; }
+
+		// A path to entitlements to be embedded into the executable
+		public string EntitlementsInExecutable { get; set; }
 
 		[Required]
 		public string SdkDevPath { get; set; }
@@ -48,6 +53,9 @@ namespace Xamarin.MacDev.Tasks {
 					var libExtension = Path.GetExtension (lib).ToLowerInvariant ();
 					switch (libExtension) {
 					case ".a":
+						var forceLoad = string.Equals (libSpec.GetMetadata ("ForceLoad"), "true", StringComparison.OrdinalIgnoreCase);
+						if (forceLoad)
+							arguments.Add ("-force_load");
 						arguments.Add (lib);
 						break;
 					case ".dylib":
@@ -87,12 +95,50 @@ namespace Xamarin.MacDev.Tasks {
 				foreach (var obj in ObjectFiles)
 					arguments.Add (Path.GetFullPath (obj.ItemSpec));
 
+			arguments.AddRange (GetEmbedEntitlementsInExecutableLinkerFlags (EntitlementsInExecutable));
+
 			arguments.Add ("-o");
-			arguments.Add (OutputFile);
+			arguments.Add (Path.GetFullPath (OutputFile));
+
+			if (LinkerFlags != null) {
+				foreach (var flag in LinkerFlags)
+					arguments.Add (flag.ItemSpec);
+			}
 
 			ExecuteAsync ("xcrun", arguments, sdkDevPath: SdkDevPath).Wait ();
 
 			return !Log.HasLoggedErrors;
+		}
+
+		public static string[] GetEmbedEntitlementsInExecutableLinkerFlags (string entitlements)
+		{
+			if (string.IsNullOrEmpty (entitlements))
+				return Array.Empty<string> ();
+
+			if (!EntitlementsRequireLinkerFlags (entitlements))
+				return Array.Empty<string> ();
+
+			return new string [] {
+				"-Xlinker", "-sectcreate",
+				"-Xlinker", "__TEXT",
+				"-Xlinker", "__entitlements",
+				"-Xlinker", Path.GetFullPath (entitlements),
+			};
+		}
+
+		static bool EntitlementsRequireLinkerFlags (string path)
+		{
+			try {
+				var plist = PDictionary.FromFile (path);
+
+				// FIXME: most keys do not require linking in the entitlements file, so we
+				// could probably add some smarter logic here to iterate over all of the
+				// keys in order to determine whether or not we really need to link with
+				// the entitlements or not.
+				return plist.Count != 0;
+			} catch {
+				return false;
+			}
 		}
 	}
 }

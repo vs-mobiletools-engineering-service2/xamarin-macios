@@ -16,16 +16,21 @@ using System.Text;
 using Xamarin.Bundler;
 using Xamarin.Linker;
 
-#if MTOUCH
-using PlatformResolver=MonoTouch.Tuner.MonoTouchResolver;
+#if MONOTOUCH
+using PlatformResolver = MonoTouch.Tuner.MonoTouchResolver;
+#elif MMP
+using PlatformResolver = Xamarin.Bundler.MonoMacResolver;
+#elif NET
+using PlatformResolver = Xamarin.Linker.DotNetResolver;
 #else
-using PlatformResolver=Xamarin.Bundler.MonoMacResolver;
+#error Invalid defines
 #endif
 
 using Registrar;
 using Foundation;
 using ObjCRuntime;
 using Mono.Cecil;
+using Mono.Linker;
 using Mono.Tuner;
 
 namespace Registrar {
@@ -577,7 +582,7 @@ namespace Registrar {
 		Dictionary<IMetadataTokenProvider, object> availability_annotations;
 
 		PlatformResolver resolver;
-		PlatformResolver Resolver {  get { return resolver ?? Target.Resolver; } }
+		PlatformResolver Resolver { get { return resolver ?? Target.Resolver; } }
 
 #if MONOMAC
 		readonly Version MacOSTenTwelveVersion = new Version (10,12);
@@ -995,7 +1000,7 @@ namespace Registrar {
 			if (corlib == null)
 				corlib = Resolver.Resolve (AssemblyNameReference.Parse (corlib_name), new ReaderParameters ());
 
-			if (corlib != null) { 
+			if (corlib != null) {
 				candidates = new AssemblyDefinition [] { corlib };
 			} else if (Resolver != null) {
 				candidates = Resolver.ToResolverCache ().Values.Cast<AssemblyDefinition> ();
@@ -2122,7 +2127,7 @@ namespace Registrar {
 			namespaces.Add (ns);
 
 #if !MMP
-			if (App.IsSimulatorBuild && !Driver.IsFrameworkAvailableInSimulator (App, ns)) {
+			if (App.IsSimulatorBuild && !App.IsFrameworkAvailableInSimulator (ns)) {
 				Driver.Log (5, "Not importing the framework {0} in the generated registrar code because it's not available in the simulator.", ns);
 				return;
 			}
@@ -2634,7 +2639,7 @@ namespace Registrar {
 		bool IsTypeAllowedInSimulator (ObjCType type)
 		{
 			var ns = type.Type.Namespace;
-			return Driver.IsFrameworkAvailableInSimulator (App, ns);
+			return App.IsFrameworkAvailableInSimulator (ns);
 		}
 #endif
 

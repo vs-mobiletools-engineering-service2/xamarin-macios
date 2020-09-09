@@ -8,10 +8,22 @@ namespace Xamarin.MacDev.Tasks {
 		public string ExtraArgs { get; set; }
 
 		[Output]
+		public string MarshalManagedExceptionMode { get; set; }
+
+		[Output]
+		public string MarshalObjectiveCExceptionMode { get; set; }
+
+		[Output]
 		public string NoSymbolStrip { get; set; }
 
 		[Output]
 		public string NoDSymUtil { get; set; }
+
+		[Output]
+		public string Optimize { get; set; }
+
+		[Output]
+		public int Verbosity { get; set; }
 
 		public override bool Execute ()
 		{
@@ -59,6 +71,25 @@ namespace Xamarin.MacDev.Tasks {
 						break;
 					case "dsym":
 						NoDSymUtil = ParseBool (value) ? "false" : "true";
+						break;
+					case "verbose":
+					case "v":
+						Verbosity++;
+						break;
+					case "quiet":
+					case "q":
+						Verbosity--;
+						break;
+					case "marshal-managed-exceptions":
+						MarshalManagedExceptionMode = value;
+						break;
+					case "marshal-objectivec-exceptions":
+						MarshalObjectiveCExceptionMode = value;
+						break;
+					case "optimize":
+						if (!string.IsNullOrEmpty (Optimize))
+							Optimize += ",";
+						Optimize += value;
 						break;
 					default:
 						break;

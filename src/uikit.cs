@@ -518,152 +518,6 @@ namespace UIKit {
 	}
 #endif // !WATCH
 
-	[ThreadSafe]
-	[BaseType (typeof (NSObject))]
-	interface NSParagraphStyle : NSSecureCoding, NSMutableCopying {
-		[Export ("lineSpacing")]
-		nfloat LineSpacing { get; [NotImplemented] set; }
-
-		[Export ("paragraphSpacing")]
-		nfloat ParagraphSpacing { get; [NotImplemented] set; }
-
-		[Export ("alignment")]
-		UITextAlignment Alignment { get; [NotImplemented] set; }
-
-		[Export ("headIndent")]
-		nfloat HeadIndent { get; [NotImplemented] set; }
-
-		[Export ("tailIndent")]
-		nfloat TailIndent { get; [NotImplemented] set; }
-
-		[Export ("firstLineHeadIndent")]
-		nfloat FirstLineHeadIndent { get; [NotImplemented] set; }
-
-		[Export ("minimumLineHeight")]
-		nfloat MinimumLineHeight { get; [NotImplemented] set; }
-
-		[Export ("maximumLineHeight")]
-		nfloat MaximumLineHeight { get; [NotImplemented] set; }
-
-		[Export ("lineBreakMode")]
-		UILineBreakMode LineBreakMode { get; [NotImplemented] set; }
-
-		[Export ("baseWritingDirection")]
-		NSWritingDirection BaseWritingDirection { get; [NotImplemented] set; }
-
-		[Export ("lineHeightMultiple")]
-		nfloat LineHeightMultiple { get; [NotImplemented] set; }
-
-		[Export ("paragraphSpacingBefore")]
-		nfloat ParagraphSpacingBefore { get; [NotImplemented] set; }
-
-		[Export ("hyphenationFactor")]
-		float HyphenationFactor { get; [NotImplemented] set; } // Returns a float, not nfloat.
-
-		[Static]
-		[Export ("defaultWritingDirectionForLanguage:")]
-		NSWritingDirection GetDefaultWritingDirection (string languageName);
-
-		[Static]
-		[Export ("defaultParagraphStyle")]
-		NSParagraphStyle Default { get; }
-
-		[iOS (7,0)]
-		[Export ("defaultTabInterval")]
-		nfloat DefaultTabInterval { get; [NotImplemented] set; }
-
-		[iOS (7,0)]
-		[Export ("tabStops", ArgumentSemantic.Copy)]
-		NSTextTab[] TabStops { get; [NotImplemented] set; }
-
-		[iOS (9,0)]
-		[Export ("allowsDefaultTighteningForTruncation")]
-		bool AllowsDefaultTighteningForTruncation { get; [NotImplemented] set; }
-	}
-
-	[ThreadSafe]
-	[BaseType (typeof (NSParagraphStyle))]
-	interface NSMutableParagraphStyle {
-		[Export ("lineSpacing")]
-		[Override]
-		nfloat LineSpacing { get; set; }
-
-		[Export ("alignment")]
-		[Override]
-		UITextAlignment Alignment { get; set; }
-
-		[Export ("headIndent")]
-		[Override]
-		nfloat HeadIndent { get; set; }
-
-		[Export ("tailIndent")]
-		[Override]
-		nfloat TailIndent { get; set; }
-
-		[Export ("firstLineHeadIndent")]
-		[Override]
-		nfloat FirstLineHeadIndent { get; set; }
-
-		[Export ("minimumLineHeight")]
-		[Override]
-		nfloat MinimumLineHeight { get; set; }
-
-		[Export ("maximumLineHeight")]
-		[Override]
-		nfloat MaximumLineHeight { get; set; }
-
-		[Export ("lineBreakMode")]
-		[Override]
-		UILineBreakMode LineBreakMode { get; set; }
-
-		[Export ("baseWritingDirection")]
-		[Override]
-		NSWritingDirection BaseWritingDirection { get; set; }
-
-		[Export ("lineHeightMultiple")]
-		[Override]
-		nfloat LineHeightMultiple { get; set; }
-
-		[Export ("paragraphSpacing")]
-		[Override]
-		nfloat ParagraphSpacing { get; set; }
-
-		[Export ("paragraphSpacingBefore")]
-		[Override]
-		nfloat ParagraphSpacingBefore { get; set; }
-
-		[Export ("hyphenationFactor")]
-		[Override]
-		float HyphenationFactor { get; set; } // Returns a float, not nfloat.
-
-		[iOS (7,0)]
-		[Export ("defaultTabInterval")]
-		[Override]
-		nfloat DefaultTabInterval { get; set; }
-
-		[iOS (7,0)]
-		[Export ("tabStops", ArgumentSemantic.Copy)]
-		[Override]
-		NSTextTab[] TabStops { get; set; }
-
-		[iOS (9,0)]
-		[Override]
-		[Export ("allowsDefaultTighteningForTruncation")]
-		bool AllowsDefaultTighteningForTruncation { get; set; }
-
-		[iOS (9,0)]
-		[Export ("addTabStop:")]
-		void AddTabStop (NSTextTab textTab);
-
-		[iOS (9,0)]
-		[Export ("removeTabStop:")]
-		void RemoveTabStop (NSTextTab textTab);
-
-		[iOS (9,0)]
-		[Export ("setParagraphStyle:")]
-		void SetParagraphStyle (NSParagraphStyle paragraphStyle);
-	}
-
 	[iOS (7,0)]
 	[BaseType (typeof (NSObject))]
 	interface NSTextTab : NSCoding, NSCopying, NSSecureCoding {
@@ -830,7 +684,12 @@ namespace UIKit {
 		void RemoveLayoutManager (NSLayoutManager aLayoutManager);
 
 		[Export ("editedMask")]
-		NSTextStorageEditActions EditedMask { get; set; }
+		NSTextStorageEditActions EditedMask {
+			get;
+#if !XAMCORE_4_0
+			[NotImplemented] set;
+#endif
+		}
 
 		[Export ("editedRange")]
 		NSRange EditedRange { get;
@@ -7285,6 +7144,7 @@ namespace UIKit {
 #endif
 		[ThreadSafe]
 		[Static] [Export ("imageNamed:")][Autorelease]
+		[return: NullAllowed]
 		UIImage FromBundle (string name);
 
 #if !WATCH
@@ -7296,15 +7156,18 @@ namespace UIKit {
 		[ThreadSafe]
 		[iOS (8,0)]
 		[Static, Export ("imageNamed:inBundle:compatibleWithTraitCollection:")]
+		[return: NullAllowed]
 		UIImage FromBundle (string name, [NullAllowed] NSBundle bundle, [NullAllowed] UITraitCollection traitCollection);
 #endif // !WATCH
 
 		[Static] [Export ("imageWithContentsOfFile:")][Autorelease]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage FromFile (string filename);
 		
 		[Static] [Export ("imageWithData:")][Autorelease]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage LoadFromData (NSData data);
 
 		[Static] [Export ("imageWithCGImage:")][Autorelease]
@@ -7400,14 +7263,17 @@ namespace UIKit {
 
 		[Static, Export ("animatedImageNamed:duration:")][Autorelease]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage CreateAnimatedImage (string name, double duration);
 
 		[Static, Export ("animatedImageWithImages:duration:")][Autorelease]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage CreateAnimatedImage (UIImage [] images, double duration);
 
 		[Static, Export ("animatedResizableImageNamed:capInsets:duration:")][Autorelease]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage CreateAnimatedImage (string name, UIEdgeInsets capInsets, double duration);
 
 		[Export ("initWithCGImage:")]
@@ -7427,11 +7293,13 @@ namespace UIKit {
 #if !WATCH
 		[Export ("CIImage")]
 		[ThreadSafe]
+		[NullAllowed]
 		CIImage CIImage { get; }
 #endif // !WATCH
 		
 		[Export ("images")]
 		[ThreadSafe]
+		[NullAllowed]
 		UIImage [] Images { get; }
 
 		[Export ("duration")]
@@ -7456,6 +7324,7 @@ namespace UIKit {
 		[Static]
 		[Export ("imageWithData:scale:")]
 		[ThreadSafe, Autorelease]
+		[return: NullAllowed]
 		UIImage LoadFromData (NSData data, nfloat scale);
 
 #if !WATCH
@@ -7482,6 +7351,7 @@ namespace UIKit {
 		[Static]
 		[Export ("animatedResizableImageNamed:capInsets:resizingMode:duration:")]
 		[ThreadSafe]
+		[return: NullAllowed]
 		UIImage CreateAnimatedImage (string name, UIEdgeInsets capInsets, UIImageResizingMode resizingMode, double duration);
 		
 		[Export ("imageWithAlignmentRectInsets:")]
@@ -7501,6 +7371,7 @@ namespace UIKit {
 		[iOS (8,0)]
 		[Export ("imageAsset")]
 		[ThreadSafe]
+		[NullAllowed]
 		UIImageAsset ImageAsset { get; }
 #endif // !WATCH
 
@@ -7581,6 +7452,7 @@ namespace UIKit {
 
 		[Watch (6,0), TV (13,0), iOS (13,0)]
 		[Export ("configuration", ArgumentSemantic.Copy)]
+		[NullAllowed]
 		UIImageConfiguration Configuration { get; }
 
 		[Watch (6,0), TV (13,0), iOS (13,0)]

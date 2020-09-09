@@ -19,13 +19,6 @@ Copyright (C) 2013-2014 Xamarin. All rights reserved.
 	<Import Project="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).Before.props"
 			Condition="Exists('$(MSBuildThisFileDirectory)$(MSBuildThisFileName).Before.props')"/>
 
-	<!-- This is used to determine whether Xamarin.Mac.Common.targets needs to import
-         Xamarin.Mac.Common.props itself, or whether it has been imported previously,
-         e.g. by the project itself. -->
-	<PropertyGroup>
-		<_XamarinCommonPropsHasBeenImported>true</_XamarinCommonPropsHasBeenImported>
-	</PropertyGroup>
-
 	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Shared.props" />
 
 	<!-- Story-time! MigrateToNewXMIdentifier is special because it un-does a lie we started telling from the 
@@ -49,20 +42,9 @@ Copyright (C) 2013-2014 Xamarin. All rights reserved.
 		<FilterDeniedAssemblies Condition="'$(TargetFrameworkIdentifier)' != 'Xamarin.Mac'">true</FilterDeniedAssemblies>
 	</PropertyGroup>
 
-	<!-- When looking for related files to copy, look for Mono debugging files as well -->
-	<PropertyGroup>
-		<AllowedReferenceRelatedFileExtensions>
-			$(AllowedReferenceRelatedFileExtensions);
-			.dll.mdb;
-			.exe.mdb;
-			.pdb
-		</AllowedReferenceRelatedFileExtensions>
-	</PropertyGroup>
-
 	<PropertyGroup>
 		<CodesignProvision Condition="'$(CodesignProvision)' == ''"></CodesignProvision>
 		<CodesignEntitlements Condition="'$(CodesignEntitlements)' == ''"></CodesignEntitlements>
-		<CodesignResourceRules Condition="'$(CodesignResourceRules)' == ''"></CodesignResourceRules>
 		<CodesignExtraArgs Condition="'$(CodesignExtraArgs)' == ''"></CodesignExtraArgs>
 		<CreatePackage Condition="'$(CreatePackage)' == ''">false</CreatePackage>
 		<HttpClientHandler Condition="'$(HttpClientHandler)' == ''">HttpClientHandler</HttpClientHandler>
@@ -77,10 +59,6 @@ Copyright (C) 2013-2014 Xamarin. All rights reserved.
 		<AotScope Condition="'$(AotScope)' == ''">None</AotScope>
 		<ArchiveOnBuild Condition="'$(ArchiveOnBuild)' == ''">False</ArchiveOnBuild>
 		<Profiling Condition="'$(MtouchProfiling)' == ''">False</Profiling>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<IsMacEnabled>true</IsMacEnabled>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFrameworkName)' == 'Full'">

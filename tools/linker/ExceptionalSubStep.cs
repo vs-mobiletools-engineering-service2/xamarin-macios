@@ -8,6 +8,7 @@ using Xamarin.Bundler;
 using Xamarin.Tuner;
 
 #if NET
+using Mono.Linker;
 using Mono.Linker.Steps;
 #endif
 
@@ -18,7 +19,26 @@ namespace Xamarin.Linker {
 #if !NET
 		protected DerivedLinkContext LinkContext {
 			get {
+#if NET
+				return Configuration.DerivedLinkContext;
+#else
 				return (DerivedLinkContext) base.context;
+#endif
+			}
+		}
+
+#if NET
+		protected LinkContext context {
+			get { return Context; }
+		}
+
+		protected LinkerConfiguration Configuration {
+			get { return LinkerConfiguration.GetInstance (Context);  }
+		}
+
+		protected Profile Profile {
+			get {
+				return Configuration.Profile;
 			}
 		}
 #endif

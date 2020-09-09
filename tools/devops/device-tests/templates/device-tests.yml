@@ -35,6 +35,9 @@ steps:
 - checkout: maccore
   persistCredentials: true  # hugely important, else there are some scripts that check a single file from maccore that will fail
 
+- bash: cd $(System.DefaultWorkingDirectory)/xamarin-macios/ && git clean -xdf
+  displayName: 'Clean workspace'
+
 # Run the pipeline script tests to ensure that we will have not have an unexpected behaviour.
 - bash: make -C $(System.DefaultWorkingDirectory)/xamarin-macios/tools/devops/device-tests/scripts run-tests
   displayName: 'Run pipeline script tests'
@@ -45,7 +48,7 @@ steps:
     Import-Module ./VSTS.psm1
     Import-Module ./GitHub.psm1
     Set-GitHubStatus -Status "error" -Description "Pipeline scripts tests failed." -Context "$Env:CONTEXT"
-    New-GitHubComment -Header "Pipeline scripts tests failed on $Env:CONTEXT" -Emoji ":fire:" -Description "The tests of the scripts used in the pepeline failed. The build was cancelled."
+    New-GitHubComment -Header "Pipeline scripts tests failed on $Env:CONTEXT" -Emoji ":fire:" -Description "The tests of the scripts used in the pipeline failed. The build was cancelled."
     Stop-Pipeline
   env:
     BUILD_REVISION: $(BUILD_REVISION)
@@ -87,6 +90,8 @@ steps:
       Set-GitHubStatus -Status "error" -Description "Not enough free space in the host." -Context "$Env:CONTEXT"
       New-GitHubComment -Header "Tests failed catastrophically on $Env:CONTEXT" -Emoji ":fire:" -Description "Not enough free space in the host."
       Stop-Pipeline
+    } else {
+      Set-GitHubStatus -Status "pending" -Description "Device tests on VSTS have been started." -Context "$Env:CONTEXT"
     }
   env:
     BUILD_REVISION: $(BUILD_REVISION)
@@ -277,6 +282,9 @@ steps:
         echo "##vso[task.setvariable variable=XAMARIN_STORAGE_PATH;isOutput=true]"
       fi
     fi
+
+    echo "Running tests on $AGENT_NAME"
+    echo "##vso[task.setvariable variable=TESTS_BOT;isOutput=true]$AGENT_NAME"
 
     make -C builds download -j || true
     make -C builds downloads -j || true
