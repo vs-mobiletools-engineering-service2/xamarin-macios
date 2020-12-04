@@ -83,7 +83,7 @@ if (!Directory.Exists (xcode_path)) {
 	var url = FindVariable ("XCODE_URL");
 	Console.WriteLine ($"Could not find an already installed Xcode in {root}, will download and install from {url}.");
 	var xcode_provisionator_name = Path.GetFileNameWithoutExtension (url).Substring (6); // Strip off 'Xcode_' from the start of the filename
-	Xcode (xcode_provisionator_name)
+	Xcode ("12.2")
 		.XcodeSelect ()
 		.Action ((v) => {
 			ExecVerbose ("ln", "-Fhs", "/Applications/Xcode.app", root);
