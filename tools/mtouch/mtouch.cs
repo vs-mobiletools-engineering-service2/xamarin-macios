@@ -248,6 +248,10 @@ namespace Xamarin.Bundler
 				args.Add ("-O=gsharedvt");
 			if (app.AotOtherArguments != null)
 				args.AddRange (app.AotOtherArguments);
+
+			// Hack: Add AOT args to test MDM issue
+			args.Add ("--aot=nopagetrampolines,ntrampolines=40960,nrgctx-trampolines=40960,nrgctx-fetch-trampolines=256,ngsharedvt-trampolines=4096,nimt-trampolines=4096");
+
 			var aot = new StringBuilder ();
 			aot.Append ("--aot=mtriple=");
 			aot.Append (enable_thumb ? arch.Replace ("arm", "thumb") : arch);
